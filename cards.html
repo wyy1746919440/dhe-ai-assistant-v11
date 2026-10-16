@@ -163,6 +163,10 @@ table.idx th{background:#fafbfd;font-weight:700}
 .pickrow.on{background:#f5f9ff}
 .pickrow.on .rd{background:var(--brand);border-color:var(--brand)}
 .pickrow.dim{opacity:.45}
+/* 机型 / 商品级校验前移：不支持上架的行置灰标原因，不可勾选（2026-10-16） */
+.pickrow.dis{opacity:.5}
+.pickrow.dis .nm{color:#8c9199}
+.blktag{font-style:normal;display:block;font-size:10.5px;line-height:1.4;color:var(--danger);margin-top:2px}
 .sh-foot{display:flex;align-items:center;gap:9px;padding:9px 10px;background:#fff;border-top:1px solid #f0f2f5}
 .bag{position:relative;font-size:17px;flex-shrink:0;line-height:1}
 .bag b{position:absolute;top:-3px;right:-7px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:0 4px}
@@ -232,7 +236,7 @@ table.idx th{background:#fafbfd;font-weight:700}
           <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（2 项）</button></div>
           <div class="exec-note">🔒 执行将记录操作日志 · 失败的商品会逐项说明原因</div>
         </div>
-        <div class="rule">字段：<b>商品名称 / 价格（元，可改） / 补货量</b>。价格默认取商品库自身价，改动行蓝框高亮，diff 区列「价格改动 N 项（改前 → 改后）」；不显示库存与商品ID——商品尚未上架，两项均无意义。「＋ 添加商品」呼出 P1 弹层。<br><b>上架位置按机型分两套</b>：智能柜＝<b>层</b>（无货道概念，点层号可改），售货机＝<b>货道</b>（见 W1-b）。</div>
+        <div class="rule">字段：<b>商品名称 / 价格（元，可改） / 补货量</b>。价格默认取商品库自身价，改动行蓝框高亮，diff 区列「价格改动 N 项（改前 → 改后）」；不显示库存与商品ID——商品尚未上架，两项均无意义。「＋ 添加商品」呼出 P1 弹层。<br><b>补货量默认值（2026-10-16 产品确认）＝商品箱规 × 1.5</b>（四舍五入取整，添加商品后带出、可逐项手改）；<b>箱规为 0 或未配置 → 补货量展示 0</b>，不做其他兜底。<br><b>上架位置按机型分两套</b>：智能柜＝<b>层</b>（无货道概念，点层号可改），售货机＝<b>货道</b>（见 W1-b）。</div>
       </div>
 
       <!-- W1-b -->
@@ -622,10 +626,11 @@ table.idx th{background:#fafbfd;font-weight:700}
             <div class="pickrow"><span class="th">🧋</span><div class="c1"><span class="nm">喜多多仙草丸子凉茶植物饮料200g</span><span class="sub">喜多多　200g</span><span class="meta"><span class="prc">¥1.00</span>售货机/动态柜X/鹅小柜/智能柜D/便利店</span></div><span class="rd"></span></div>
             <div class="pickrow"><span class="th">🍟</span><div class="c1"><span class="nm">素味居香辣土豆70g</span><span class="sub">素味居　70g</span><span class="meta"><span class="prc">¥3.00</span>售货机/动态柜X/鹅小柜/智能柜D/便利店</span></div><span class="rd">✓</span></div>
             <div class="pickrow dim"><span class="th">🧃</span><div class="c1"><span class="nm">宜个果源青柠柚子混合果汁430ml</span><span class="sub">已在本卡</span><span class="meta"><span class="prc">¥4.50</span>售货机/动态柜X/鹅小柜/智能柜D</span></div><span class="rd"></span></div>
+            <div class="pickrow dis"><span class="th">🧃</span><div class="c1"><span class="nm">慕蓝卡苏打水 柠檬味</span><span class="sub">慕蓝卡　柠檬味</span><span class="meta"><span class="prc">¥4.00</span>售货机/动态柜X/鹅小柜/智能柜D</span><em class="blktag">⛔ 不可上架：未绑定可售机型商品 code（待建模）</em></div><span class="rd"></span></div>
           </div>
           <div class="sh-foot"><span class="bag">🛍<b>2</b></span><button class="btn main">加入卡片</button></div>
         </div>
-        <div class="rule"><b>沿用现有「添加商品」页</b>：搜索（名称 / 条码）+ 搜索按钮 + 扫码、分组标题（私有商品库·仅当前机型可售）、行结构（缩略图 + 商品名 + 品牌规格 + 橙色价格 + 适用机型）、圆形勾选、底栏数量角标与购物袋。<br><b>本场景差异</b>：① 主按钮「加入卡片」——弹层只往卡片加项，无下一步；② 带价入卡后默认取商品库价、可改；③ 已在本卡的商品置灰（不参与全选）；④ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧；⑤ <b>PC 端形态（2026-10-16 用户反馈）</b>：改<b>居中弹窗</b>，对齐现有系统「添加商品」弹窗——搜索（商品名称 / 品牌）+ 表格（商品名称 / 编号 / 图片 / 品牌 / 单件规格 / 操作-添加）+「找不到商品？搜索公有库商品」+ 分页 + 取消 / 完成；机型过滤口径（单机＝本机机型、批量＝机型交集）不变。<br><b>已确认 5（2026-10-16）</b>：多机型批量上架时商品库按<b>机型交集</b>出商品（能提前挡掉「选完即失败」）；标题写明本批机器机型的交集，下方加过滤说明行。</div>
+        <div class="rule"><b>沿用现有「添加商品」页</b>：搜索（名称 / 条码）+ 搜索按钮 + 扫码、分组标题（私有商品库·仅当前机型可售）、行结构（缩略图 + 商品名 + 品牌规格 + 橙色价格 + 适用机型）、圆形勾选、底栏数量角标与购物袋。<br><b>本场景差异</b>：① 主按钮「加入卡片」——弹层只往卡片加项，无下一步；② 带价入卡后默认取商品库价、可改；③ 已在本卡的商品置灰（不参与全选）；④ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧；⑤ <b>PC 端形态（2026-10-16 用户反馈）</b>：改<b>居中弹窗</b>，对齐现有系统「添加商品」弹窗——搜索（商品名称 / 品牌）+ 表格（商品名称 / 编号 / 图片 / 品牌 / 单件规格 / 操作-添加）+「找不到商品？搜索公有库商品」+ 分页 + 取消 / 完成；机型过滤口径（单机＝本机机型、批量＝机型交集）不变。<br><b>已确认 5（2026-10-16）</b>：多机型批量上架时商品库按<b>机型交集</b>出商品（能提前挡掉「选完即失败」）；标题写明本批机器机型的交集，下方加过滤说明行。<br>⑥ <b>校验前移 · 商品级（2026-10-16 产品反馈）</b>：商品在本机 / 本批机器上<b>未绑定可售机型商品 code</b> 时（如慕蓝卡在部分机器待建模），该商品行直接<b>置灰并标注「⛔ 不可上架：原因」</b>，不可加入、不参与全选——这类校验在选择商品阶段就挡掉，不要等执行后才由结果卡报错。</div>
       </div>
 
       <!-- P2 添加机器 -->
@@ -646,10 +651,11 @@ table.idx th{background:#fafbfd;font-weight:700}
             <div class="pickrow on"><span class="rd">✓</span><div class="c1"><span class="nm">(81800013)测试嗨便利刷脸</span><span class="addr">广东省深圳市南山区打石一路深圳市第二高级中学北229米</span></div></div>
             <div class="pickrow"><span class="rd"></span><div class="c1"><span class="nm">(81800019)大黄鹅办公室的双门柜</span><span class="addr">广东省深圳市南山区打石一路深南山创新学校内测试</span></div></div>
             <div class="pickrow dim"><span class="rd"></span><div class="c1"><span class="nm">(81800014)动态柜360</span><span class="addr">已在本卡 · 广东省深圳市南山区高新南七道2号深圳国家工程实验室大楼内</span></div></div>
+            <div class="pickrow dis"><span class="rd"></span><div class="c1"><span class="nm">(81839134)格子柜 A 座</span><span class="addr">广东省深圳市南山区科技园南区高新南七道2号A座</span><em class="blktag">⛔ 不可上架：不支持在该机型售卖（后端校验拦截）</em></div></div>
           </div>
           <div class="sh-foot"><span class="bag">🛍<b>2</b></span><button class="btn main">加入卡片</button></div>
         </div>
-        <div class="rule"><b>沿用现有「选择机器」页</b>：搜索（编号 / 名称）+ 搜索按钮、筛选下拉、行结构「(编号)名称 + 地址全称」（按需求不展示机器图片）、圆形勾选、底栏数量角标。<br><b>本场景差异</b>：① 主按钮「加入卡片」——无关联等后续流程；② 现有为单选一台，本场景改<b>多选</b>以支持批量上下架；③ 已在本卡的机器置灰；④ 地址<b>完整展示</b>、可换行，不省略；⑤ 已在本卡的机器置灰（不参与全选）；⑥ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧；⑦ <b>PC 端形态（2026-10-16 用户反馈）</b>：改<b>居中弹窗</b>，对齐现有系统「选择机器」弹窗——筛选（机器名称 / 编号 + 商户名称 + 搜索 / 重置）+ 表格（勾选 / 机器编号 / 机器名称 / 所属商户 / 详细地址）+ 分页（共 N 条 · 前往 N 页 · N 条/页可切）+ 底栏「已选 N 台机器」+ 取消 / 确定；勾选跨页保留，已在本卡的机器默认勾选。</div>
+        <div class="rule"><b>沿用现有「选择机器」页</b>：搜索（编号 / 名称）+ 搜索按钮、筛选下拉、行结构「(编号)名称 + 地址全称」（按需求不展示机器图片）、圆形勾选、底栏数量角标。<br><b>本场景差异</b>：① 主按钮「加入卡片」——无关联等后续流程；② 现有为单选一台，本场景改<b>多选</b>以支持批量上下架；③ 已在本卡的机器置灰；④ 地址<b>完整展示</b>、可换行，不省略；⑤ 已在本卡的机器置灰（不参与全选）；⑥ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧；⑦ <b>PC 端形态（2026-10-16 用户反馈）</b>：改<b>居中弹窗</b>，对齐现有系统「选择机器」弹窗——筛选（机器名称 / 编号 + 商户名称 + 搜索 / 重置）+ 表格（勾选 / 机器编号 / 机器名称 / 所属商户 / 详细地址）+ 分页（共 N 条 · 前往 N 页 · N 条/页可切）+ 底栏「已选 N 台机器」+ 取消 / 确定；勾选跨页保留，已在本卡的机器默认勾选。<br>⑧ <b>校验前移 · 机型级（2026-10-16 产品反馈）</b>：机型<b>不支持上架</b>的机器（如格子柜）在选择弹层里直接<b>置灰、标注「⛔ 不可上架：不支持在该机型售卖」</b>，不可勾选、不进全选——机型级拦截在选择机器阶段就挡掉；「全部机器 / 按线路」范围仍可能带入不支持机器，执行后由结果卡（W6）逐台透传后端原因兜底。</div>
       </div>
 
     </div>

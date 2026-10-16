@@ -424,6 +424,10 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .pickrow.on{background:#f5f9ff}
 .pickrow.on .rd{background:var(--brand);border-color:var(--brand)}
 .pickrow.dim{opacity:.45}
+/* 机型 / 商品级校验前移：不支持上架的行置灰标原因，不可勾选（2026-10-16） */
+.pickrow.dis{opacity:.5}
+.pickrow.dis .nm{color:#8c9199}
+.blktag{font-style:normal;display:block;font-size:10.5px;line-height:1.4;color:var(--danger);margin-top:2px}
 .sh-foot{display:flex;align-items:center;gap:9px;padding:9px 10px;background:#fff;border-top:1px solid #f0f2f5}
 .bag{position:relative;font-size:17px;flex-shrink:0;line-height:1}
 .bag b{position:absolute;top:-3px;right:-7px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:0 4px}
@@ -489,9 +493,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261016k" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261016k" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261016k" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261016l" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261016l" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261016l" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1325,7 +1329,7 @@ function scopeStock(mids,n){
   let now=0,mx=0,hit=0;
   (mids||[]).forEach(k=>{const m=MACHINES[k];if(!m)return;const p=m.products.find(x=>x.n===n);if(!p)return;hit++;
     (p.lanes||[]).forEach(l=>{now+=(l.stock||0);if(l.max)mx+=l.max})});
-  return {now:now,mx:mx,hit:hit,box:(prodByName(n)||{}).box||12};
+  return {now:now,mx:mx,hit:hit,box:boxOf(n)};
 }
 /* 商品在指定机器上的货道 / 层（上下架卡用；⚠ 订单明细不用——machine_order_detail 是订单商品快照，无位置维度） */
 function laneOfProd(mid,n){const m=MACHINES[mid];if(!m)return '';const p=m.products.find(x=>x.n===n);return p?laneIds(p).join('/'):''}
@@ -1350,13 +1354,13 @@ function cardOnshelf(mid,items){
     return {n:it.n,price:it.price!=null?it.price:p.price,lib:p.price,qty:it.qty!=null?it.qty:suggestQty(p),slot:slot,ln:ln};
   });
   if(!items.length){const s0=isVm?(free[0]||'A1 货道'):free[0];
-    items=[{n:'百事可乐 500ml',price:3.5,lib:3.5,qty:30,slot:s0,ln:isVm?(laneOf(m,s0)||{max:30,stock:0}):null}]}
+    items=[{n:'百事可乐 500ml',price:3.5,lib:3.5,qty:suggestQty(prodByName('百事可乐 500ml')),slot:s0,ln:isVm?(laneOf(m,s0)||{max:30,stock:0}):null}]}
   const id=uid();
   const rows=items.map((it,i)=>`<div class="pr pre" data-i="${i}">
     <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>
       ${pcCol(slotCol(it),84)}${pcCol(laneMax(it,isVm),72)}${pcCol(laneNow(it),48)}
       <span class="c5"><input class="pin" data-i="${i}" data-lib="${it.lib}" value="${Number(it.price).toFixed(2)}" inputmode="decimal"></span>
-      <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(((prodByName(it.n)||{}).box||12)+' 件/箱',68)}</div>
+      <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(boxOf(it.n)+' 件/箱',68)}</div>
     ${pcLn(`<span class="slot">${esc(it.slot)} ▾</span>${isVm?subLane(it):'价格默认取商品库价，可直接改'}`)}
   </div>`).join('');
   const c=pushCard(`<div class="cardbox" id="${id}_box">
@@ -1441,7 +1445,7 @@ function rerenderOnshelf(c,id,state,refresh){
     <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>
       ${pcCol(slotCol(it),96)}${pcCol(laneMax(it,isVm),88)}${pcCol(laneNow(it),56)}
       <span class="c5"><input class="pin" data-i="${i}" data-lib="${it.lib}" value="${Number(it.price).toFixed(2)}" inputmode="decimal"></span>
-      <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(((prodByName(it.n)||{}).box||12)+' 件/箱',68)}</div>
+      <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(boxOf(it.n)+' 件/箱',68)}</div>
     ${pcLn(`<span class="slot">${esc(it.slot)} ▾</span>${isVm?subLane(it):'价格默认取商品库价，可直接改'}`)}
   </div>`).join('');
   [...c.querySelectorAll('.pin')].forEach(i=>{i.oninput=refresh;i.classList.toggle('chg',Math.abs(Number(i.value)-Number(i.getAttribute('data-lib')))>1e-9)});
@@ -1456,7 +1460,10 @@ function subLane(it){
   const st=it.ln&&it.ln.stock!=null?it.ln.stock:0;
   return `最大 ${mx} · 现存 ${st}`;
 }
-function suggestQty(p){return Math.max(12,Math.round((p&&p.box||12)*1.5))}
+/* 补货量默认值口径（2026-10-16 产品确认）：取商品**箱规 × 1.5**（四舍五入取整）；
+   箱规为 0 或未配置 → 补货量与箱规列都展示 0，不兜底成其他值 */
+function boxOf(n){const p=prodByName(n);return (p&&p.box!=null)?Number(p.box):0}
+function suggestQty(p){const b=(p&&p.box!=null)?Number(p.box):0;return b>0?Math.round(b*1.5):0}
 function nextFreeLane(m,need){need=need||2;const used={};m.products.forEach(p=>(p.lanes||[]).forEach(l=>used[l.id]=1));
   const out=[];const A='ABCDEFGH';for(let r=0;r<A.length&&out.length<need+2;r++)for(let c=1;c<=6&&out.length<need+2;c++){const id=A[r]+c+' 货道';if(!used[id])out.push(id)}
   return out;}
@@ -1479,6 +1486,18 @@ function pickOnshelfFails(mids,names){
   });
   return f;
 }
+/* 校验前移（2026-10-16 产品反馈：这种校验不应该在选择机器的时候就直接校验吗）：
+   ① 机型级拦截 → P2「选择机器」弹层里直接置灰、标原因、不可勾选（不进全选）；
+   ② 商品级拦截（机器 × 商品未建模）→ P1「添加商品」弹层里该商品置灰不可添加。
+   执行层 pickOnshelfFails → W6 结果卡保留作兜底：
+   「全部机器 / 按线路」范围仍可能带入不支持机器，失败原因逐台透传。 */
+function onshelfMachineBlocked(k){return ONSHELF_BLOCK[k]||''}
+function onshelfGoodsBlocked(mid,mids,n){
+  const ids=(mid?[mid]:[]).concat(mids||[]);
+  for(let i=0;i<ids.length;i++){const s=ONSHELF_GOODS_BLOCK[ids[i]];
+    if(s&&n.indexOf(s.key)>=0)return s.reason}
+  return '';
+}
 
 /* ---------- W2-a / W2-b / W2-c：批量上架（范围三选一）----------
    ⚠ 三张卡共用同一套商品行，仅机器选择区不同；顶部 .seg 切换
@@ -1491,7 +1510,7 @@ function cardBatchOnshelf(scope,items){
   else mids=(batchPickCache.length?batchPickCache.slice():['hls','lj3','nwhh']);
   items=(items||[]).map(it=>{const p=prodByName(it.n)||{price:3.5,box:12};
     return {n:it.n,price:it.price!=null?it.price:p.price,lib:p.price,qty:it.qty!=null?it.qty:suggestQty(p)}});
-  if(!items.length){const p=prodByName('百事可乐 500ml');items=[{n:'百事可乐 500ml',price:p.price,lib:p.price,qty:30}]}
+  if(!items.length){const p=prodByName('百事可乐 500ml');items=[{n:'百事可乐 500ml',price:p.price,lib:p.price,qty:suggestQty(p)}]}
   const id=uid();
   const c=pushCard(`<div class="cardbox" id="${id}_box">
     <div class="cb-head c" id="${id}_head"><span class="ttl">➕ 批量上架商品</span><span class="st" id="${id}_st">待确认</span></div>
@@ -1507,7 +1526,7 @@ function cardBatchOnshelf(scope,items){
         <div id="${id}_rows">${items.map((it,i)=>`<div class="pr pre" data-i="${i}">
           <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>${pcCol(money(it.lib),88)}
             <span class="c5"><input class="pin" data-i="${i}" data-lib="${it.lib}" value="${Number(it.price).toFixed(2)}" inputmode="decimal"></span>
-            <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(((prodByName(it.n)||{}).box||12)+' 件/箱',68)}</div>
+            <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(boxOf(it.n)+' 件/箱',68)}</div>
           ${pcLn(`对 <b class="cnt">${mids.length}</b> 台逐台执行 · 货道自动分配`)}
         </div>`).join('')}</div>
       </div>
@@ -1577,7 +1596,7 @@ function cardBatchOnshelf(scope,items){
     c.querySelector('#'+id+'_rows').innerHTML=state.items.map((it,i)=>`<div class="pr pre" data-i="${i}">
       <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>${pcCol(money(it.lib),88)}
         <span class="c5"><input class="pin" data-i="${i}" data-lib="${it.lib}" value="${Number(it.price).toFixed(2)}" inputmode="decimal"></span>
-        <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(((prodByName(it.n)||{}).box||12)+' 件/箱',68)}</div>
+        <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(boxOf(it.n)+' 件/箱',68)}</div>
       ${pcLn(`对 <b class="cnt">${state.mids.length}</b> 台逐台执行 · 货道自动分配`)}
     </div>`).join('');
     [...c.querySelectorAll('.pin')].forEach(i=>{i.oninput=refresh;i.classList.toggle('chg',Math.abs(Number(i.value)-Number(i.getAttribute('data-lib')))>1e-9)});
@@ -1859,7 +1878,7 @@ function cardReplenish(mids){
      PC 端是仓管/运营在后台按单备货，必须能看到「现在还剩多少、最多能放多少」。 */
   const items=REPLEN_ITEMS.map(it=>{
     const need=it.max-it.now;
-    return {n:it.n,max:it.max,now:it.now,lack:need,cur:need,box:(prodByName(it.n)||{}).box||12};
+    return {n:it.n,max:it.max,now:it.now,lack:need,cur:need,box:boxOf(it.n)};
   });
   const sumNow=items.reduce((a,x)=>a+x.now,0),sumMx=items.reduce((a,x)=>a+x.max,0);
   const c=pushCard(`<div class="cardbox" id="${id}_box">
@@ -2105,10 +2124,11 @@ function sheetAddProduct(mid,cb,mids,cur){
     ${fams.length?`<div class="fithint">${isBatch?`已按<b>交集</b>过滤`:'已按本机机型过滤'}${drop.length?` ${drop.length} 件不适用：${drop.map(x=>esc(x.p.n)).join('、')}`:' 0 件'}${isBatch&&!drop.length?'（本批所有机型都支持全部商品）':''}</div>`:''}
     <div class="selbar"><span class="ck off" id="p_all">○</span>全选<span class="cnt" id="p_cnt">已选 0 件</span></div>
     <div class="picklist" id="p_list">
-      ${avail.map(x=>`<div class="pickrow" data-i="${x.i}"><span class="th">${x.p.emoji}</span>
+      ${avail.map(x=>{const gb=onshelfGoodsBlocked(mid,mids,x.p.n);
+        return `<div class="pickrow${gb?' dis':''}" data-i="${x.i}"${gb?` data-blk="${esc(gb)}"`:''}><span class="th">${x.p.emoji}</span>
         <div class="c1"><span class="nm">${esc(x.p.n)}</span><span class="sub">${esc(x.p.brand)}　${esc(x.p.spec)}</span>
-        <span class="meta"><span class="prc">${money(x.p.price)}</span>${esc(x.p.fit)}</span></div>
-        <span class="rd"></span><span class="row-act">加入</span></div>`).join('')}
+        <span class="meta"><span class="prc">${money(x.p.price)}</span>${esc(x.p.fit)}</span>${gb?`<em class="blktag">⛔ 不可上架：${esc(gb)}</em>`:''}</div>
+        <span class="rd"></span><span class="row-act">加入</span></div>`}).join('')}
     </div>
     <div class="sh-foot"><span class="bag">🛍<b id="p_bag">0</b></span><button class="btn main" id="p_ok" disabled>加入卡片</button></div>`;
   const mask=openSheet(inner);
@@ -2116,11 +2136,11 @@ function sheetAddProduct(mid,cb,mids,cur){
         okBtn=mask.querySelector('#p_ok'),allBtn=mask.querySelector('#p_all');
   function refresh(){
     const rows=[...list.querySelectorAll('.pickrow')];
-    const pick=rows.filter(r=>!r.classList.contains('dim')&&r.classList.contains('on'));
+    const pick=rows.filter(r=>!r.classList.contains('dim')&&!r.classList.contains('dis')&&r.classList.contains('on'));
     cnt.textContent='已选 '+pick.length+' 件';
     bag.textContent=pick.length;
     okBtn.disabled=!pick.length;
-    const avail=rows.filter(r=>!r.classList.contains('dim'));
+    const avail=rows.filter(r=>!r.classList.contains('dim')&&!r.classList.contains('dis'));
     const on=avail.filter(r=>r.classList.contains('on'));
     allBtn.className='ck'+(on.length===0?' off':(on.length===avail.length?'':' half'));
     allBtn.textContent=on.length===avail.length?'◉':(on.length===0?'○':'◍');
@@ -2128,6 +2148,7 @@ function sheetAddProduct(mid,cb,mids,cur){
   list.querySelectorAll('.pickrow').forEach(r=>{
     const act=r.querySelector('.row-act');
     const toggle=()=>{
+      if(r.classList.contains('dis')){toastMsg('不可上架：'+(r.getAttribute('data-blk')||'当前范围不支持该商品'));return}
       if(r.classList.contains('dim')){toastMsg('该商品已在本卡');return}
       r.classList.toggle('on');
       const on=r.classList.contains('on');
@@ -2142,7 +2163,7 @@ function sheetAddProduct(mid,cb,mids,cur){
     if(act)act.onclick=e=>{e.stopPropagation();toggle()};
   });
   allBtn.onclick=()=>{
-    const rows=[...list.querySelectorAll('.pickrow')].filter(r=>!r.classList.contains('dim'));
+    const rows=[...list.querySelectorAll('.pickrow')].filter(r=>!r.classList.contains('dim')&&!r.classList.contains('dis'));
     const allOn=rows.every(r=>r.classList.contains('on'));
     rows.forEach(r=>{
       r.classList.toggle('on',!allOn);
@@ -2204,13 +2225,14 @@ function modalAddProduct(mid,cb,mids,cur){
     const slice=list.slice((page-1)*PAGE,page*PAGE);
     rowsEl.innerHTML=slice.length?slice.map(x=>{
       const p=x.p,onCard=has.indexOf(p.n)>=0,on=sel.has(p.n);
+      const gb=onshelfGoodsBlocked(mid,mids,p.n);
       return `<tr>
-        <td class="nm" title="${esc(p.n)}">${esc(p.n)}</td>
+        <td class="nm" title="${esc(p.n)}">${esc(p.n)}${gb?` <em class="blktag">⛔ 不可上架：${esc(gb)}</em>`:''}</td>
         <td>${esc(p.id)}</td>
         <td><span class="pic">${p.emoji}</span></td>
         <td>${esc(p.brand)}</td>
         <td>${esc(p.spec)}</td>
-        <td>${onCard?'<span class="addlk dis">已在本卡</span>':`<span class="addlk${on?' done':''}" data-n="${esc(p.n)}">${on?'已添加':'添加'}</span>`}</td>
+        <td>${onCard?'<span class="addlk dis">已在本卡</span>':(gb?`<span class="addlk dis" title="${esc(gb)}">不可上架</span>`:`<span class="addlk${on?' done':''}" data-n="${esc(p.n)}">${on?'已添加':'添加'}</span>`)}</td>
       </tr>`}).join(''):'<tr><td colspan="6" class="pm-empty">没有符合条件的商品</td></tr>';
     let pg=`<span class="tot">共 ${list.length} 条</span><span class="pg${page<=1?' dis':''}" data-p="prev">‹</span>`;
     for(let i=1;i<=pages;i++)pg+=`<span class="pg${i===page?' on':''}" data-p="${i}">${i}</span>`;
@@ -2249,11 +2271,14 @@ function modalAddProduct(mid,cb,mids,cur){
    所属商户 / 详细地址）→ 分页（共 N 条 · 前往 N 页 · N 条/页）→
    底栏「已选 N 台机器」+ 取消 / 确定。
    与 P1 同一容器（.pc-modal）；选中集合跨页保留；已在本卡的机器默认勾选。
-   ⚠ 所属商户为演示数据（按线路给运营点名）；真实实现取机器归属商户字段。 */
+   ⚠ 所属商户为演示数据（按线路给运营点名）；真实实现取机器归属商户字段。
+   ⚠ 机型级校验前移（2026-10-16）：不支持上架的机器（ONSHELF_BLOCK）在本弹窗内
+     直接置灰、标原因、checkbox 禁用，全选跳过；执行层 W6 仅作兜底。 */
 function modalAddMachine(current,cb){
   const MER={'南油线路':'南油运营点','科技园线路':'科技园运营点','福田线路':'福田运营点','南山线路':'南山运营点'};
-  const rows=Object.entries(MACHINES).map(([k,m])=>({k:k,m:m,mer:MER[m.line]||'—'}));
-  const sel=new Set(current||[]);
+  /* 机型级校验前移：不支持上架的机器置灰标原因、不可勾选、不进全选（2026-10-16 产品反馈） */
+  const rows=Object.entries(MACHINES).map(([k,m])=>({k:k,m:m,mer:MER[m.line]||'—',blk:onshelfMachineBlocked(k)}));
+  const sel=new Set((current||[]).filter(k=>!onshelfMachineBlocked(k)));
   let kwM='',kwB='',page=1,size=5;
   const mask=elx(`<div class="pc-modal-mask"><div class="pc-modal" role="dialog">
     <div class="pm-hd">选择机器<span class="x" title="关闭">✕</span></div>
@@ -2278,9 +2303,11 @@ function modalAddMachine(current,cb){
     const pages=Math.max(1,Math.ceil(list.length/size));
     if(page>pages)page=pages;
     const slice=list.slice((page-1)*size,page*size);
-    rowsEl.innerHTML=slice.length?slice.map(x=>`<tr data-k="${x.k}" class="${sel.has(x.k)?'onrow':''}">
-        <td class="wck"><input type="checkbox" ${sel.has(x.k)?'checked':''}></td>
-        <td>${esc(x.m.code)}</td><td>${esc(x.m.name)}</td><td>${esc(x.mer)}</td><td class="addr">${esc(x.m.addr)}</td></tr>`).join('')
+    rowsEl.innerHTML=slice.length?slice.map(x=>{
+      const dis=!!x.blk;
+      return `<tr data-k="${x.k}" class="${sel.has(x.k)?'onrow':''}${dis?' disrow':''}">
+        <td class="wck"><input type="checkbox" ${sel.has(x.k)?'checked':''} ${dis?'disabled title="该机型不支持上架"':''}></td>
+        <td>${esc(x.m.code)}</td><td>${esc(x.m.name)}${dis?` <em class="blktag">⛔ 不可上架：${esc(x.blk)}</em>`:''}</td><td>${esc(x.mer)}</td><td class="addr">${esc(x.m.addr)}</td></tr>`}).join('')
       :'<tr><td colspan="5" class="pm-empty">没有符合条件的机器</td></tr>';
     let pg=`<span class="tot">共 ${list.length} 条</span><span class="pg${page<=1?' dis':''}" data-p="prev">‹</span>`;
     for(let i=1;i<=pages;i++)pg+=`<span class="pg${i===page?' on':''}" data-p="${i}">${i}</span>`;
@@ -2299,16 +2326,17 @@ function modalAddMachine(current,cb){
     pageEl.querySelector('#pm_size').onchange=e=>{size=parseInt(e.target.value,10)||5;page=1;render()};
     rowsEl.querySelectorAll('tr[data-k]').forEach(r=>{r.onclick=()=>{
       const k=r.getAttribute('data-k');
+      if(r.classList.contains('disrow')){const x=rows.find(y=>y.k===k);toastMsg('不可上架：'+(x&&x.blk||'该机型不支持上架'));return}
       if(sel.has(k))sel.delete(k);else sel.add(k);
       render();
     }});
     cntEl.innerHTML=`已选 <b>${sel.size}</b> 台机器`;
-    const pageRows=list.slice((page-1)*size,page*size);
+    const pageRows=list.slice((page-1)*size,page*size).filter(x=>!x.blk);
     mask.querySelector('#pm_all').checked=pageRows.length>0&&pageRows.every(x=>sel.has(x.k));
   }
   mask.querySelector('#pm_all').onchange=e=>{
     const list=filtered(),on=e.target.checked;
-    list.slice((page-1)*size,page*size).forEach(x=>{if(on)sel.add(x.k);else sel.delete(x.k)});
+    list.slice((page-1)*size,page*size).forEach(x=>{if(x.blk)return;if(on)sel.add(x.k);else sel.delete(x.k)});
     render();
   };
   function doSearch(){kwM=mask.querySelector('#pm_m').value.trim();kwB=mask.querySelector('#pm_b').value.trim();page=1;render()}
@@ -2327,7 +2355,8 @@ function modalAddMachine(current,cb){
 function sheetAddMachine(current,cb){
   /* PC 端：改用居中弹窗（对齐现有系统「选择机器」弹窗，2026-10-16 用户反馈） */
   if(PCW)return modalAddMachine(current,cb);
-  const sel=new Set(current||[]);
+  /* 机型级校验前移：不支持上架的机器直接置灰标原因、不可勾选（2026-10-16 产品反馈） */
+  const sel=new Set((current||[]).filter(k=>!onshelfMachineBlocked(k)));
   const inner=`
     <div class="sh-hd">添加机器<span class="x">✕</span></div>
     <div class="sh-search">
@@ -2337,8 +2366,9 @@ function sheetAddMachine(current,cb){
     <div><span class="sh-sel">南油线路 ▾</span></div>
     <div class="selbar"><span class="ck off" id="m_all">○</span>全选<span class="cnt" id="m_cnt">已选 0 台</span></div>
     <div class="picklist" id="m_list">
-      ${Object.entries(MACHINES).map(([k,m],i)=>`<div class="pickrow" data-k="${k}"><span class="rd"></span>
-        <div class="c1"><span class="nm">(${m.code})${esc(m.name)}</span><span class="addr">${esc(m.addr)}</span></div><span class="row-act">加入</span></div>`).join('')}
+      ${Object.entries(MACHINES).map(([k,m])=>{const blk=onshelfMachineBlocked(k);
+        return `<div class="pickrow${blk?' dis':''}" data-k="${k}"><span class="rd"></span>
+        <div class="c1"><span class="nm">(${m.code})${esc(m.name)}</span><span class="addr">${esc(m.addr)}</span>${blk?`<em class="blktag">⛔ 不可上架：${esc(blk)}</em>`:''}</div><span class="row-act">加入</span></div>`}).join('')}
     </div>
     <div class="sh-foot"><span class="bag">🛍<b id="m_bag">0</b></span><button class="btn main" id="m_ok">加入卡片</button></div>`;
   const mask=openSheet(inner);
@@ -2346,21 +2376,23 @@ function sheetAddMachine(current,cb){
         okBtn=mask.querySelector('#m_ok'),allBtn=mask.querySelector('#m_all');
   function refresh(){
     const rows=[...list.querySelectorAll('.pickrow')];
-    const pick=rows.filter(r=>!r.classList.contains('dim')&&r.classList.contains('on'));
+    const pick=rows.filter(r=>!r.classList.contains('dim')&&!r.classList.contains('dis')&&r.classList.contains('on'));
     cnt.textContent='已选 '+pick.length+' 台';
     bag.textContent=pick.length;
     okBtn.disabled=!pick.length;
-    const avail=rows.filter(r=>!r.classList.contains('dim'));
+    const avail=rows.filter(r=>!r.classList.contains('dim')&&!r.classList.contains('dis'));
     const on=avail.filter(r=>r.classList.contains('on'));
     allBtn.className='ck'+(on.length===0?' off':(on.length===avail.length?'':' half'));
     allBtn.textContent=on.length===avail.length?'◉':(on.length===0?'○':'◍');
   }
   list.querySelectorAll('.pickrow').forEach(r=>{
     const k=r.getAttribute('data-k');
-    if((current||[]).indexOf(k)>=0){r.classList.add('on');r.querySelector('.rd').textContent='✓';sel.add(k)}
+    const blk=onshelfMachineBlocked(k);
+    if((current||[]).indexOf(k)>=0&&!blk){r.classList.add('on');r.querySelector('.rd').textContent='✓';sel.add(k)}
     const act=r.querySelector('.row-act');
     if(act&&r.classList.contains('on'))act.textContent='已加入';
     const toggle=()=>{
+      if(blk){toastMsg('不可上架：'+blk);return}
       if(r.classList.contains('dim')){toastMsg('该机器已在本卡');return}
       r.classList.toggle('on');
       const on=r.classList.contains('on');
@@ -2373,7 +2405,7 @@ function sheetAddMachine(current,cb){
     if(act)act.onclick=e=>{e.stopPropagation();toggle()};
   });
   allBtn.onclick=()=>{
-    const rows=[...list.querySelectorAll('.pickrow')].filter(r=>!r.classList.contains('dim'));
+    const rows=[...list.querySelectorAll('.pickrow')].filter(r=>!r.classList.contains('dim')&&!r.classList.contains('dis'));
     const allOn=rows.every(r=>r.classList.contains('on'));
     rows.forEach(r=>{
       const k=r.getAttribute('data-k');
