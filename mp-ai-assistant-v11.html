@@ -489,9 +489,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261016i" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261016i" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261016i" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261016j" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261016j" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261016j" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1286,10 +1286,10 @@ function pushCard(html){
 }
 /* 挑商品 / 挑机器的容器
    · 手机端＝贴着 chat-view 底部弹出的**半屏弹层**（375 屏没有别的选择）
-   · PC 端：**添加商品（P1）＝居中弹窗**，对齐现有系统「添加商品」弹窗
-     （2026-10-16 用户反馈，见 modalAddProduct）；**添加机器（P2）仍走内联表**
-     （会话里出一张表，每行右侧「选这台」，不占满屏、不打断右侧面板）
-   ⚠ 两端选择逻辑一份代码，只有容器与版式不同。 */
+   · PC 端：**P1 添加商品 / P2 添加机器均＝居中弹窗**（2026-10-16 用户反馈）——
+     P1 对齐现有系统「添加商品」弹窗（modalAddProduct），
+     P2 对齐现有系统「选择机器」弹窗（modalAddMachine）
+   ⚠ 两端选择逻辑一份代码，只有容器与版式不同；.pc-inline 内联表容器保留但当前无入口。 */
 function openSheet(inner){
   if(PCW){
     const box=elx(`<div class="pc-inline">${inner}</div>`);
@@ -2243,8 +2243,90 @@ function modalAddProduct(mid,cb,mids,cur){
   render();
   return mask;
 }
+/* ---------- P2（PC）：选择机器弹窗 ----------
+   2026-10-16 用户反馈：PC 端「＋ 添加机器」同样对齐现有系统弹窗——
+   筛选（机器名称/编号 + 商户名称 + 搜索 / 重置）→ 表格（勾选 / 机器编号 / 机器名称 /
+   所属商户 / 详细地址）→ 分页（共 N 条 · 前往 N 页 · N 条/页）→
+   底栏「已选 N 台机器」+ 取消 / 确定。
+   与 P1 同一容器（.pc-modal）；选中集合跨页保留；已在本卡的机器默认勾选。
+   ⚠ 所属商户为演示数据（按线路给运营点名）；真实实现取机器归属商户字段。 */
+function modalAddMachine(current,cb){
+  const MER={'南油线路':'南油运营点','科技园线路':'科技园运营点','福田线路':'福田运营点','南山线路':'南山运营点'};
+  const rows=Object.entries(MACHINES).map(([k,m])=>({k:k,m:m,mer:MER[m.line]||'—'}));
+  const sel=new Set(current||[]);
+  let kwM='',kwB='',page=1,size=5;
+  const mask=elx(`<div class="pc-modal-mask"><div class="pc-modal" role="dialog">
+    <div class="pm-hd">选择机器<span class="x" title="关闭">✕</span></div>
+    <div class="pm-search">
+      <span class="pm-fl">机器：<input id="pm_m" placeholder="请输入机器名称/编号搜索"></span>
+      <span class="pm-fl">商户名称：<input id="pm_b" placeholder="请输入商户名称搜索"></span>
+      <button class="pm-sbtn" id="pm_go">搜索</button>
+      <button class="pm-rbtn" id="pm_rs">重置</button>
+    </div>
+    <div class="pm-table-wrap"><table class="pm-table">
+      <thead><tr><th class="wck"><input type="checkbox" id="pm_all" title="全选本页"></th><th>机器编号</th><th>机器名称</th><th>所属商户</th><th>详细地址</th></tr></thead>
+      <tbody id="pm_rows"></tbody>
+    </table></div>
+    <div class="pm-page" id="pm_page"></div>
+    <div class="pm-ft"><span class="pm-selcnt" id="pm_cnt">已选 <b>${sel.size}</b> 台机器</span><button class="btn ghost" id="pm_cancel">取 消</button><button class="btn main" id="pm_ok">确 定</button></div>
+  </div></div>`);
+  document.body.appendChild(mask);
+  const rowsEl=mask.querySelector('#pm_rows'),pageEl=mask.querySelector('#pm_page'),cntEl=mask.querySelector('#pm_cnt');
+  function filtered(){return rows.filter(x=>(!kwM||x.m.name.indexOf(kwM)>=0||x.m.code.indexOf(kwM)>=0)&&(!kwB||x.mer.indexOf(kwB)>=0))}
+  function render(){
+    const list=filtered();
+    const pages=Math.max(1,Math.ceil(list.length/size));
+    if(page>pages)page=pages;
+    const slice=list.slice((page-1)*size,page*size);
+    rowsEl.innerHTML=slice.length?slice.map(x=>`<tr data-k="${x.k}" class="${sel.has(x.k)?'onrow':''}">
+        <td class="wck"><input type="checkbox" ${sel.has(x.k)?'checked':''}></td>
+        <td>${esc(x.m.code)}</td><td>${esc(x.m.name)}</td><td>${esc(x.mer)}</td><td class="addr">${esc(x.m.addr)}</td></tr>`).join('')
+      :'<tr><td colspan="5" class="pm-empty">没有符合条件的机器</td></tr>';
+    let pg=`<span class="tot">共 ${list.length} 条</span><span class="pg${page<=1?' dis':''}" data-p="prev">‹</span>`;
+    for(let i=1;i<=pages;i++)pg+=`<span class="pg${i===page?' on':''}" data-p="${i}">${i}</span>`;
+    pg+=`<span class="pg${page>=pages?' dis':''}" data-p="next">›</span><span class="jmp">前往 <input id="pm_jmp" value="${page}"> 页</span>`;
+    pg+=`<select id="pm_size"><option${size===5?' selected':''} value="5">5 条/页</option><option${size===10?' selected':''} value="10">10 条/页</option><option${size===20?' selected':''} value="20">20 条/页</option></select>`;
+    pageEl.innerHTML=pg;
+    pageEl.querySelectorAll('.pg').forEach(b=>{b.onclick=()=>{
+      const v=b.getAttribute('data-p');
+      if(v==='prev'){if(page>1)page--}
+      else if(v==='next'){if(page<pages)page++}
+      else page=+v;
+      render();
+    }});
+    const j=pageEl.querySelector('#pm_jmp');
+    if(j)j.onchange=()=>{page=Math.min(pages,Math.max(1,+j.value||1));render()};
+    pageEl.querySelector('#pm_size').onchange=e=>{size=parseInt(e.target.value,10)||5;page=1;render()};
+    rowsEl.querySelectorAll('tr[data-k]').forEach(r=>{r.onclick=()=>{
+      const k=r.getAttribute('data-k');
+      if(sel.has(k))sel.delete(k);else sel.add(k);
+      render();
+    }});
+    cntEl.innerHTML=`已选 <b>${sel.size}</b> 台机器`;
+    const pageRows=list.slice((page-1)*size,page*size);
+    mask.querySelector('#pm_all').checked=pageRows.length>0&&pageRows.every(x=>sel.has(x.k));
+  }
+  mask.querySelector('#pm_all').onchange=e=>{
+    const list=filtered(),on=e.target.checked;
+    list.slice((page-1)*size,page*size).forEach(x=>{if(on)sel.add(x.k);else sel.delete(x.k)});
+    render();
+  };
+  function doSearch(){kwM=mask.querySelector('#pm_m').value.trim();kwB=mask.querySelector('#pm_b').value.trim();page=1;render()}
+  mask.querySelector('#pm_go').onclick=doSearch;
+  mask.querySelector('#pm_rs').onclick=()=>{mask.querySelector('#pm_m').value='';mask.querySelector('#pm_b').value='';kwM='';kwB='';page=1;render()};
+  ['pm_m','pm_b'].forEach(id=>{const i=mask.querySelector('#'+id);i.onkeydown=e=>{if(e.key==='Enter')doSearch()}});
+  function close(){mask.remove()}
+  mask.querySelector('.pm-hd .x').onclick=close;
+  mask.querySelector('#pm_cancel').onclick=close;
+  mask.addEventListener('click',e=>{if(e.target===mask)close()});
+  mask.querySelector('#pm_ok').onclick=()=>{const picks=[...sel];close();if(cb)cb(picks)};
+  render();
+  return mask;
+}
 /* ---------- P2：添加机器（编号 + 名称 + 地址完整展示）---------- */
 function sheetAddMachine(current,cb){
+  /* PC 端：改用居中弹窗（对齐现有系统「选择机器」弹窗，2026-10-16 用户反馈） */
+  if(PCW)return modalAddMachine(current,cb);
   const sel=new Set(current||[]);
   const inner=`
     <div class="sh-hd">添加机器<span class="x">✕</span></div>

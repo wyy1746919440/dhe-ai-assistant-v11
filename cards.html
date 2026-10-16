@@ -201,7 +201,7 @@ table.idx th{background:#fafbfd;font-weight:700}
       <tr><td>R5</td><td>商品维度销售额</td><td>读·结果</td><td>C7</td><td>「辣媳妇山椒笋尖近三个月销量 / 所有在线机器的」</td></tr>
       <tr><td>R6</td><td>离线原因</td><td>读·结果</td><td>C9</td><td>「什么原因离线」</td></tr>
       <tr><td>P1</td><td>添加商品弹层（商品库选择）</td><td>手机半屏 / PC 居中弹窗</td><td>W1 / W2</td><td>卡内点「＋ 添加商品」</td></tr>
-      <tr><td>P2</td><td>添加机器弹层（多选）</td><td>半屏弹层</td><td>W2-c / W3</td><td>卡内点「＋ 添加机器」</td></tr>
+      <tr><td>P2</td><td>添加机器弹层（多选）</td><td>手机半屏 / PC 居中弹窗</td><td>W2-c / W3</td><td>卡内点「＋ 添加机器」</td></tr>
     </table>
   </div>
 
@@ -599,7 +599,7 @@ table.idx th{background:#fafbfd;font-weight:700}
 
   <!-- ================= 添加弹层 ================= -->
   <div class="panel">
-    <h2><span class="n">三</span>「＋ 添加商品 / 添加机器」弹层（手机端半屏 · PC 端添加商品＝居中弹窗）</h2>
+    <h2><span class="n">三</span>「＋ 添加商品 / 添加机器」弹层（手机端半屏 · PC 端均＝居中弹窗）</h2>
     <div class="grid">
 
       <!-- P1 添加商品 -->
@@ -632,7 +632,7 @@ table.idx th{background:#fafbfd;font-weight:700}
       <div class="unit">
         <div class="cap"><span class="cd">P2</span>添加机器 · 编号 + 名称 + 地址</div>
         <span class="q">W2-c / W3 内点「＋ 添加机器」呼出</span>
-        <div class="masknote">半屏底部弹出 · 点遮罩或 ✕ 关闭，已勾选保留</div>
+        <div class="masknote">手机端＝半屏底部弹出；PC 端（2026-10-16）＝居中弹窗，对齐现有系统「选择机器」弹窗</div>
         <div class="sheet">
           <div class="sh-hd">添加机器<span class="x">✕</span></div>
           <div class="sh-search">
@@ -649,7 +649,7 @@ table.idx th{background:#fafbfd;font-weight:700}
           </div>
           <div class="sh-foot"><span class="bag">🛍<b>2</b></span><button class="btn main">加入卡片</button></div>
         </div>
-        <div class="rule"><b>沿用现有「选择机器」页</b>：搜索（编号 / 名称）+ 搜索按钮、筛选下拉、行结构「(编号)名称 + 地址全称」（按需求不展示机器图片）、圆形勾选、底栏数量角标。<br><b>本场景差异</b>：① 主按钮「加入卡片」——无关联等后续流程；② 现有为单选一台，本场景改<b>多选</b>以支持批量上下架；③ 已在本卡的机器置灰；④ 地址<b>完整展示</b>、可换行，不省略；⑤ 已在本卡的机器置灰（不参与全选）；⑥ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧。</div>
+        <div class="rule"><b>沿用现有「选择机器」页</b>：搜索（编号 / 名称）+ 搜索按钮、筛选下拉、行结构「(编号)名称 + 地址全称」（按需求不展示机器图片）、圆形勾选、底栏数量角标。<br><b>本场景差异</b>：① 主按钮「加入卡片」——无关联等后续流程；② 现有为单选一台，本场景改<b>多选</b>以支持批量上下架；③ 已在本卡的机器置灰；④ 地址<b>完整展示</b>、可换行，不省略；⑤ 已在本卡的机器置灰（不参与全选）；⑥ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧；⑦ <b>PC 端形态（2026-10-16 用户反馈）</b>：改<b>居中弹窗</b>，对齐现有系统「选择机器」弹窗——筛选（机器名称 / 编号 + 商户名称 + 搜索 / 重置）+ 表格（勾选 / 机器编号 / 机器名称 / 所属商户 / 详细地址）+ 分页（共 N 条 · 前往 N 页 · N 条/页可切）+ 底栏「已选 N 台机器」+ 取消 / 确定；勾选跨页保留，已在本卡的机器默认勾选。</div>
       </div>
 
     </div>
