@@ -489,9 +489,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261016h" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261016h" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261016h" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261016i" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261016i" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261016i" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1286,9 +1286,10 @@ function pushCard(html){
 }
 /* 挑商品 / 挑机器的容器
    · 手机端＝贴着 chat-view 底部弹出的**半屏弹层**（375 屏没有别的选择）
-   · PC 端＝**不出弹层**，直接在触发它的那张卡下面接一张内联表（线上 PC 就是这么做的：
-     会话里出一张表，每行右侧一个「加入 / 选这台」，不占满屏、不打断右侧面板）
-   ⚠ 两端的 inner 完全相同，只有容器不同 —— 选择逻辑一份代码。 */
+   · PC 端：**添加商品（P1）＝居中弹窗**，对齐现有系统「添加商品」弹窗
+     （2026-10-16 用户反馈，见 modalAddProduct）；**添加机器（P2）仍走内联表**
+     （会话里出一张表，每行右侧「选这台」，不占满屏、不打断右侧面板）
+   ⚠ 两端选择逻辑一份代码，只有容器与版式不同。 */
 function openSheet(inner){
   if(PCW){
     const box=elx(`<div class="pc-inline">${inner}</div>`);
@@ -1404,7 +1405,7 @@ function cardOnshelf(mid,items){
       state.items.push({n:n,price:p.price,lib:p.price,qty:suggestQty(p),slot:slot,ln:isVm?laneOf(m,slot):null});
     });
     rerenderOnshelf(c,id,state,refresh);
-  });
+  },null,state.items.map(x=>x.n));
   c.querySelector('#'+id+'_cancel').onclick=()=>markCancelled(id);
   okBtn.onclick=()=>{
     const btns=c.querySelector('#'+id+'_btns');if(btns)btns.innerHTML=`<button class="btn done" disabled>⏳ 执行中…</button>`;
@@ -1571,7 +1572,7 @@ function cardBatchOnshelf(scope,items){
     picks.forEach(n=>{if(cur.indexOf(n)>=0)return;const p=prodByName(n)||{price:3,box:12};
       state.items.push({n:n,price:p.price,lib:p.price,qty:suggestQty(p)})});
     renderRows();refresh();
-  },state.mids);
+  },state.mids,state.items.map(x=>x.n));
   function renderRows(){
     c.querySelector('#'+id+'_rows').innerHTML=state.items.map((it,i)=>`<div class="pr pre" data-i="${i}">
       <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>${pcCol(money(it.lib),88)}
@@ -2084,7 +2085,9 @@ function cardOfflineReason(){
    ⚠ 机型族取 m.type 的「·」前缀（售货机 / 智能柜），与商品 fit 字段对齐。 */
 function machineFamily(k){const t=(MACHINES[k]||{}).type||'';return t.split(' · ')[0]}
 function prodFits(p,fams){return fams.every(f=>p.fit.indexOf(f)>=0)}
-function sheetAddProduct(mid,cb,mids){
+function sheetAddProduct(mid,cb,mids,cur){
+  /* PC 端：改用居中弹窗（对齐现有系统「添加商品」弹窗，2026-10-16 用户反馈） */
+  if(PCW)return modalAddProduct(mid,cb,mids,cur);
   const m=mid?MACHINES[mid]:null;
   const fams=m?[machineFamily(mid)]:Array.from(new Set((mids||[]).map(machineFamily))).filter(Boolean);
   const isBatch=!m&&fams.length>0;
@@ -2156,6 +2159,88 @@ function sheetAddProduct(mid,cb,mids){
   mask.querySelector('.sh-hd .x').onclick=closeSheet;
   okBtn.onclick=()=>{const picks=[...sel];closeSheet();if(cb)cb(picks)};
   refresh();
+  return mask;
+}
+/* ---------- P1（PC）：添加商品弹窗 ----------
+   2026-10-16 用户反馈：PC 端「＋ 添加商品」要对齐现有系统的**居中弹窗**——
+   搜索（商品名称 / 品牌）→ 私有商品库表格（名称 / 编号 / 图片 / 品牌 / 单件规格 / 操作-添加）
+   →「找不到商品？搜索公有库商品」→ 分页 → 取消 / 完成。
+   机型过滤口径不变：单台＝本机机型；批量＝本批机器机型交集（2026-10-16 裁决 5）。
+   选择逻辑：行内「添加」＝选中 / 再点取消；「完成」才回填卡片 —— 与手机端 sheet
+   的「加入卡片」同一回调契约（picks＝商品名数组）。已在本卡的商品置灰不可选。 */
+function modalAddProduct(mid,cb,mids,cur){
+  const m=mid?MACHINES[mid]:null;
+  const fams=m?[machineFamily(mid)]:Array.from(new Set((mids||[]).map(machineFamily))).filter(Boolean);
+  const isBatch=!m&&fams.length>0;
+  const avail=PRODUCTS.map((p,i)=>({p:p,i:i})).filter(x=>prodFits(x.p,fams));
+  const drop=PRODUCTS.filter(p=>!prodFits(p,fams));
+  const has=(cur||[]);
+  const sel=new Set();
+  let kwN='',kwB='',page=1;const PAGE=5;
+  const mask=elx(`<div class="pc-modal-mask"><div class="pc-modal" role="dialog">
+    <div class="pm-hd">添加商品<span class="x" title="关闭">✕</span></div>
+    <div class="pm-search">
+      <span class="pm-fl">商品名称：<input id="pm_kn" placeholder="请输入"></span>
+      <span class="pm-fl">品牌：<input id="pm_kb" placeholder="请输入"></span>
+      <button class="pm-sbtn" id="pm_go">搜索</button>
+    </div>
+    <div class="pm-grp">私有商品库（${fams.length?(isBatch?`仅展示本批 ${(mids||[]).length} 台机器<b>机型交集</b>的可售商品`:`仅展示当前机型（${fams.join(' · ')}）可售的商品`):'私有商品库'}）</div>
+    ${fams.length?`<div class="pm-fithint">已按${isBatch?'交集':'本机机型'}过滤${drop.length?`，${drop.length} 件不适用：${drop.map(x=>esc(x.n)).join('、')}`:'，本批机型均支持库内全部商品'}</div>`:''}
+    <div class="pm-table-wrap"><table class="pm-table">
+      <thead><tr><th>商品名称</th><th>商品编号</th><th>商品图片</th><th>商品品牌</th><th>单件规格</th><th>操作</th></tr></thead>
+      <tbody id="pm_rows"></tbody>
+    </table></div>
+    <div class="pm-none">找不到商品？点击搜索 <a id="pm_pub">公有库商品</a></div>
+    <div class="pm-page" id="pm_page"></div>
+    <div class="pm-ft"><button class="btn ghost" id="pm_cancel">取 消</button><button class="btn main" id="pm_ok">完 成</button></div>
+  </div></div>`);
+  document.body.appendChild(mask);
+  const rowsEl=mask.querySelector('#pm_rows'),pageEl=mask.querySelector('#pm_page');
+  function filtered(){return avail.filter(x=>(!kwN||x.p.n.indexOf(kwN)>=0)&&(!kwB||x.p.brand.indexOf(kwB)>=0))}
+  function render(){
+    const list=filtered();
+    const pages=Math.max(1,Math.ceil(list.length/PAGE));
+    if(page>pages)page=pages;
+    const slice=list.slice((page-1)*PAGE,page*PAGE);
+    rowsEl.innerHTML=slice.length?slice.map(x=>{
+      const p=x.p,onCard=has.indexOf(p.n)>=0,on=sel.has(p.n);
+      return `<tr>
+        <td class="nm" title="${esc(p.n)}">${esc(p.n)}</td>
+        <td>${esc(p.id)}</td>
+        <td><span class="pic">${p.emoji}</span></td>
+        <td>${esc(p.brand)}</td>
+        <td>${esc(p.spec)}</td>
+        <td>${onCard?'<span class="addlk dis">已在本卡</span>':`<span class="addlk${on?' done':''}" data-n="${esc(p.n)}">${on?'已添加':'添加'}</span>`}</td>
+      </tr>`}).join(''):'<tr><td colspan="6" class="pm-empty">没有符合条件的商品</td></tr>';
+    let pg=`<span class="tot">共 ${list.length} 条</span><span class="pg${page<=1?' dis':''}" data-p="prev">‹</span>`;
+    for(let i=1;i<=pages;i++)pg+=`<span class="pg${i===page?' on':''}" data-p="${i}">${i}</span>`;
+    pg+=`<span class="pg${page>=pages?' dis':''}" data-p="next">›</span><span class="jmp">前往 <input id="pm_jmp" value="${page}"> 页</span>`;
+    pageEl.innerHTML=pg;
+    pageEl.querySelectorAll('.pg').forEach(b=>{b.onclick=()=>{
+      const v=b.getAttribute('data-p');
+      if(v==='prev'){if(page>1)page--}
+      else if(v==='next'){if(page<pages)page++}
+      else page=+v;
+      render();
+    }});
+    const j=pageEl.querySelector('#pm_jmp');
+    if(j)j.onchange=()=>{page=Math.min(pages,Math.max(1,+j.value||1));render()};
+    rowsEl.querySelectorAll('.addlk[data-n]').forEach(a=>{a.onclick=()=>{
+      const n=a.getAttribute('data-n');
+      if(sel.has(n)){sel.delete(n);a.textContent='添加';a.classList.remove('done')}
+      else{sel.add(n);a.textContent='已添加';a.classList.add('done')}
+    }});
+  }
+  function doSearch(){kwN=mask.querySelector('#pm_kn').value.trim();kwB=mask.querySelector('#pm_kb').value.trim();page=1;render()}
+  mask.querySelector('#pm_go').onclick=doSearch;
+  ['pm_kn','pm_kb'].forEach(id=>{const i=mask.querySelector('#'+id);i.onkeydown=e=>{if(e.key==='Enter')doSearch()}});
+  mask.querySelector('#pm_pub').onclick=()=>toastMsg('演示：公有库商品搜索与现有系统一致，此处不展开');
+  function close(){mask.remove()}
+  mask.querySelector('.pm-hd .x').onclick=close;
+  mask.querySelector('#pm_cancel').onclick=close;
+  mask.addEventListener('click',e=>{if(e.target===mask)close()});
+  mask.querySelector('#pm_ok').onclick=()=>{const picks=[...sel];close();if(cb)cb(picks)};
+  render();
   return mask;
 }
 /* ---------- P2：添加机器（编号 + 名称 + 地址完整展示）---------- */

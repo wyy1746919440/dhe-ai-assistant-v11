@@ -746,6 +746,68 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
   background-size:400% 100%;animation:cbskl 1.2s ease-in-out infinite}
 @keyframes cbskl{0%{background-position:100% 50%}100%{background-position:0 50%}}
 
+/* ================= PC 端「添加商品」居中弹窗（2026-10-16） =================
+   对齐现有系统「添加商品」弹窗：标题栏 ✕ / 搜索（商品名称 / 品牌）/ 表格
+   （商品名称 / 编号 / 图片 / 品牌 / 单件规格 / 操作）/ 公有库提示 / 分页 / 取消·完成。
+   机型过滤口径不变（单台＝本机机型；批量＝机型交集），以灰字说明行呈现在分组标题下。 */
+.pc-modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:80;display:flex;
+        align-items:center;justify-content:center}
+.pc-modal{width:860px;max-width:calc(100vw - 60px);max-height:84vh;background:#fff;border-radius:8px;
+        display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.2);
+        animation:pmIn .18s ease}
+@keyframes pmIn{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.pc-modal .pm-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;
+        font-size:15px;font-weight:600;color:#1f2937;border-bottom:1px solid #f0f2f5;flex-shrink:0}
+.pc-modal .pm-hd .x{cursor:pointer;color:#8c8c8c;font-size:14px;font-weight:400}
+.pc-modal .pm-hd .x:hover{color:#595959}
+.pc-modal .pm-search{display:flex;align-items:center;gap:14px;padding:12px 18px 4px;
+        font-size:13px;color:#5b6472;flex-shrink:0}
+.pc-modal .pm-search .pm-fl{display:flex;align-items:center;gap:8px}
+.pc-modal .pm-search input{height:32px;width:180px;border:1px solid #dfe4ea;border-radius:6px;
+        padding:0 10px;font-size:13px;font-family:inherit;outline:none;color:#1f2937;background:#fff}
+.pc-modal .pm-search input:focus{border-color:var(--pc-brand)}
+.pc-modal .pm-sbtn{height:32px;padding:0 16px;background:var(--pc-brand);color:#fff;border:none;
+        border-radius:6px;font-size:13px;cursor:pointer;font-family:inherit}
+.pc-modal .pm-sbtn:hover{background:#4096ff}
+.pc-modal .pm-grp{padding:10px 18px 2px;font-size:12.5px;font-weight:600;color:#1f2937;flex-shrink:0}
+.pc-modal .pm-grp b{color:#1677ff}
+.pc-modal .pm-fithint{padding:0 18px 6px;font-size:11.5px;color:#8c8c8c;flex-shrink:0}
+.pc-modal .pm-table-wrap{margin:6px 18px 0;border:1px solid #eef0f3;border-radius:6px;overflow:auto;
+        max-height:44vh;flex-shrink:0}
+.pc-modal table.pm-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.pc-modal .pm-table th{background:#fafbfd;color:#5b6472;font-weight:600;text-align:left;
+        padding:9px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;position:sticky;top:0}
+.pc-modal .pm-table td{padding:10px 12px;border-bottom:1px solid #f6f7f9;color:#374151}
+.pc-modal .pm-table tr:hover td{background:#fafcff}
+.pc-modal .pm-table .nm{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-modal .pm-table .pic{width:34px;height:34px;border-radius:6px;background:#f5f7fa;
+        display:flex;align-items:center;justify-content:center;font-size:18px}
+.pc-modal .pm-table .addlk{color:var(--pc-brand);cursor:pointer}
+.pc-modal .pm-table .addlk:hover{text-decoration:underline}
+.pc-modal .pm-table .addlk.done{color:#22a06b}
+.pc-modal .pm-table .addlk.done:hover{text-decoration:none}
+.pc-modal .pm-table .addlk.dis{color:#bfbfbf;cursor:default}
+.pc-modal .pm-table .addlk.dis:hover{text-decoration:none}
+.pc-modal .pm-none{padding:10px 18px 0;font-size:12px;color:#8c8c8c;text-align:center;flex-shrink:0}
+.pc-modal .pm-none a{color:var(--pc-brand);cursor:pointer}
+.pc-modal .pm-none a:hover{text-decoration:underline}
+.pc-modal .pm-page{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;
+        font-size:12.5px;color:#5b6472;flex-shrink:0}
+.pc-modal .pm-page .tot{color:#8c8c8c;margin-right:6px}
+.pc-modal .pm-page .pg{min-width:26px;height:26px;line-height:26px;text-align:center;
+        border:1px solid #dfe4ea;border-radius:4px;cursor:pointer;padding:0 6px}
+.pc-modal .pm-page .pg:hover{color:var(--pc-brand);border-color:var(--pc-brand)}
+.pc-modal .pm-page .pg.on{color:var(--pc-brand);border-color:var(--pc-brand);cursor:default;font-weight:600}
+.pc-modal .pm-page .pg.dis{color:#bfbfbf;cursor:default;border-color:#f0f2f5}
+.pc-modal .pm-page .pg.dis:hover{color:#bfbfbf;border-color:#f0f2f5}
+.pc-modal .pm-page .jmp{color:#8c8c8c;margin-left:6px}
+.pc-modal .pm-page .jmp input{width:40px;height:26px;border:1px solid #dfe4ea;border-radius:4px;
+        text-align:center;font-size:12.5px;font-family:inherit;outline:none;margin:0 4px}
+.pc-modal .pm-ft{display:flex;justify-content:flex-end;gap:10px;padding:12px 18px 16px;
+        border-top:1px solid #f0f2f5;flex-shrink:0;background:#fff}
+.pc-modal .pm-ft .btn{height:32px;padding:0 20px;border-radius:6px;font-size:13px;flex:0 0 auto}
+.pc-modal .pm-empty{padding:26px 0;text-align:center;color:#8c8c8c;font-size:12.5px}
+
 </style>
 </head>
 <body>
@@ -895,9 +957,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261016h" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261016h" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261016h" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261016i" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261016i" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261016i" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1530,9 +1592,10 @@ function pushCard(html){
 }
 /* 挑商品 / 挑机器的容器
    · 手机端＝贴着 chat-view 底部弹出的**半屏弹层**（375 屏没有别的选择）
-   · PC 端＝**不出弹层**，直接在触发它的那张卡下面接一张内联表（线上 PC 就是这么做的：
-     会话里出一张表，每行右侧一个「加入 / 选这台」，不占满屏、不打断右侧面板）
-   ⚠ 两端的 inner 完全相同，只有容器不同 —— 选择逻辑一份代码。 */
+   · PC 端：**添加商品（P1）＝居中弹窗**，对齐现有系统「添加商品」弹窗
+     （2026-10-16 用户反馈，见 modalAddProduct）；**添加机器（P2）仍走内联表**
+     （会话里出一张表，每行右侧「选这台」，不占满屏、不打断右侧面板）
+   ⚠ 两端选择逻辑一份代码，只有容器与版式不同。 */
 function openSheet(inner){
   if(PCW){
     const box=elx(`<div class="pc-inline">${inner}</div>`);
@@ -1648,7 +1711,7 @@ function cardOnshelf(mid,items){
       state.items.push({n:n,price:p.price,lib:p.price,qty:suggestQty(p),slot:slot,ln:isVm?laneOf(m,slot):null});
     });
     rerenderOnshelf(c,id,state,refresh);
-  });
+  },null,state.items.map(x=>x.n));
   c.querySelector('#'+id+'_cancel').onclick=()=>markCancelled(id);
   okBtn.onclick=()=>{
     const btns=c.querySelector('#'+id+'_btns');if(btns)btns.innerHTML=`<button class="btn done" disabled>⏳ 执行中…</button>`;
@@ -1815,7 +1878,7 @@ function cardBatchOnshelf(scope,items){
     picks.forEach(n=>{if(cur.indexOf(n)>=0)return;const p=prodByName(n)||{price:3,box:12};
       state.items.push({n:n,price:p.price,lib:p.price,qty:suggestQty(p)})});
     renderRows();refresh();
-  },state.mids);
+  },state.mids,state.items.map(x=>x.n));
   function renderRows(){
     c.querySelector('#'+id+'_rows').innerHTML=state.items.map((it,i)=>`<div class="pr pre" data-i="${i}">
       <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>${pcCol(money(it.lib),88)}
@@ -2328,7 +2391,9 @@ function cardOfflineReason(){
    ⚠ 机型族取 m.type 的「·」前缀（售货机 / 智能柜），与商品 fit 字段对齐。 */
 function machineFamily(k){const t=(MACHINES[k]||{}).type||'';return t.split(' · ')[0]}
 function prodFits(p,fams){return fams.every(f=>p.fit.indexOf(f)>=0)}
-function sheetAddProduct(mid,cb,mids){
+function sheetAddProduct(mid,cb,mids,cur){
+  /* PC 端：改用居中弹窗（对齐现有系统「添加商品」弹窗，2026-10-16 用户反馈） */
+  if(PCW)return modalAddProduct(mid,cb,mids,cur);
   const m=mid?MACHINES[mid]:null;
   const fams=m?[machineFamily(mid)]:Array.from(new Set((mids||[]).map(machineFamily))).filter(Boolean);
   const isBatch=!m&&fams.length>0;
@@ -2400,6 +2465,88 @@ function sheetAddProduct(mid,cb,mids){
   mask.querySelector('.sh-hd .x').onclick=closeSheet;
   okBtn.onclick=()=>{const picks=[...sel];closeSheet();if(cb)cb(picks)};
   refresh();
+  return mask;
+}
+/* ---------- P1（PC）：添加商品弹窗 ----------
+   2026-10-16 用户反馈：PC 端「＋ 添加商品」要对齐现有系统的**居中弹窗**——
+   搜索（商品名称 / 品牌）→ 私有商品库表格（名称 / 编号 / 图片 / 品牌 / 单件规格 / 操作-添加）
+   →「找不到商品？搜索公有库商品」→ 分页 → 取消 / 完成。
+   机型过滤口径不变：单台＝本机机型；批量＝本批机器机型交集（2026-10-16 裁决 5）。
+   选择逻辑：行内「添加」＝选中 / 再点取消；「完成」才回填卡片 —— 与手机端 sheet
+   的「加入卡片」同一回调契约（picks＝商品名数组）。已在本卡的商品置灰不可选。 */
+function modalAddProduct(mid,cb,mids,cur){
+  const m=mid?MACHINES[mid]:null;
+  const fams=m?[machineFamily(mid)]:Array.from(new Set((mids||[]).map(machineFamily))).filter(Boolean);
+  const isBatch=!m&&fams.length>0;
+  const avail=PRODUCTS.map((p,i)=>({p:p,i:i})).filter(x=>prodFits(x.p,fams));
+  const drop=PRODUCTS.filter(p=>!prodFits(p,fams));
+  const has=(cur||[]);
+  const sel=new Set();
+  let kwN='',kwB='',page=1;const PAGE=5;
+  const mask=elx(`<div class="pc-modal-mask"><div class="pc-modal" role="dialog">
+    <div class="pm-hd">添加商品<span class="x" title="关闭">✕</span></div>
+    <div class="pm-search">
+      <span class="pm-fl">商品名称：<input id="pm_kn" placeholder="请输入"></span>
+      <span class="pm-fl">品牌：<input id="pm_kb" placeholder="请输入"></span>
+      <button class="pm-sbtn" id="pm_go">搜索</button>
+    </div>
+    <div class="pm-grp">私有商品库（${fams.length?(isBatch?`仅展示本批 ${(mids||[]).length} 台机器<b>机型交集</b>的可售商品`:`仅展示当前机型（${fams.join(' · ')}）可售的商品`):'私有商品库'}）</div>
+    ${fams.length?`<div class="pm-fithint">已按${isBatch?'交集':'本机机型'}过滤${drop.length?`，${drop.length} 件不适用：${drop.map(x=>esc(x.n)).join('、')}`:'，本批机型均支持库内全部商品'}</div>`:''}
+    <div class="pm-table-wrap"><table class="pm-table">
+      <thead><tr><th>商品名称</th><th>商品编号</th><th>商品图片</th><th>商品品牌</th><th>单件规格</th><th>操作</th></tr></thead>
+      <tbody id="pm_rows"></tbody>
+    </table></div>
+    <div class="pm-none">找不到商品？点击搜索 <a id="pm_pub">公有库商品</a></div>
+    <div class="pm-page" id="pm_page"></div>
+    <div class="pm-ft"><button class="btn ghost" id="pm_cancel">取 消</button><button class="btn main" id="pm_ok">完 成</button></div>
+  </div></div>`);
+  document.body.appendChild(mask);
+  const rowsEl=mask.querySelector('#pm_rows'),pageEl=mask.querySelector('#pm_page');
+  function filtered(){return avail.filter(x=>(!kwN||x.p.n.indexOf(kwN)>=0)&&(!kwB||x.p.brand.indexOf(kwB)>=0))}
+  function render(){
+    const list=filtered();
+    const pages=Math.max(1,Math.ceil(list.length/PAGE));
+    if(page>pages)page=pages;
+    const slice=list.slice((page-1)*PAGE,page*PAGE);
+    rowsEl.innerHTML=slice.length?slice.map(x=>{
+      const p=x.p,onCard=has.indexOf(p.n)>=0,on=sel.has(p.n);
+      return `<tr>
+        <td class="nm" title="${esc(p.n)}">${esc(p.n)}</td>
+        <td>${esc(p.id)}</td>
+        <td><span class="pic">${p.emoji}</span></td>
+        <td>${esc(p.brand)}</td>
+        <td>${esc(p.spec)}</td>
+        <td>${onCard?'<span class="addlk dis">已在本卡</span>':`<span class="addlk${on?' done':''}" data-n="${esc(p.n)}">${on?'已添加':'添加'}</span>`}</td>
+      </tr>`}).join(''):'<tr><td colspan="6" class="pm-empty">没有符合条件的商品</td></tr>';
+    let pg=`<span class="tot">共 ${list.length} 条</span><span class="pg${page<=1?' dis':''}" data-p="prev">‹</span>`;
+    for(let i=1;i<=pages;i++)pg+=`<span class="pg${i===page?' on':''}" data-p="${i}">${i}</span>`;
+    pg+=`<span class="pg${page>=pages?' dis':''}" data-p="next">›</span><span class="jmp">前往 <input id="pm_jmp" value="${page}"> 页</span>`;
+    pageEl.innerHTML=pg;
+    pageEl.querySelectorAll('.pg').forEach(b=>{b.onclick=()=>{
+      const v=b.getAttribute('data-p');
+      if(v==='prev'){if(page>1)page--}
+      else if(v==='next'){if(page<pages)page++}
+      else page=+v;
+      render();
+    }});
+    const j=pageEl.querySelector('#pm_jmp');
+    if(j)j.onchange=()=>{page=Math.min(pages,Math.max(1,+j.value||1));render()};
+    rowsEl.querySelectorAll('.addlk[data-n]').forEach(a=>{a.onclick=()=>{
+      const n=a.getAttribute('data-n');
+      if(sel.has(n)){sel.delete(n);a.textContent='添加';a.classList.remove('done')}
+      else{sel.add(n);a.textContent='已添加';a.classList.add('done')}
+    }});
+  }
+  function doSearch(){kwN=mask.querySelector('#pm_kn').value.trim();kwB=mask.querySelector('#pm_kb').value.trim();page=1;render()}
+  mask.querySelector('#pm_go').onclick=doSearch;
+  ['pm_kn','pm_kb'].forEach(id=>{const i=mask.querySelector('#'+id);i.onkeydown=e=>{if(e.key==='Enter')doSearch()}});
+  mask.querySelector('#pm_pub').onclick=()=>toastMsg('演示：公有库商品搜索与现有系统一致，此处不展开');
+  function close(){mask.remove()}
+  mask.querySelector('.pm-hd .x').onclick=close;
+  mask.querySelector('#pm_cancel').onclick=close;
+  mask.addEventListener('click',e=>{if(e.target===mask)close()});
+  mask.querySelector('#pm_ok').onclick=()=>{const picks=[...sel];close();if(cb)cb(picks)};
+  render();
   return mask;
 }
 /* ---------- P2：添加机器（编号 + 名称 + 地址完整展示）---------- */
