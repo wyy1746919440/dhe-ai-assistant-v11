@@ -103,9 +103,9 @@ html,body{height:100%;background:var(--bg)}
   </header>
 
   <nav class="tabs">
-    <a class="tab" href="index.html?v=20261016d">← 1.1 汇总页</a>
+    <a class="tab" href="index.html?v=20261016e">← 1.1 汇总页</a>
     <a class="tab on">📘 需求说明</a>
-    <a class="tab" href="v11-list.html?v=20261016d">1.1 迭代清单 →</a>
+    <a class="tab" href="v11-list.html?v=20261016e">1.1 迭代清单 →</a>
     <span class="spacer">来源：运营商真实提问 654 条分析（2026-10-14）+ 现有系统接口核对</span>
   </nav>
 
@@ -206,7 +206,7 @@ html,body{height:100%;background:var(--bg)}
       </div>
       <div class="doc" id="docBody"><h1 id="需求说明-大黄鹅-AI-助手-1-1-期-小程序端-运营商-PC-端">需求说明 —— 大黄鹅 AI 助手 · 1.1 期（小程序端 + 运营商 PC 端）</h1>
 <blockquote>
-<p><strong>版本</strong> v1.4 ｜ <strong>日期</strong> 2026-10-16 ｜ <strong>适用端</strong> 运营商小程序（移动端）· 运营商 PC 后台
+<p><strong>版本</strong> v1.5 ｜ <strong>日期</strong> 2026-10-16 ｜ <strong>适用端</strong> 运营商小程序（移动端）· 运营商 PC 后台
 <strong>关联文档</strong> 《1.1 期卡片设计稿》（16 卡 + 2 弹层）· 《1.1 期迭代清单》（5 张表）· 可问答原型（小程序端 / PC 端）
 <strong>不在本期范围</strong> 公司内部 OS 后台智能机器人（维持「只说不做」，见 §2.2）</p>
 </blockquote>
@@ -250,6 +250,12 @@ html,body{height:100%;background:var(--bg)}
 <td><strong>2026-10-15</strong></td>
 <td><strong>PC 端交互重做（不是"放大的手机端"）：停靠面板 / 顶栏线上四按钮 + 历史会话 / 挑机器挑商品改内联表 / 机器清单改表格 + 操作列；各卡补 PC 独有字段（补货单加可售库存 · 最大库存等）</strong></td>
 <td>用户评审意见</td>
+</tr>
+<tr>
+<td><strong>v1.5</strong></td>
+<td><strong>2026-10-16</strong></td>
+<td><strong>第二轮评审收口：① §3.0 波次改三波次，与迭代清单表 1 对齐；② R4 现金口径定案（＝现金总额，不拆纸币 / 硬币）并给出降级方案；③ R6 删除未核的「预警通知」来源，只留故障记录表、预警通知转待确认；④ §5.5 / §11.1 跨仓拦截补 ISP 服务商前提条件；⑤ §8 原则 2 去「将清空 N 件」旧话；⑥ W2-a 范围文案改「全部可上架机型 N 台」；⑦ §3.5 第 2 条去掉「如有」，改为必须核对的 checklist 项</strong></td>
+<td>第二轮评审 + 产品裁决 2026-10-16</td>
 </tr>
 <tr>
 <td><strong>v1.4</strong></td>
@@ -400,15 +406,21 @@ html,body{height:100%;background:var(--bg)}
 </thead>
 <tbody>
 <tr>
-<td><strong>波次一 · P1（8 项）</strong></td>
-<td>A1 上架（W1 / W1-b / W2-a·b·c）· B1 补货记录（R1）· B2 补货单（W5）· B3 订单明细（R2）· C8 下架（W3）＋ qa 补条目 3 项（B4 / B5 / B6）</td>
-<td>① ca-api 写接口扩展（上架 / 下架）② 只读接口编排（补货记录 / 订单明细）③ mp_kb 条目入库</td>
+<td><strong>波次一 · P1（qa 先行，3 项）</strong></td>
+<td>B4 故障排查 qa · B5 商户工单兜底引导 qa · B6 客服管理条目入库</td>
+<td>① mp_kb 条目入库</td>
+<td>对应问法能命中并返回正确入口</td>
+</tr>
+<tr>
+<td><strong>波次二 · P1（功能项，5 项）</strong></td>
+<td>A1 上架（W1 / W1-b / W2-a·b·c）· B1 补货记录（R1）· B2 补货单（W5）· B3 订单明细（R2）· C8 下架（W3）</td>
+<td>① ca-api 写接口扩展（上架 / 下架）② 只读接口编排（补货记录 / 订单明细）</td>
 <td>小程序端 + PC 端两端原型冒烟全通过</td>
 </tr>
 <tr>
-<td><strong>波次二 · P2（5 项）</strong></td>
+<td><strong>波次三 · P2（5 项）</strong></td>
 <td>C2 批量改价（W4）· C3 反查机器（R3）· C4 支付方式（R4）· C7 商品销售（R5）· C9 离线原因（R6）</td>
-<td>波次一已上线；跨机器批量提交的 confirm_id 粒度确认完毕</td>
+<td>波次二已上线；跨机器批量提交的 confirm_id 粒度确认完毕</td>
 <td>同上</td>
 </tr>
 <tr>
@@ -420,7 +432,8 @@ html,body{height:100%;background:var(--bg)}
 </tbody>
 </table>
 <blockquote>
-<p>波次只表达<strong>优先级与依赖顺序</strong>，不等于两次发版；P1 未完成不阻塞 P2 开发，但 P2 上线以 P1 已上线为前提。实际排期以研发排期表为准。</p>
+<p><strong>波次与优先级的对应关系（已与《迭代清单 · 表 1》对齐）</strong>：P1 拆两个波次是<strong>依赖驱动</strong>——qa 补条目（3 项）只需 mp_kb 入库、无新增接口依赖，故先行；功能项（5 项）须等 ca-api 写接口扩展，次之；P2（5 项）以波次二上线为前提。波次只表达优先级与依赖顺序，不等于三次发版；波次二未完成不阻塞 P2 开发，但 P2 上线以波次二已上线为前提。实际排期以研发排期表为准。
+⚠ <strong>2026-10-16 修正</strong>：原正文把 P1 的 8 项并成单个「波次一」，与迭代清单表 1 的「qa＝波次一 / 功能＝波次二」不一致，两份文档同场评审会当场打架。现统一为<strong>三波次</strong>（qa → 功能 → P2）。</p>
 </blockquote>
 <h3 id="3-1-P1-必做-8-项">3.1 P1 必做（8 项）</h3>
 <table>
@@ -644,10 +657,10 @@ html,body{height:100%;background:var(--bg)}
 </tr>
 <tr>
 <td>2</td>
-<td>小程序端同类定位文案 / 欢迎卡副文案</td>
-<td>同上口径（如有）</td>
-<td>同 #1 一并核对并同步</td>
-<td>两端定位须一致</td>
+<td>小程序端：<strong>欢迎卡副文案 / 能力清单页文案 / 越界 &amp; 未命中兜底话术</strong>（三处，逐处核对，不再写「如有」）</td>
+<td>与 #1 同源的「只能回答」类表述</td>
+<td>同 #1 一并改为「可查询 + 可代办执行，执行前给预览、需你确认」</td>
+<td>两端定位须一致。<br>⚠ 2026-10-16 收口：原写「同上口径（如有）」等于把核对动作推给了执行方、这条 checklist 项自身没闭环；现改为<strong>列出必须逐处检查的三处位置</strong>，核对完在 checklist 上打勾才算闭环</td>
 </tr>
 </tbody>
 </table>
@@ -782,7 +795,7 @@ html,body{height:100%;background:var(--bg)}
 <tr>
 <td>W2-a</td>
 <td>全部机器</td>
-<td>范围只写「全部 N 台」，不区分在线 / 离线台数</td>
+<td>范围写「<strong>全部可上架机型 N 台</strong>」，不区分在线 / 离线台数（N 已排除静态柜，见本节第 1 条）</td>
 </tr>
 <tr>
 <td>W2-b</td>
@@ -799,7 +812,7 @@ html,body{height:100%;background:var(--bg)}
 <p><strong>批量不逐台指定货道 / 层</strong>（各机货道不同，一张卡里无法逐个指定），按各机自动分配；要精确指定货道用单台卡 W1 / W1-b。</p>
 <ul>
 <li>⚠⚠ <strong>静态柜不支持上架</strong>（2026-10-16 代码复核裁决）：<strong>单机与批量两条路径都拦</strong>——批量 <code>addGoodsBatch</code>（<code>SmartAilseInfoController.java:216-218</code>）直接 return，单机走 <code>displayAddGooods</code> 也会被 <code>AbstractSmartAisleInfoService.java:1435-1437</code> 抛 <code>NOT_SUPPORT_ALI_MACHINE_SHELVES</code>。因此 W1 / W1-b / W2-a·b·c 的机器选择范围<strong>一律排除静态柜</strong>；命中静态柜时按本节末「机型不支持」口径报错，不做降级重试。</li>
-<li><strong>离线机器也支持上架</strong>（2026-10-16 产品裁决）：AI / 前端<strong>不做在线状态门槛</strong>，是否可上架<strong>由后端判定</strong>；卡片范围只写「全部 N 台」，不区分在线 / 离线台数，成败一律由后端校验结果透传（失败原因原样展示在 W6）</li>
+<li><strong>离线机器也支持上架</strong>（2026-10-16 产品裁决）：AI / 前端<strong>不做在线状态门槛</strong>，是否可上架<strong>由后端判定</strong>；卡片范围写「全部可上架机型 N 台」，不区分在线 / 离线台数，成败一律由后端校验结果透传（失败原因原样展示在 W6）</li>
 <li><strong>商品库按机型交集出</strong>（2026-10-16 产品裁决）：P1 弹层在批量场景取<strong>这批机器机型的交集</strong>，交集外的商品直接不出现（能提前挡掉「选完即失败」）；弹层标题写明交集、下方给一行过滤说明。单台上架＝交集退化为该机机型，与现有「添加商品」页一致</li>
 </ul>
 <blockquote>
@@ -853,7 +866,10 @@ html,body{height:100%;background:var(--bg)}
 </ul>
 <p><strong>生成结构：一主多子</strong>——一次生成<strong>一张主单</strong>（masterId），每台机器挂一条子单（子单号＝主单号-序号），<strong>禁止逐台循环调用</strong>（会出多张主单）。</p>
 <blockquote>
-<p>约束：合并的多台机器须<strong>同属一个车线路仓</strong>，跨仓时按仓分开提交（后端直接报错拦截）。</p>
+<p>⚠⚠ <strong>跨仓拦截有前提条件</strong>（2026-10-16 代码复核，被补上的遗漏）：跨仓校验位于 <code>ReplenishmentListMasterServiceImpl.java:439-449</code>，但<strong>外层套了 <code>ispReplenishSku</code> 开关</strong>——
+<code>if (Objects.nonNull(masterView.getIspReplenishSku()) &amp;&amp; masterView.getIspReplenishSku() &amp;&amp; orgIds.size() &gt; 1) { …ispStockHouseInfoList.size() &gt; 1 → throw「补货机器关联多个车线路仓，请和仓管确认，按车线路仓分开提交」 }</code>
+即：<strong>仅当该主单启用 ISP 服务商补货时才校验</strong>。普通运营商（未开 ISP）选了跨仓的多台机器，会<strong>直接合成一张主单且不报错</strong>。<br>
+因此卡片口径不能写死「跨仓必拦」，须写「<strong>跨仓须同属一个车线路仓</strong>」——由 AI 在<strong>提交前</strong>按仓分组提示，而不是依赖后端报错兜底；非服务商场景是否与现在保持「合并成一张主单」不变，见 §12.2 第 8 条。</p>
 </blockquote>
 <h3 id="5-6-批量执行结果与成功明细-W6-W6-b">5.6 批量执行结果与成功明细（W6 / W6-b）</h3>
 <p>结果卡<strong>必须闭环</strong>：失败可重试、成功可展开明细，两者<strong>同源同批</strong>（成功台数 + 失败台数 = 命中总数），不允许只报一边。</p>
@@ -901,8 +917,13 @@ html,body{height:100%;background:var(--bg)}
 <h3 id="6-4-R4-销售额支付方式拆分-C4">6.4 R4 销售额支付方式拆分（C4）</h3>
 <p><strong>口径：默认给合计，用户要求时才拆分</strong>。拆分维度：<strong>支付方式 / 金额 / 笔数 / 占比</strong> + 合计行。</p>
 <blockquote>
-<p><strong>支付方式枚举</strong>（2026-10-16 裁决）：<strong>微信 / 支付宝 / 现金 / 刷卡</strong> 等支付渠道，按渠道拆分，不是现金内部的细分。
-⚠ <strong>数据源需确认</strong>：现有 <code>OfflinePayRecordController</code> 拆的是<strong>现金内部</strong>的纸币 / 硬币（<code>pay_type</code> 1/2）；<code>RptDayReceivePaymentController</code> 拆的是 <code>app_id / machine_type / type(支付|退款)</code>——<strong>两者都不是「支付渠道」维度</strong>。ca-api 编排前须确认取哪个数据源、能否凑出渠道拆分；凑不出则该项降级或换源，并在评审时说明。</p>
+<p><strong>支付方式枚举</strong>（2026-10-16 裁决）：<strong>微信 / 支付宝 / 现金 / 刷卡</strong> 等支付渠道，按<strong>渠道</strong>拆分。
+<strong>现金口径</strong>（2026-10-16 产品裁决）：<strong>现金就是现金支付总额，不拆纸币 / 硬币</strong>。<code>OfflinePayRecordController</code> 里 <code>pay_type</code> 1（纸币）/ 2（硬币）同属现金，<strong>取两者合计</strong>，明细层不展示。<br>
+<strong>数据源分工</strong>（已收敛，不再是「完全悬空」）：
+1. <strong>现金</strong> → <code>OfflinePayRecordController</code>，<code>pay_type</code> 1/2 <strong>合计</strong>，可直接用；
+2. <strong>微信 / 支付宝</strong> → 属线上支付流水，需由 ca-api 确认唯一数据源（<code>RptDayReceivePaymentController</code> 当前拆的是 <code>app_id / machine_type / type</code>，需核实能否映射为渠道）；
+3. <strong>刷卡（银行卡）</strong> → 无人售货机场景<strong>极少发生</strong>，能否取到数待确认（§12.2 第 9 条）。<br>
+<strong>降级方案（先在前端定死，避免拖到 P2 联调才爆）</strong>：若「刷卡」取不到数，R4 只出 <strong>微信 / 支付宝 / 现金</strong> 三类，其余归「其他」并注明；<strong>不允许</strong>为了凑四分类而用错误的近似源。</p>
 </blockquote>
 <h3 id="6-5-R5-商品维度销售额-C7">6.5 R5 商品维度销售额（C7）</h3>
 <p><strong>字段</strong>：商品名称 / 商品ID / 单价 / 销量 / 销售额 + 铺货机器数；支持限定「所有在线机器」范围。</p>
@@ -914,7 +935,8 @@ html,body{height:100%;background:var(--bg)}
 <p><strong>口径</strong>：原因取自 <strong><code>monitor_fault_records</code>（<code>fault_type='machine_offline'</code>）故障记录</strong>，处理建议文案取自 <strong>nacos 配置</strong>（现为「机器离线时间超过阀值，请检查网络」，<code>MonitorFaultRecordServiceImpl.java:130-131</code>）；并标注<strong>来源与时间</strong>。无记录时给「暂无原因记录，建议查硬件状态 / 提交工单」。</p>
 <blockquote>
 <p>⚠⚠ <strong>2026-10-16 代码复核修正</strong>：原写「预警通知或<strong>操作日志</strong>」——<code>machine_online_record</code> 表只有 <code>id / machine_id / online_status / msg_protocol / gmt_created</code>，<strong>没有离线原因字段</strong>，「操作日志」这个数据源<strong>不存在</strong>。若按旧口径接，R6 会拿不到数据。
-卡片「来源」列相应只可能出现：<strong>故障记录</strong> / <strong>预警通知</strong> 两类，不再出现「操作日志」。</p>
+⚠ <strong>2026-10-16 第二轮收口</strong>：上一版把「预警通知」留作第二个来源，但它<strong>同样未被核过</strong>（没有对应的表 / 接口证据），属于与上一条同类的「写进结论却没核实」问题。<br>
+<strong>本期只保留已核实的一个来源 —— 故障记录表</strong>；卡片「来源」列只写「<strong>故障记录</strong>」。「预警通知」能否作为补充来源转入 §12.2 第 10 条待确认，核到证据后再加回卡片，<strong>不得先写进结论</strong>。</p>
 <p>这是<strong>纯只读卡</strong>——不给「查硬件状态 / 远程重启」按钮：卡内已在展示状态，再点「查硬件状态」是循环跳转；重启属另一个能力，用户直接问即可。</p>
 </blockquote>
 <hr />
@@ -954,7 +976,7 @@ html,body{height:100%;background:var(--bg)}
 <tr>
 <td>2</td>
 <td><strong>库存列取舍</strong></td>
-<td>按「这个场景有没有库存可言」判断：上架＝没有；下架＝显示现有库存（并标「将清空 N 件」）；改价＝显示现存；补货＝显示缺货数 / 缺货箱数</td>
+<td>按「这个场景有没有库存可言」判断：上架＝没有；下架＝显示现有库存，且<strong>按机型说清楚处置结果</strong>（智能柜「将清空 N 件」/ 售货机「将停售 N 件，库存保留」）；改价＝显示现存；补货＝显示缺货数 / 缺货箱数。<br>⚠ 2026-10-16 修正：原统一写「将清空」与 §5.3 冲突（售货机不清库存），详见 §8 原则 10</td>
 </tr>
 <tr>
 <td>3</td>
@@ -1334,7 +1356,7 @@ html,body{height:100%;background:var(--bg)}
 </tr>
 <tr>
 <td>离线原因（C9）</td>
-<td><code>MonitorFaultRecordController</code>（micro-service-data，<code>monitor_fault_records</code> · <code>fault_type='machine_offline'</code>；建议文案＝nacos 配置 <code>MonitorFaultRecordServiceImpl.java:130-131</code>）· <code>MachineOnlineRecordDataController</code>（<strong>只有上下线状态，<code>machine_online_record</code> 无原因字段</strong>，不能作为原因来源）</td>
+<td><code>MonitorFaultRecordController</code>（micro-service-data，<code>monitor_fault_records</code> · <code>fault_type='machine_offline'</code>；建议文案＝nacos 配置 <code>MonitorFaultRecordServiceImpl.java:130-131</code>）· <code>MachineOnlineRecordDataController</code>（<strong>只有上下线状态，<code>machine_online_record</code> 无原因字段</strong>，不能作为原因来源）。⚠ 「预警通知」来源<strong>未核</strong>，本期不采用（§12.2 第 10 条）</td>
 </tr>
 </tbody>
 </table>
@@ -1384,7 +1406,7 @@ html,body{height:100%;background:var(--bg)}
 <ol>
 <li><strong>写能力 4 项</strong>（上架 / 下架 / 批量改价 / 补货单）在小程序端与 PC 端均能完成「预览 → 确认执行」闭环；取消不产生任何副作用。</li>
 <li><strong>读能力 6 张卡</strong>均能按代表问法命中出卡，字段与 §6 一致。</li>
-<li><strong>补货单结构</strong>：一次生成一张主单 + 每台机器一条子单；跨仓被拦截并给出明确错误。</li>
+<li><strong>补货单结构</strong>：一次生成一张主单 + 每台机器一条子单。<strong>跨仓</strong>：① 启用 ISP 服务商补货时，后端报错「补货机器关联多个车线路仓，请和仓管确认，按车线路仓分开提交」（<code>ReplenishmentListMasterServiceImpl.java:439-449</code>）；② <strong>未启用 ISP 的普通运营商，后端不报错</strong>（跨仓会合成一张主单），须由 AI 在提交前按仓分组提示——见 §5.5 与 §12.2 第 8 条。验收须覆盖<strong>两种场景</strong>，不能只测服务商账号。</li>
 <li><strong>结果卡闭环</strong>：批量执行后成功 + 失败 = 命中总数；失败项可重试，成功项可展开明细。</li>
 <li><strong>机型差异</strong>：下架（智能柜移除并清零 / <strong>售货机货道停售</strong>）、上架位置（层 / 货道）按机型正确分流；<strong>静态柜在上下架链路上一律不支持并明确报错</strong>（见 §5.1 / §5.2）。</li>
 <li><strong>qa 补条目 3 项</strong>入库后能被对应问法命中；客服管理条目<strong>按载体端分路径</strong>返回正确入口。</li>
@@ -1486,11 +1508,36 @@ html,body{height:100%;background:var(--bg)}
 <td>产品 · 王泳瑜</td>
 <td>1.2 立项评审</td>
 </tr>
+<tr>
+<td>8</td>
+<td>跨仓拦截只对 ISP 服务商生效</td>
+<td>服务端跨仓校验外层包了 <code>ispReplenishSku</code> 开关（<code>ReplenishmentListMasterServiceImpl.java:439-449</code>），普通运营商跨仓不报错</td>
+<td><strong>非服务商场景要不要一并按仓分组</strong>？若保持现状（合成一张主单），AI 需在提交前主动提示；若要拦，需后端扩校验范围</td>
+<td>ca-api + 后端负责人（待指派）</td>
+<td>1.1 联调前</td>
+</tr>
+<tr>
+<td>9</td>
+<td>R4「刷卡」能否取到数</td>
+<td>枚举含「刷卡（银行卡）」</td>
+<td>无人售货机场景刷卡极少发生，<strong>是否存在该渠道数据</strong>？取不到则按 §6.4 降级方案只出微信 / 支付宝 / 现金三类</td>
+<td>ca-api 负责人（待指派）</td>
+<td><strong>P2 开工前</strong>（不要拖到联调）</td>
+</tr>
+<tr>
+<td>10</td>
+<td>R6「预警通知」能否作为补充来源</td>
+<td>本期只采用已核实的 <code>monitor_fault_records</code></td>
+<td>「预警通知」对应的<strong>表 / 接口是什么、能否取到</strong>？核到证据后再决定是否加回卡片来源列（不得先写进结论）</td>
+<td>后端负责人（待指派）</td>
+<td>1.1 联调前</td>
+</tr>
 </tbody>
 </table>
 <blockquote>
 <p>跟踪要求：每项「仍待确认」须在<strong>对应里程碑前</strong>给出结论或改期说明；未按期闭环的在下次评审上过一遍，不得静默过期。</p>
-<p>另有 2 条<strong>风险盲区</strong>已登记在《迭代清单 · 落定口径与风险》表：R1「ca-api 不在代码库」、R2「多台循环上架的部分失败反馈」。评审时一并看。</p>
+<p>另有 2 条<strong>风险盲区</strong>已登记在《迭代清单 · 落定口径与风险》表：R1「ca-api 不在代码库」、R2「多台循环上架的部分失败反馈」。评审时一并看。
+⚠ <strong>时序提示</strong>：第 9 条（R4 刷卡）必须在 <strong>P2 开工前</strong>闭环 —— 它是 6 张读卡里唯一「换源还是新增接口」长期未定的一项，挂到联调阶段才处理会直接卡住 R4 排期。</p>
 </blockquote>
 <hr />
 <h2 id="附-关联材料">附：关联材料</h2>
@@ -1536,7 +1583,7 @@ html,body{height:100%;background:var(--bg)}
 <div class="toast" id="toast"></div>
 <script type="text/markdown" id="mdSrc"># 需求说明 —— 大黄鹅 AI 助手 · 1.1 期（小程序端 + 运营商 PC 端）
 
-> **版本** v1.4 ｜ **日期** 2026-10-16 ｜ **适用端** 运营商小程序（移动端）· 运营商 PC 后台
+> **版本** v1.5 ｜ **日期** 2026-10-16 ｜ **适用端** 运营商小程序（移动端）· 运营商 PC 后台
 > **关联文档** 《1.1 期卡片设计稿》（16 卡 + 2 弹层）· 《1.1 期迭代清单》（5 张表）· 可问答原型（小程序端 / PC 端）
 > **不在本期范围** 公司内部 OS 后台智能机器人（维持「只说不做」，见 §2.2）
 
@@ -1549,6 +1596,7 @@ html,body{height:100%;background:var(--bg)}
 | v0.3 | 2026-10-15 | 17 张卡片 + 2 个弹层定稿；三端定位澄清（PC 端＝运营商 PC 端） | 卡片设计稿评审 |
 | **v1.0** | **2026-10-15** | **合并小程序端 + 运营商 PC 端成一份需求说明；补两端差异与验收口径** | 本轮 |
 | **v1.1** | **2026-10-15** | **PC 端交互重做（不是"放大的手机端"）：停靠面板 / 顶栏线上四按钮 + 历史会话 / 挑机器挑商品改内联表 / 机器清单改表格 + 操作列；各卡补 PC 独有字段（补货单加可售库存 · 最大库存等）** | 用户评审意见 |
+| **v1.5** | **2026-10-16** | **第二轮评审收口：① §3.0 波次改三波次，与迭代清单表 1 对齐；② R4 现金口径定案（＝现金总额，不拆纸币 / 硬币）并给出降级方案；③ R6 删除未核的「预警通知」来源，只留故障记录表、预警通知转待确认；④ §5.5 / §11.1 跨仓拦截补 ISP 服务商前提条件；⑤ §8 原则 2 去「将清空 N 件」旧话；⑥ W2-a 范围文案改「全部可上架机型 N 台」；⑦ §3.5 第 2 条去掉「如有」，改为必须核对的 checklist 项** | 第二轮评审 + 产品裁决 2026-10-16 |
 | **v1.4** | **2026-10-16** | **代码侧独立复核后 7 条口径修正：① 下架·售货机改「货道停售」（沿用现有规则，不换默认商品）；② 上架能力明确不支持静态柜；③ R5「铺货 N 台」标注需新增接口（现有接口给的是卖过的机器数）；④ R4 拆分维度明确为微信 / 支付宝 / 现金 / 刷卡等支付渠道；⑤ R6 离线原因来源改为故障记录表（`操作日志` 来源不存在）；⑥ 最大库存口径钉到 `default_goods_stock` 并指定取 analysis 侧真实值；⑦ 新增 §3.5 上线前必改项（前端 AI 定位文案）** | 代码库复核 + 产品裁决 2026-10-16 |
 | **v1.3** | **2026-10-16** | **评审意见落地：① §3.0 补波次里程碑与前置依赖；② §4.4 补路由决策树；③ §9.3 补两端异常处理差异；④ §11.4 补性能验收阈值；⑤ §12.2 待确认项加「负责人 / 预计解决版本」；⑥ §8 补空状态与加载态定则；⑦ §9.1 输入辅助口径修正（PC 端不做语音，同步移除原型语音 UI）** | 网页解析评审意见 |
 | **v1.2** | **2026-10-16** | **5 条待确认项裁决落地：① W5-a/W5-b 合并为 W5（不要算法建议量，补货量＝最大库存−现存）；② W4 命中台数卡内可展开到机器层级；③ 批量上架商品库按机型交集；④ 离线机器也可上架（后端判定）；⑤ R5 保留「铺货 N 台」。同时 PC 端移除「回答链路」演示面板、写卡改纯表格（不留副行）** | 产品裁决 2026-10-16 |
@@ -1621,11 +1669,13 @@ html,body{height:100%;background:var(--bg)}
 
 | 波次 | 范围 | 前置依赖 | 完成标志 |
 |---|---|---|---|
-| **波次一 · P1（8 项）** | A1 上架（W1 / W1-b / W2-a·b·c）· B1 补货记录（R1）· B2 补货单（W5）· B3 订单明细（R2）· C8 下架（W3）＋ qa 补条目 3 项（B4 / B5 / B6） | ① ca-api 写接口扩展（上架 / 下架）② 只读接口编排（补货记录 / 订单明细）③ mp_kb 条目入库 | 小程序端 + PC 端两端原型冒烟全通过 |
-| **波次二 · P2（5 项）** | C2 批量改价（W4）· C3 反查机器（R3）· C4 支付方式（R4）· C7 商品销售（R5）· C9 离线原因（R6） | 波次一已上线；跨机器批量提交的 confirm_id 粒度确认完毕 | 同上 |
+| **波次一 · P1（qa 先行，3 项）** | B4 故障排查 qa · B5 商户工单兜底引导 qa · B6 客服管理条目入库 | ① mp_kb 条目入库 | 对应问法能命中并返回正确入口 |
+| **波次二 · P1（功能项，5 项）** | A1 上架（W1 / W1-b / W2-a·b·c）· B1 补货记录（R1）· B2 补货单（W5）· B3 订单明细（R2）· C8 下架（W3） | ① ca-api 写接口扩展（上架 / 下架）② 只读接口编排（补货记录 / 订单明细） | 小程序端 + PC 端两端原型冒烟全通过 |
+| **波次三 · P2（5 项）** | C2 批量改价（W4）· C3 反查机器（R3）· C4 支付方式（R4）· C7 商品销售（R5）· C9 离线原因（R6） | 波次二已上线；跨机器批量提交的 confirm_id 粒度确认完毕 | 同上 |
 | **配套（不单列排期）** | B7 NLU 泛化 + 机器点名 / 上下文 | ca-api 侧配合（⚠ 不在本代码库，需另行确认） | 随相关能力一并交付 |
 
-> 波次只表达**优先级与依赖顺序**，不等于两次发版；P1 未完成不阻塞 P2 开发，但 P2 上线以 P1 已上线为前提。实际排期以研发排期表为准。
+> **波次与优先级的对应关系（已与《迭代清单 · 表 1》对齐）**：P1 拆两个波次是**依赖驱动**——qa 补条目（3 项）只需 mp_kb 入库、无新增接口依赖，故先行；功能项（5 项）须等 ca-api 写接口扩展，次之；P2（5 项）以波次二上线为前提。波次只表达优先级与依赖顺序，不等于三次发版；波次二未完成不阻塞 P2 开发，但 P2 上线以波次二已上线为前提。实际排期以研发排期表为准。
+> ⚠ **2026-10-16 修正**：原正文把 P1 的 8 项并成单个「波次一」，与迭代清单表 1 的「qa＝波次一 / 功能＝波次二」不一致，两份文档同场评审会当场打架。现统一为**三波次**（qa → 功能 → P2）。
 
 ### 3.1 P1 必做（8 项）
 
@@ -1679,7 +1729,7 @@ html,body{height:100%;background:var(--bg)}
 | # | 位置 | 现状 | 必改内容 | 为什么 |
 |---|---|---|---|---|
 | 1 | `admin-manager-pc-2.0` · `AiChat/mock.js:6 / :10 / :48` | 三处写死 AI「只能回答问题和查数据，不能直接操作系统」「只回答与只读查询，不执行任何操作」「不能代替同事执行停用、改价、退款等操作」 | 同步为「**可查询 + 可代办执行**（上架 / 下架 / 改价 / 改库存 / 生成补货单等），执行前给预览、需你确认」 | 1.0 已有改价 / 改库存 / 停售等可提交写卡，1.1 再加上架 / 下架 / 批量改价 / 补货单。若定位文案不改，用户问「能帮我上架吗」时能力清单与兜底话术仍在说「不能操作」，**与产品能力直接冲突** |
-| 2 | 小程序端同类定位文案 / 欢迎卡副文案 | 同上口径（如有） | 同 #1 一并核对并同步 | 两端定位须一致 |
+| 2 | 小程序端：**欢迎卡副文案 / 能力清单页文案 / 越界 & 未命中兜底话术**（三处，逐处核对，不再写「如有」） | 与 #1 同源的「只能回答」类表述 | 同 #1 一并改为「可查询 + 可代办执行，执行前给预览、需你确认」 | 两端定位须一致。<br>⚠ 2026-10-16 收口：原写「同上口径（如有）」等于把核对动作推给了执行方、这条 checklist 项自身没闭环；现改为**列出必须逐处检查的三处位置**，核对完在 checklist 上打勾才算闭环 |
 
 > 本表为**发布前置检查项**，不是新增需求。上线 checklist 须包含这两条；未改不允许发版。
 
@@ -1782,14 +1832,14 @@ html,body{height:100%;background:var(--bg)}
 
 | 卡 | 范围 | 表现 |
 |---|---|---|
-| W2-a | 全部机器 | 范围只写「全部 N 台」，不区分在线 / 离线台数 |
+| W2-a | 全部机器 | 范围写「**全部可上架机型 N 台**」，不区分在线 / 离线台数（N 已排除静态柜，见本节第 1 条） |
 | W2-b | 按线路 | kv 行是下拉（线路 + 台数），下方 chips 预览该线路机器、可切换 |
 | W2-c | 自选 | chips 逐个列出已选机器（带 ✕ 可删）+「＋ 添加机器」（呼出 P2）；diff 区列出全部机器编号，确认前防选错 |
 
 **批量不逐台指定货道 / 层**（各机货道不同，一张卡里无法逐个指定），按各机自动分配；要精确指定货道用单台卡 W1 / W1-b。
 
 - ⚠⚠ **静态柜不支持上架**（2026-10-16 代码复核裁决）：**单机与批量两条路径都拦**——批量 `addGoodsBatch`（`SmartAilseInfoController.java:216-218`）直接 return，单机走 `displayAddGooods` 也会被 `AbstractSmartAisleInfoService.java:1435-1437` 抛 `NOT_SUPPORT_ALI_MACHINE_SHELVES`。因此 W1 / W1-b / W2-a·b·c 的机器选择范围**一律排除静态柜**；命中静态柜时按本节末「机型不支持」口径报错，不做降级重试。
-- **离线机器也支持上架**（2026-10-16 产品裁决）：AI / 前端**不做在线状态门槛**，是否可上架**由后端判定**；卡片范围只写「全部 N 台」，不区分在线 / 离线台数，成败一律由后端校验结果透传（失败原因原样展示在 W6）
+- **离线机器也支持上架**（2026-10-16 产品裁决）：AI / 前端**不做在线状态门槛**，是否可上架**由后端判定**；卡片范围写「全部可上架机型 N 台」，不区分在线 / 离线台数，成败一律由后端校验结果透传（失败原因原样展示在 W6）
 - **商品库按机型交集出**（2026-10-16 产品裁决）：P1 弹层在批量场景取**这批机器机型的交集**，交集外的商品直接不出现（能提前挡掉「选完即失败」）；弹层标题写明交集、下方给一行过滤说明。单台上架＝交集退化为该机机型，与现有「添加商品」页一致
 
 > **机型不支持的失败反馈**：静态柜被后端拦截时，结果卡（W6）直接透传后端原文「售货机、静态柜不支持批量上新」/「不支持该机型上架」，AI **不重写、不降级**；卡片侧在提交前按机型把静态柜剔除出可选范围，尽量让这一步在**提交前**就挡掉，而不是提交后才报错。
@@ -1832,7 +1882,10 @@ html,body{height:100%;background:var(--bg)}
 
 **生成结构：一主多子**——一次生成**一张主单**（masterId），每台机器挂一条子单（子单号＝主单号-序号），**禁止逐台循环调用**（会出多张主单）。
 
-> 约束：合并的多台机器须**同属一个车线路仓**，跨仓时按仓分开提交（后端直接报错拦截）。
+> ⚠⚠ **跨仓拦截有前提条件**（2026-10-16 代码复核，被补上的遗漏）：跨仓校验位于 `ReplenishmentListMasterServiceImpl.java:439-449`，但**外层套了 `ispReplenishSku` 开关**——
+> `if (Objects.nonNull(masterView.getIspReplenishSku()) && masterView.getIspReplenishSku() && orgIds.size() > 1) { …ispStockHouseInfoList.size() > 1 → throw「补货机器关联多个车线路仓，请和仓管确认，按车线路仓分开提交」 }`
+> 即：**仅当该主单启用 ISP 服务商补货时才校验**。普通运营商（未开 ISP）选了跨仓的多台机器，会**直接合成一张主单且不报错**。<br>
+> 因此卡片口径不能写死「跨仓必拦」，须写「**跨仓须同属一个车线路仓**」——由 AI 在**提交前**按仓分组提示，而不是依赖后端报错兜底；非服务商场景是否与现在保持「合并成一张主单」不变，见 §12.2 第 8 条。
 
 ### 5.6 批量执行结果与成功明细（W6 / W6-b）
 
@@ -1874,8 +1927,13 @@ html,body{height:100%;background:var(--bg)}
 
 **口径：默认给合计，用户要求时才拆分**。拆分维度：**支付方式 / 金额 / 笔数 / 占比** + 合计行。
 
-> **支付方式枚举**（2026-10-16 裁决）：**微信 / 支付宝 / 现金 / 刷卡** 等支付渠道，按渠道拆分，不是现金内部的细分。
-> ⚠ **数据源需确认**：现有 `OfflinePayRecordController` 拆的是**现金内部**的纸币 / 硬币（`pay_type` 1/2）；`RptDayReceivePaymentController` 拆的是 `app_id / machine_type / type(支付|退款)`——**两者都不是「支付渠道」维度**。ca-api 编排前须确认取哪个数据源、能否凑出渠道拆分；凑不出则该项降级或换源，并在评审时说明。
+> **支付方式枚举**（2026-10-16 裁决）：**微信 / 支付宝 / 现金 / 刷卡** 等支付渠道，按**渠道**拆分。
+> **现金口径**（2026-10-16 产品裁决）：**现金就是现金支付总额，不拆纸币 / 硬币**。`OfflinePayRecordController` 里 `pay_type` 1（纸币）/ 2（硬币）同属现金，**取两者合计**，明细层不展示。<br>
+> **数据源分工**（已收敛，不再是「完全悬空」）：
+> 1. **现金** → `OfflinePayRecordController`，`pay_type` 1/2 **合计**，可直接用；
+> 2. **微信 / 支付宝** → 属线上支付流水，需由 ca-api 确认唯一数据源（`RptDayReceivePaymentController` 当前拆的是 `app_id / machine_type / type`，需核实能否映射为渠道）；
+> 3. **刷卡（银行卡）** → 无人售货机场景**极少发生**，能否取到数待确认（§12.2 第 9 条）。<br>
+> **降级方案（先在前端定死，避免拖到 P2 联调才爆）**：若「刷卡」取不到数，R4 只出 **微信 / 支付宝 / 现金** 三类，其余归「其他」并注明；**不允许**为了凑四分类而用错误的近似源。
 
 ### 6.5 R5 商品维度销售额（C7）
 
@@ -1889,7 +1947,8 @@ html,body{height:100%;background:var(--bg)}
 **口径**：原因取自 **`monitor_fault_records`（`fault_type='machine_offline'`）故障记录**，处理建议文案取自 **nacos 配置**（现为「机器离线时间超过阀值，请检查网络」，`MonitorFaultRecordServiceImpl.java:130-131`）；并标注**来源与时间**。无记录时给「暂无原因记录，建议查硬件状态 / 提交工单」。
 
 > ⚠⚠ **2026-10-16 代码复核修正**：原写「预警通知或**操作日志**」——`machine_online_record` 表只有 `id / machine_id / online_status / msg_protocol / gmt_created`，**没有离线原因字段**，「操作日志」这个数据源**不存在**。若按旧口径接，R6 会拿不到数据。
-> 卡片「来源」列相应只可能出现：**故障记录** / **预警通知** 两类，不再出现「操作日志」。
+> ⚠ **2026-10-16 第二轮收口**：上一版把「预警通知」留作第二个来源，但它**同样未被核过**（没有对应的表 / 接口证据），属于与上一条同类的「写进结论却没核实」问题。<br>
+> **本期只保留已核实的一个来源 —— 故障记录表**；卡片「来源」列只写「**故障记录**」。「预警通知」能否作为补充来源转入 §12.2 第 10 条待确认，核到证据后再加回卡片，**不得先写进结论**。
 
 > 这是**纯只读卡**——不给「查硬件状态 / 远程重启」按钮：卡内已在展示状态，再点「查硬件状态」是循环跳转；重启属另一个能力，用户直接问即可。
 
@@ -1924,7 +1983,7 @@ html,body{height:100%;background:var(--bg)}
 | # | 原则 | 口径 |
 |---|---|---|
 | 1 | **统一字段** | 商品名称 · 价格 · 库存 是基础项；**商品ID 按场景取舍**——上架 / 下架卡不显示（商品还没上架，ID 对运营商无意义），补货卡也不显示（改看箱规），改价 / 订单明细卡保留 |
-| 2 | **库存列取舍** | 按「这个场景有没有库存可言」判断：上架＝没有；下架＝显示现有库存（并标「将清空 N 件」）；改价＝显示现存；补货＝显示缺货数 / 缺货箱数 |
+| 2 | **库存列取舍** | 按「这个场景有没有库存可言」判断：上架＝没有；下架＝显示现有库存，且**按机型说清楚处置结果**（智能柜「将清空 N 件」/ 售货机「将停售 N 件，库存保留」）；改价＝显示现存；补货＝显示缺货数 / 缺货箱数。<br>⚠ 2026-10-16 修正：原统一写「将清空」与 §5.3 冲突（售货机不清库存），详见 §8 原则 10 |
 | 3 | **价格可编辑** | 上架卡价格默认取商品库价但**必须可改**；改动行蓝框高亮，diff 区列改动前后 |
 | 4 | **状态文案** | 一律用文字「成功 / 失败」，**禁止 ✕ ✓**；失败原因放名称下方红色副行，机器级与商品级分开标「对象」 |
 | 5 | **补货卡字段** | 不显示价格与商品ID；只讲缺货数 / 缺货箱数 / 补货量；手机端箱规放副行、PC 端提为列；缺货箱数＝缺货数 ÷ 箱规；**补货量＝最大库存（补满配置值）− 现存** |
@@ -2029,7 +2088,7 @@ html,body{height:100%;background:var(--bg)}
 | 按销售额反查机器（C3） | `MachineSoldGroupDayController`（micro-service-analysis） |
 | 支付方式拆分（C4） | `OfflinePayRecordController`、`RptDayReceivePaymentController`（data / ops） |
 | 商品维度销售额（C7） | `GoodsSoldController`（micro-service-analysis）。⚠ **「铺货机器数」需新增接口**：现有 `soldMachineNumber`＝「有销售记录的机器数」；铺货口径在 `GoodsSoldMapper.xml:280+`（`GoodsDisplay` 服务），Controller 未暴露 |
-| 离线原因（C9） | `MonitorFaultRecordController`（micro-service-data，`monitor_fault_records` · `fault_type='machine_offline'`；建议文案＝nacos 配置 `MonitorFaultRecordServiceImpl.java:130-131`）· `MachineOnlineRecordDataController`（**只有上下线状态，`machine_online_record` 无原因字段**，不能作为原因来源） |
+| 离线原因（C9） | `MonitorFaultRecordController`（micro-service-data，`monitor_fault_records` · `fault_type='machine_offline'`；建议文案＝nacos 配置 `MonitorFaultRecordServiceImpl.java:130-131`）· `MachineOnlineRecordDataController`（**只有上下线状态，`machine_online_record` 无原因字段**，不能作为原因来源）。⚠ 「预警通知」来源**未核**，本期不采用（§12.2 第 10 条） |
 
 ### 10.3 核对边界
 
@@ -2051,7 +2110,7 @@ html,body{height:100%;background:var(--bg)}
 
 1. **写能力 4 项**（上架 / 下架 / 批量改价 / 补货单）在小程序端与 PC 端均能完成「预览 → 确认执行」闭环；取消不产生任何副作用。
 2. **读能力 6 张卡**均能按代表问法命中出卡，字段与 §6 一致。
-3. **补货单结构**：一次生成一张主单 + 每台机器一条子单；跨仓被拦截并给出明确错误。
+3. **补货单结构**：一次生成一张主单 + 每台机器一条子单。**跨仓**：① 启用 ISP 服务商补货时，后端报错「补货机器关联多个车线路仓，请和仓管确认，按车线路仓分开提交」（`ReplenishmentListMasterServiceImpl.java:439-449`）；② **未启用 ISP 的普通运营商，后端不报错**（跨仓会合成一张主单），须由 AI 在提交前按仓分组提示——见 §5.5 与 §12.2 第 8 条。验收须覆盖**两种场景**，不能只测服务商账号。
 4. **结果卡闭环**：批量执行后成功 + 失败 = 命中总数；失败项可重试，成功项可展开明细。
 5. **机型差异**：下架（智能柜移除并清零 / **售货机货道停售**）、上架位置（层 / 货道）按机型正确分流；**静态柜在上下架链路上一律不支持并明确报错**（见 §5.1 / §5.2）。
 6. **qa 补条目 3 项**入库后能被对应问法命中；客服管理条目**按载体端分路径**返回正确入口。
@@ -2103,10 +2162,14 @@ html,body{height:100%;background:var(--bg)}
 |---|---|---|---|---|---|
 | 6 | 多台循环的部分失败反馈 | 逐台列出失败机器与原因 | 单机循环时被后台校验拦截（不支持机型 / 未绑定 code）的**反馈时序与聚合方式**属前端与 ca-api 交互约定 | ca-api 负责人（待指派） | 1.1 联调前 |
 | 7 | PC 端导出能力 | 本期不做 | PC 端具备导出条件（对账 / 存档场景），**是否纳入 1.2** | 产品 · 王泳瑜 | 1.2 立项评审 |
+| 8 | 跨仓拦截只对 ISP 服务商生效 | 服务端跨仓校验外层包了 `ispReplenishSku` 开关（`ReplenishmentListMasterServiceImpl.java:439-449`），普通运营商跨仓不报错 | **非服务商场景要不要一并按仓分组**？若保持现状（合成一张主单），AI 需在提交前主动提示；若要拦，需后端扩校验范围 | ca-api + 后端负责人（待指派） | 1.1 联调前 |
+| 9 | R4「刷卡」能否取到数 | 枚举含「刷卡（银行卡）」 | 无人售货机场景刷卡极少发生，**是否存在该渠道数据**？取不到则按 §6.4 降级方案只出微信 / 支付宝 / 现金三类 | ca-api 负责人（待指派） | **P2 开工前**（不要拖到联调） |
+| 10 | R6「预警通知」能否作为补充来源 | 本期只采用已核实的 `monitor_fault_records` | 「预警通知」对应的**表 / 接口是什么、能否取到**？核到证据后再决定是否加回卡片来源列（不得先写进结论） | 后端负责人（待指派） | 1.1 联调前 |
 
 > 跟踪要求：每项「仍待确认」须在**对应里程碑前**给出结论或改期说明；未按期闭环的在下次评审上过一遍，不得静默过期。
 
 > 另有 2 条**风险盲区**已登记在《迭代清单 · 落定口径与风险》表：R1「ca-api 不在代码库」、R2「多台循环上架的部分失败反馈」。评审时一并看。
+> ⚠ **时序提示**：第 9 条（R4 刷卡）必须在 **P2 开工前**闭环 —— 它是 6 张读卡里唯一「换源还是新增接口」长期未定的一项，挂到联调阶段才处理会直接卡住 R4 排期。
 
 ---
 
