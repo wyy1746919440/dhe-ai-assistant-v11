@@ -451,6 +451,30 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .msg{gap:0}
 .msg .cardbox{max-width:100%}
 .msg .bub{max-width:100%}
+/* —— 演示脚本里的边界态演示按钮 —— */
+.demo-btns{display:flex;gap:8px;margin-top:10px}
+.demo-btns .dbtn{font-size:11.5px;padding:5px 11px;border-radius:6px;cursor:pointer;
+  border:1px solid #d6dce4;background:#fff;color:#42526e}
+.demo-btns .dbtn:hover{background:#f3f7ff;border-color:#a9c8f5;color:#1668dc}
+
+/* —— 卡片边界状态：空状态 / 加载中（统一出口，见 emptyCard / loadingCard）——
+   读卡查不到数据时不给空表（空表＝像坏了），给一句「现在是什么情况 + 为什么」；
+   取数过程只给行骨架，不假装有数字。 */
+.cb-empty{padding:20px 14px;text-align:center;background:#fafbfc;border:1px dashed #dfe4ea;border-radius:10px;margin:6px 0 2px}
+.cb-empty .e-ic{font-size:24px;line-height:1;opacity:.8}
+.cb-empty .e-t{font-size:13.5px;font-weight:700;color:#1A1A1A;margin-top:8px}
+.cb-empty .e-h{font-size:11.5px;color:#8c8c8c;line-height:1.7;margin-top:5px}
+.cb-loading{padding:14px 12px;background:#fafbfc;border-radius:10px;margin:6px 0 2px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.cb-loading .sp{width:13px;height:13px;flex:none;border:2px solid #dfe4ea;border-top-color:#2B7DF6;
+  border-radius:50%;animation:cbspin .7s linear infinite}
+@keyframes cbspin{to{transform:rotate(360deg)}}
+.cb-loading .lt{font-size:12.5px;color:#595959}
+.cb-loading .sk{width:100%;display:flex;flex-direction:column;gap:7px;margin-top:3px}
+.cb-loading .sk i{height:11px;border-radius:5px;
+  background:linear-gradient(90deg,#eef1f5 25%,#e3e8ef 37%,#eef1f5 63%);
+  background-size:400% 100%;animation:cbskl 1.2s ease-in-out infinite}
+@keyframes cbskl{0%{background-position:100% 50%}100%{background-position:0 50%}}
 
 </style>
 </head>
@@ -465,9 +489,10 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261016b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261016b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261016b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 17 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261016c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261016c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261016c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
 
@@ -869,6 +894,52 @@ const OP_TOOL={price:'set_price',stock:'update_aisle_stock',stop:'stop_machine',
   replenish:'create_replenishment',temp:'set_temperature',volume:'set_volume',
   onshelf:'machine_goods_onshelf',offshelf:'machine_goods_offshelf',priceBatchAll:'batch_set_price'};
 
+/* =================== 卡片边界状态：空状态 / 加载中 ===================
+   ⚠ 卡片内＝客户话术：说清「现在是什么情况」+ 一句为什么 + 有必要时给下一步；
+     不出现「返回空数组」「无数据」「loading」这类实现语言。
+   之前这两类边界态没有统一出口，各读卡各写各的（只有订单列表卡手写了一个「暂无」），
+   导致同一产品里「没有数据」长得不一样，也没法在评审时一次看全。 */
+function emptyCard(icon,title,hint){
+  return `<div class="cb-empty"><div class="e-ic">${icon}</div><div class="e-t">${title}</div>${hint?`<div class="e-h">${hint}</div>`:''}</div>`;
+}
+/* 卡片级加载：用于「取数中」。骨架屏只给行骨架，不假装有数字 */
+function loadingCard(text){
+  return `<div class="cb-loading"><span class="sp"></span><span class="lt">${text||'正在查询…'}</span>
+    <div class="sk"><i></i><i></i><i></i></div></div>`;
+}
+/* 把空状态塞进已有卡片容器（保持 cb-head 与卡头状态一致） */
+function pushEmpty(icon,head,title,hint){
+  return pushCard(`<div class="cardbox"><div class="cb-head q"><span class="ttl">${head}</span><span class="st">已查询</span></div>${emptyCard(icon,title,hint)}</div>`);
+}
+/* 演示脚本按钮用：先把会话页打开（PC 端＝展开右侧抽屉，手机端＝进入对话页）。
+   ⚠ 两端入口不同，这里统一兜一层，避免点按钮后卡片渲染在看不见的地方。 */
+function openDemoChat(){
+  try{
+    if(typeof PCW!=='undefined'&&PCW&&typeof toggleAi==='function') toggleAi(true);
+    else if(typeof goChat==='function') goChat();
+  }catch(e){}
+}
+/* 评审用：把两类边界态直接渲染出来看一眼。日常使用不会走到这里，
+   只有从演示脚本点「边界态演示」才触发。 */
+function demoEmptyState(){
+  openDemoChat();
+  bub('ai','下面 4 张是各读卡在「查不到数据」时的样子 —— 不再给空表：');
+  pushEmpty('✅','⚠️ 缺货设备','当前没有机器缺货',
+    '全部 '+Object.keys(MACHINES).length+' 台机器库存正常 · 缺货门槛为 30%（可在 PC 端故障策略配置调整）');
+  pushEmpty('🚚','🚚 补货记录（近 30 天）','近 30 天没有补货记录',
+    '如果期间确实补过货，可能是补货单未提交成功 · 可到 PC 端补货管理核对');
+  pushEmpty('📊','📊 机器销售额','没有低于 '+money0(700)+' 的机器',
+    '2026-09 全部机器销售额均 ≥ '+money0(700)+' · 可以把阈值调高再查');
+  pushEmpty('🔌','🔌 离线原因','当前没有离线机器',
+    '全部 '+Object.keys(MACHINES).length+' 台设备通信正常 · 离线原因取自预警通知或操作日志');
+  trace('guide','边界态演示 · <b>空状态</b>：读卡无数据统一走 emptyCard()，文案只说「现在是什么情况 + 为什么」，不出现实现语言。');
+}
+function demoLoadingState(){
+  openDemoChat();
+  pushCard(`<div class="cardbox"><div class="cb-head q"><span class="ttl">📦 库存查询 · 演示</span><span class="st">取数中</span></div>${loadingCard('正在查这台机器的货道库存…')}</div>`);
+  trace('guide','边界态演示 · <b>取数中</b>：卡片级骨架屏，只给行骨架、不假装有数字；写操作另有按钮态「⏳ 执行中…」。');
+}
+
 /* =================== 1.0 继承卡片 =================== */
 /* 只读查询卡：stock 视图按货道 / 层；price 视图按商品 */
 function cardStock(mid,focus){
@@ -891,6 +962,12 @@ function cardStock(mid,focus){
 }
 function cardLackList(){
   const lacks=Object.entries(MACHINES).filter(([id,m])=>m.lack);
+  /* 空状态：没有机器缺货时，别给一张空表 —— 这是「好消息」，要说清楚 */
+  if(!lacks.length){
+    pushEmpty('✅','⚠️ 缺货设备','当前没有机器缺货','全部 '+Object.keys(MACHINES).length+' 台机器库存正常 · 缺货门槛为 30%（可在 PC 端故障策略配置调整）');
+    trace('api',`意图 <b>query</b> → GET <b>/ai/tools/lack_list</b>?threshold=30% · 只读清单 <b>命中 0 台</b> → 走空状态卡，不给空表也不给「生成补货单」按钮。`);
+    return null;
+  }
   const c=elx(`<div class="msg ai"><div class="av">AI</div><div class="cardbox">
     <div class="cb-head q">⚠️ 缺货设备 · ${lacks.length} 台</div>
     <div class="mini-rows">${lacks.map(([id,m])=>`<div class="mr"><span>${m.icon} ${m.name}</span><span class="lack-tag">缺货率 ${m.lackRate}</span></div>`).join('')}</div>
@@ -1844,6 +1921,12 @@ function cardReplenish(mids){
 function cardReplenishRecord(){
   const id=uid();
   const rows=REPLEN_REC.map(r=>Object.assign({},r,{on:r.days>=7}));
+  /* 空状态：近 30 天无补货记录 —— 说清时间范围，别让客户以为坏了 */
+  if(!rows.length){
+    pushEmpty('🚚','🚚 补货记录（近 30 天）','近 30 天没有补货记录','如果期间确实补过货，可能是补货单未提交成功 · 可到 PC 端补货管理核对');
+    trace('api',`意图 <b>query</b> → GET <b>/ai/tools/replenish_record?range=30d</b> · <b>返回 0 条</b> → 走空状态卡（说明时间范围 + 排查建议），不给空表和按钮。`);
+    return id;
+  }
   const c=pushCard(`<div class="cardbox" id="${id}_box">
     <div class="cb-head q" id="${id}_head"><span class="ttl">🚚 补货记录（近 30 天）</span><span class="st" id="${id}_st">已查询</span></div>
     <div class="kv"><span class="k">统计范围</span><span class="v">${Object.keys(MACHINES).length} 台<em>未补货时长倒序</em></span></div>
@@ -1912,6 +1995,12 @@ function cardMachineSales(th){
   th=th||700;
   const id=uid();
   const hit=SALES_M.filter(s=>s.amt<th);
+  /* 空状态：阈值以上全部达标 —— 「没命中」是好事，必须说出来 */
+  if(!hit.length){
+    pushEmpty('📊','📊 机器销售额','没有低于 '+money0(th)+' 的机器','2026-09 全部 '+SALES_M.length+' 台机器销售额均 ≥ '+money0(th)+' · 可以把阈值调高再查');
+    trace('api',`意图 <b>query</b> → GET <b>/ai/tools/machine_sales</b>?month=2026-09&amount_lt=${th} · <b>命中 0 台</b> → 走空状态卡（提示可调高阈值），不给空表。`);
+    return id;
+  }
   pushCard(`<div class="cardbox" id="${id}_box">
     <div class="cb-head q"><span class="ttl">📊 机器销售额</span><span class="st">已查询</span></div>
     <div class="kv"><span class="k">时间</span><span class="v">2026-09<em>阈值 &lt; ${money0(th)}</em></span></div>
@@ -1964,6 +2053,12 @@ function cardProductSales(){
 /* ---------- R6：离线原因（纯只读，不挂跳转按钮）---------- */
 function cardOfflineReason(){
   const id=uid();
+  /* 空状态：无离线机器 —— 与 R6 trace 文案同源 */
+  if(!OFFLINE_REASON.length){
+    pushEmpty('🔌','🔌 离线原因','当前没有离线机器','全部 '+Object.keys(MACHINES).length+' 台设备通信正常 · 离线原因取自预警通知或操作日志');
+    trace('api',`意图 <b>query</b> → GET <b>/ai/tools/machine_offline_reason</b> · <b>无记录</b> → 走空状态卡（说明「暂无原因记录，建议查硬件状态 / 提交工单」），不给空表。`);
+    return id;
+  }
   pushCard(`<div class="cardbox" id="${id}_box">
     <div class="cb-head q"><span class="ttl">🔌 离线原因</span><span class="st">已查询</span></div>
     <div class="kv"><span class="k">离线机器</span><span class="v">${OFFLINE_REASON.length} 台<em>共 ${Object.keys(MACHINES).length} 台</em></span></div>
