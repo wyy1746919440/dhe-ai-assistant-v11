@@ -895,9 +895,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261016e" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261016e" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261016e" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261016f" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261016f" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261016f" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1016,9 +1016,13 @@ const ORDER_DETAIL={no:'818086331791620724763',mid:'hls',t:'10-14 09:12',pay:'�
   items:[{n:'可口可乐 330ml',price:3.00,qty:2},{n:'辣媳妇山椒笋尖 75g',price:2.50,qty:1}]};
 /* R3 按销售额反查机器（阈值 < ¥700，2026-09） */
 const SALES_M=[{mid:'gzg',amt:312,orders:41,lackDays:26},{mid:'hls',amt:688,orders:96,lackDays:13},{mid:'nwhh',amt:5240,orders:612,lackDays:0}];
-/* R4 销售额支付方式拆分 */
+/* R4 销售额支付方式拆分
+   ⚠ 2026-10-16 裁决：支付方式＝**动态枚举**——只列该商户在统计期内产生过销售额的方式，
+     不写死四种。下面这份数据是「本次查询的实际结果」示例，不是固定模板。
+     数据源＝machine_sold_group_day_new · getMachinesSoldSumGroupByDayNew，
+     方式名经 provide_pay_type.payName 映射；刷卡是真实存在的方式（MachineSoldProfitBO.cardTotalAmount）。*/
 const PAY_SPLIT=[{n:'微信支付',amt:1286,cnt:312,sub:'线上 · 已到账'},{n:'支付宝',amt:742,cnt:188,sub:'线上 · 已到账'},
-  {n:'现金 / 投币',amt:386,cnt:97,sub:'线下收款 · 以实际清点为准'},{n:'会员储值卡',amt:232,cnt:41,sub:'储值卡余额扣减'}];
+  {n:'现金',amt:386,cnt:97,sub:'线下收款 · 以实际清点为准（不拆纸币 / 硬币）'},{n:'刷卡',amt:232,cnt:41,sub:'银行卡 · 已到账'}];
 /* R5 商品维度销售额（近 3 个月 · 全部在线机器） */
 const SALES_P=[{n:'辣媳妇山椒笋尖 75g',price:2.50,qty:486,mach:7},{n:'可口可乐 330ml',price:3.00,qty:1024,mach:9},{n:'雀巢咖啡 268ml',price:5.00,qty:193,mach:5}];
 /* R6 离线原因（⚠ 2026-10-16 代码复核：来源＝故障记录 monitor_fault_records[fault_type='machine_offline']，建议文案取自 nacos；「操作日志」来源不存在） */
@@ -1566,7 +1570,7 @@ function scopeStock(mids,n){
     (p.lanes||[]).forEach(l=>{now+=(l.stock||0);if(l.max)mx+=l.max})});
   return {now:now,mx:mx,hit:hit,box:(prodByName(n)||{}).box||12};
 }
-/* 商品在指定机器上的货道 / 层（订单明细等 PC 列用） */
+/* 商品在指定机器上的货道 / 层（上下架卡用；⚠ 订单明细不用——machine_order_detail 是订单商品快照，无位置维度） */
 function laneOfProd(mid,n){const m=MACHINES[mid];if(!m)return '';const p=m.products.find(x=>x.n===n);return p?laneIds(p).join('/'):''}
 /* 上架时该位置的容量与现存（PC 列；智能柜没有最大库存概念 → 显示 —）*/
 function laneMax(it,isVm){return (it.ln&&it.ln.max)?it.ln.max:(isVm?30:'—')}
@@ -2223,15 +2227,15 @@ function cardOrderDetail(){
     <div class="kv"><span class="k">订单号</span><span class="v">${o.no}</span></div>
     <div class="kv"><span class="k">机器</span><span class="v">${esc(m.name)}<em>${o.t}</em></span></div>
     <div class="ptable">
-      <div class="ph"><span class="c1">商品</span><span class="c3">单价</span><span class="c4">数量</span><span class="c5">小计</span>${pcHead('商品ID')}${pcHead('货道',72)}</div>
-      ${o.items.map(it=>`<div class="pr"><div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span><span class="c3">${money(it.price)}</span><span class="c4">${it.qty}</span><span class="c5">${money(it.price*it.qty)}</span>${pcCol('ID '+esc((prodByName(it.n)||{}).id||'6901234567892'))}${pcCol(laneOfProd(o.mid,it.n)||'—',72)}</div>
+      <div class="ph"><span class="c1">商品</span><span class="c3">单价</span><span class="c4">数量</span><span class="c5">小计</span>${pcHead('商品ID')}</div>
+      ${o.items.map(it=>`<div class="pr"><div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span><span class="c3">${money(it.price)}</span><span class="c4">${it.qty}</span><span class="c5">${money(it.price*it.qty)}</span>${pcCol('ID '+esc((prodByName(it.n)||{}).id||'6901234567892'))}</div>
         ${pcLn(`ID ${esc((prodByName(it.n)||{}).id||'6901234567892')}`)}</div>`).join('')}
       <div class="sumline"><span>合计 ${qty} 件</span><span>${money(tot)}</span></div>
     </div>
     <div class="pdiff"><div class="r"><span>支付方式</span><span>${o.pay}</span></div><div class="r"><span>订单状态</span><span>${o.st}</span></div></div>
     <div class="exec-note">用于核对消费者拿取的商品与扣款是否一致</div>
   </div>`);
-  trace('api',`意图 <b>query</b> → GET <b>/ai/tools/order_detail</b>?no=${o.no} · 只读工具，返回商品名称 / 商品ID / 单价 / 数量 / 小计 + 合计行。`);
+  trace('api',`意图 <b>query</b> → GET <b>/ai/tools/order_detail</b>?no=${o.no} · 只读工具，返回商品名称 / 商品ID / 单价 / 数量 / 小计 + 合计行。⚠ 数据源取 micro-service-analysis 侧（与销售事实表同源）；订单是商品快照，**无货道 / 层维度**，PC 端也不补该列。`);
   return id;
 }
 /* ---------- R3：按销售额反查机器（阈值筛选）---------- */

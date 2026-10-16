@@ -103,9 +103,9 @@ html,body{height:100%;background:var(--bg)}
   </header>
 
   <nav class="tabs">
-    <a class="tab" href="index.html?v=20261016e">← 1.1 汇总页</a>
+    <a class="tab" href="index.html?v=20261016f">← 1.1 汇总页</a>
     <a class="tab on">📘 需求说明</a>
-    <a class="tab" href="v11-list.html?v=20261016e">1.1 迭代清单 →</a>
+    <a class="tab" href="v11-list.html?v=20261016f">1.1 迭代清单 →</a>
     <span class="spacer">来源：运营商真实提问 654 条分析（2026-10-14）+ 现有系统接口核对</span>
   </nav>
 
@@ -206,7 +206,7 @@ html,body{height:100%;background:var(--bg)}
       </div>
       <div class="doc" id="docBody"><h1 id="需求说明-大黄鹅-AI-助手-1-1-期-小程序端-运营商-PC-端">需求说明 —— 大黄鹅 AI 助手 · 1.1 期（小程序端 + 运营商 PC 端）</h1>
 <blockquote>
-<p><strong>版本</strong> v1.5 ｜ <strong>日期</strong> 2026-10-16 ｜ <strong>适用端</strong> 运营商小程序（移动端）· 运营商 PC 后台
+<p><strong>版本</strong> v1.6 ｜ <strong>日期</strong> 2026-10-16 ｜ <strong>适用端</strong> 运营商小程序（移动端）· 运营商 PC 后台
 <strong>关联文档</strong> 《1.1 期卡片设计稿》（16 卡 + 2 弹层）· 《1.1 期迭代清单》（5 张表）· 可问答原型（小程序端 / PC 端）
 <strong>不在本期范围</strong> 公司内部 OS 后台智能机器人（维持「只说不做」，见 §2.2）</p>
 </blockquote>
@@ -250,6 +250,12 @@ html,body{height:100%;background:var(--bg)}
 <td><strong>2026-10-15</strong></td>
 <td><strong>PC 端交互重做（不是"放大的手机端"）：停靠面板 / 顶栏线上四按钮 + 历史会话 / 挑机器挑商品改内联表 / 机器清单改表格 + 操作列；各卡补 PC 独有字段（补货单加可售库存 · 最大库存等）</strong></td>
 <td>用户评审意见</td>
+</tr>
+<tr>
+<td><strong>v1.6</strong></td>
+<td><strong>2026-10-16</strong></td>
+<td><strong>定稿前最后 5 处：① §6.4 R4 整段改写为动态枚举，数据源钉死 <code>machine_sold_group_day_new</code>，删除「刷卡降级」与「微信 / 支付宝需核映射」；② §12.2 第 9 条（R4 刷卡）关闭移除，原第 10 条重编号为 9；③ §9.2 删 R2 的 PC 端「＋货道 / 层」；④ §6.2 / §10.2 订单明细数据源钉死 micro-service-analysis；⑤ §12 引导语待确认项数改 6–9</strong></td>
+<td>产品裁决 2026-10-16</td>
 </tr>
 <tr>
 <td><strong>v1.5</strong></td>
@@ -912,18 +918,20 @@ html,body{height:100%;background:var(--bg)}
 </ul>
 <h3 id="6-2-R2-订单商品明细-B3">6.2 R2 订单商品明细（B3）</h3>
 <p><strong>字段</strong>：商品名称 / 商品ID / 单价 / 数量 / 小计 + 合计行。用途：智能柜「拿了货没扣到钱」的<strong>资损核对</strong>。</p>
+<blockquote>
+<p>⚠ <strong>数据源取 micro-service-analysis 那一处</strong>（2026-10-16 裁决）：<code>MachineOrderDetailController</code> 在 <strong>analysis / data / order-pay 三个微服务里同名共存</strong>，ca-api 须<strong>指定取 analysis 侧</strong>——与 R4 / R5 所用的 <code>machine_sold_group_day</code> 系列销售事实表<strong>同源</strong>，口径能对齐。<br>
+订单明细是<strong>资损核对</strong>数据，最怕三处口径漂移导致「AI 给出的明细与后台报表对不上」，因此本条不接受「三处均可」的写法。</p>
+</blockquote>
 <h3 id="6-3-R3-按销售额反查机器-C3">6.3 R3 按销售额反查机器（C3）</h3>
 <p>支持<strong>阈值筛选与排序</strong>（「低于 700 的」「上个月低于 1000 的」）；结果可关联补货状态，接着生成补货单。</p>
 <h3 id="6-4-R4-销售额支付方式拆分-C4">6.4 R4 销售额支付方式拆分（C4）</h3>
 <p><strong>口径：默认给合计，用户要求时才拆分</strong>。拆分维度：<strong>支付方式 / 金额 / 笔数 / 占比</strong> + 合计行。</p>
 <blockquote>
-<p><strong>支付方式枚举</strong>（2026-10-16 裁决）：<strong>微信 / 支付宝 / 现金 / 刷卡</strong> 等支付渠道，按<strong>渠道</strong>拆分。
-<strong>现金口径</strong>（2026-10-16 产品裁决）：<strong>现金就是现金支付总额，不拆纸币 / 硬币</strong>。<code>OfflinePayRecordController</code> 里 <code>pay_type</code> 1（纸币）/ 2（硬币）同属现金，<strong>取两者合计</strong>，明细层不展示。<br>
-<strong>数据源分工</strong>（已收敛，不再是「完全悬空」）：
-1. <strong>现金</strong> → <code>OfflinePayRecordController</code>，<code>pay_type</code> 1/2 <strong>合计</strong>，可直接用；
-2. <strong>微信 / 支付宝</strong> → 属线上支付流水，需由 ca-api 确认唯一数据源（<code>RptDayReceivePaymentController</code> 当前拆的是 <code>app_id / machine_type / type</code>，需核实能否映射为渠道）；
-3. <strong>刷卡（银行卡）</strong> → 无人售货机场景<strong>极少发生</strong>，能否取到数待确认（§12.2 第 9 条）。<br>
-<strong>降级方案（先在前端定死，避免拖到 P2 联调才爆）</strong>：若「刷卡」取不到数，R4 只出 <strong>微信 / 支付宝 / 现金</strong> 三类，其余归「其他」并注明；<strong>不允许</strong>为了凑四分类而用错误的近似源。</p>
+<p><strong>支付方式枚举＝动态</strong>（2026-10-16 产品裁决）：<strong>只列该商户在统计期内产生过销售额的支付方式</strong>，不写死「微信 / 支付宝 / 现金 / 刷卡」四种。不同商户开通的支付渠道不同，写死会出现零值行 / 空行；统计期内没产生销售额的方式<strong>不出现</strong>。<br>
+<strong>数据源钉死</strong>（2026-10-16 代码复核）：取 <strong><code>machine_sold_group_day_new</code></strong> 表，走 <code>getMachinesSoldSumGroupByDayNew</code>（<code>MachineSoldGroupDayService.java:122</code>，方法注释即「各支付方式收入」）；支付方式名经 <strong><code>provide_pay_type.payName</code></strong> 映射后展示。<br>
+<strong>现金口径</strong>（沿用 2026-10-16 裁决）：现金就是一个支付方式条目，＝<strong>现金支付总额</strong>，<strong>不拆纸币 / 硬币</strong>（<code>OfflinePayRecordController</code> 的 <code>pay_type</code> 1 / 2 同属现金，明细层不展示）。<br>
+<strong>刷卡是真实存在的支付方式</strong>：<code>MachineSoldProfitBO.cardTotalAmount</code>（<code>MachineSoldProfitBO.java:33-34</code>）即刷卡收入字段，<strong>不需要</strong>「取不到数就降级」的兜底方案，上一版的降级方案随之作废。<br>
+⚠ <strong>上一版「微信 / 支付宝需核实能否映射为渠道」的顾虑作废</strong>：既已定为 <code>machine_sold_group_day_new</code> 的 <code>payType</code> 维度，微信 / 支付宝自然落在该维度内，无需另行核实映射。</p>
 </blockquote>
 <h3 id="6-5-R5-商品维度销售额-C7">6.5 R5 商品维度销售额（C7）</h3>
 <p><strong>字段</strong>：商品名称 / 商品ID / 单价 / 销量 / 销售额 + 铺货机器数；支持限定「所有在线机器」范围。</p>
@@ -936,7 +944,7 @@ html,body{height:100%;background:var(--bg)}
 <blockquote>
 <p>⚠⚠ <strong>2026-10-16 代码复核修正</strong>：原写「预警通知或<strong>操作日志</strong>」——<code>machine_online_record</code> 表只有 <code>id / machine_id / online_status / msg_protocol / gmt_created</code>，<strong>没有离线原因字段</strong>，「操作日志」这个数据源<strong>不存在</strong>。若按旧口径接，R6 会拿不到数据。
 ⚠ <strong>2026-10-16 第二轮收口</strong>：上一版把「预警通知」留作第二个来源，但它<strong>同样未被核过</strong>（没有对应的表 / 接口证据），属于与上一条同类的「写进结论却没核实」问题。<br>
-<strong>本期只保留已核实的一个来源 —— 故障记录表</strong>；卡片「来源」列只写「<strong>故障记录</strong>」。「预警通知」能否作为补充来源转入 §12.2 第 10 条待确认，核到证据后再加回卡片，<strong>不得先写进结论</strong>。</p>
+<strong>本期只保留已核实的一个来源 —— 故障记录表</strong>；卡片「来源」列只写「<strong>故障记录</strong>」。「预警通知」能否作为补充来源转入 §12.2 第 9 条待确认，核到证据后再加回卡片，<strong>不得先写进结论</strong>。</p>
 <p>这是<strong>纯只读卡</strong>——不给「查硬件状态 / 远程重启」按钮：卡内已在展示状态，再点「查硬件状态」是循环跳转；重启属另一个能力，用户直接问即可。</p>
 </blockquote>
 <hr />
@@ -1185,7 +1193,7 @@ html,body{height:100%;background:var(--bg)}
 <tr>
 <td>R2 订单明细</td>
 <td>商品 / 单价 / 数量 / 小计 ＋ 副行（商品ID）</td>
-<td>＋<strong>货道 / 层</strong>（该商品在这台机器上的位置）</td>
+<td>—（<strong>无位置维度</strong>：<code>machine_order_detail</code> 是订单商品快照，只有商品 / 单价 / 数量，见 §6.2）</td>
 </tr>
 <tr>
 <td>R3 机器销售额</td>
@@ -1340,7 +1348,7 @@ html,body{height:100%;background:var(--bg)}
 </tr>
 <tr>
 <td>订单商品明细（B3）</td>
-<td><code>MachineOrderDetailController</code>（micro-service-analysis / data / order-pay 三处均有）</td>
+<td><code>MachineOrderDetailController</code> <strong>（取 micro-service-analysis 那处）</strong> ⚠ 同名接口在 analysis / data / order-pay 三处共存，须指定 analysis，与 R4 / R5 销售事实表同源（见 §6.2）</td>
 </tr>
 <tr>
 <td>按销售额反查机器（C3）</td>
@@ -1356,7 +1364,7 @@ html,body{height:100%;background:var(--bg)}
 </tr>
 <tr>
 <td>离线原因（C9）</td>
-<td><code>MonitorFaultRecordController</code>（micro-service-data，<code>monitor_fault_records</code> · <code>fault_type='machine_offline'</code>；建议文案＝nacos 配置 <code>MonitorFaultRecordServiceImpl.java:130-131</code>）· <code>MachineOnlineRecordDataController</code>（<strong>只有上下线状态，<code>machine_online_record</code> 无原因字段</strong>，不能作为原因来源）。⚠ 「预警通知」来源<strong>未核</strong>，本期不采用（§12.2 第 10 条）</td>
+<td><code>MonitorFaultRecordController</code>（micro-service-data，<code>monitor_fault_records</code> · <code>fault_type='machine_offline'</code>；建议文案＝nacos 配置 <code>MonitorFaultRecordServiceImpl.java:130-131</code>）· <code>MachineOnlineRecordDataController</code>（<strong>只有上下线状态，<code>machine_online_record</code> 无原因字段</strong>，不能作为原因来源）。⚠ 「预警通知」来源<strong>未核</strong>，本期不采用（§12.2 第 9 条）</td>
 </tr>
 </tbody>
 </table>
@@ -1423,7 +1431,7 @@ html,body{height:100%;background:var(--bg)}
 <h3 id="11-3-回归验收">11.3 回归验收</h3>
 <ol>
 <li>1.0 既有链路（机器列表 / 状态筛选 / 经营只读 / 停售 / 知识问答 / 越界兜底 / 未命中兜底）<strong>全部不受影响</strong>。</li>
-<li>两端原型冒烟：小程序端 <strong>92</strong> 项断言全通过；PC 端 <strong>107</strong> 项断言全通过（含「副行提为列」与「PC 列不得出现在小程序端」双向断言）。</li>
+<li>两端原型冒烟：小程序端 <strong>96</strong> 项断言全通过；PC 端 <strong>110</strong> 项断言全通过（含「副行提为列」与「PC 列不得出现在小程序端」双向断言，以及下架机型分流、空/加载态、R2 无货道列、R4 现金不拆纸币硬币与含刷卡等防回退断言）。</li>
 <li>布局无溢出：卡片、表格、行内元素在两端均无横向溢出。</li>
 </ol>
 <h3 id="11-4-性能验收">11.4 性能验收</h3>
@@ -1440,7 +1448,8 @@ html,body{height:100%;background:var(--bg)}
 <hr />
 <h2 id="12-待确认项">12. 待确认项</h2>
 <blockquote>
-<p>原 7 项中 <strong>1–5 已于 2026-10-16 由产品裁决定稿</strong>（下表「已定稿」）；<strong>6–7 仍待确认</strong>（属技术时序 / 后续版本范围，不影响本期原型）。</p>
+<p>原 7 项中 <strong>1–5 已于 2026-10-16 由产品裁决定稿</strong>（下表「已定稿」）；<strong>6–9 仍待确认</strong>（4 项，属技术时序 / 数据源确认 / 后续版本范围，不影响本期原型）。<br>
+⚠ 2026-10-16 修正：原写「6–7 仍待确认」，与紧随其后的 §12.2 表实际项数不符（把 4 项说成 2 项）。原第 9 条（R4 刷卡）已于本次定稿关闭，原第 10 条重编号为 9。</p>
 </blockquote>
 <h3 id="12-1-已定稿-2026-10-16-产品裁决">12.1 已定稿（2026-10-16 产品裁决）</h3>
 <table>
@@ -1476,6 +1485,11 @@ html,body{height:100%;background:var(--bg)}
 <td>5</td>
 <td>铺货机器数</td>
 <td><strong>需要支持</strong>：R5 卡内展示「铺货 N 台」。⚠ 实现方式＝<strong>新增接口</strong>（现有 <code>soldMachineNumber</code> 返回的是「有销售记录的机器数」，口径不同，见 §6.5）</td>
+</tr>
+<tr>
+<td>6</td>
+<td>R4 支付方式的枚举方式与数据源（原 §12.2 第 9 条，2026-10-16 关闭）</td>
+<td><strong>动态枚举</strong>：只列统计期内产生过销售额的支付方式；数据源钉死 <code>machine_sold_group_day_new</code> + <code>getMachinesSoldSumGroupByDayNew</code>，支付方式名经 <code>provide_pay_type.payName</code> 映射。刷卡＝真实存在的支付方式（<code>MachineSoldProfitBO.cardTotalAmount</code>），<strong>不需要降级方案</strong></td>
 </tr>
 </tbody>
 </table>
@@ -1518,14 +1532,6 @@ html,body{height:100%;background:var(--bg)}
 </tr>
 <tr>
 <td>9</td>
-<td>R4「刷卡」能否取到数</td>
-<td>枚举含「刷卡（银行卡）」</td>
-<td>无人售货机场景刷卡极少发生，<strong>是否存在该渠道数据</strong>？取不到则按 §6.4 降级方案只出微信 / 支付宝 / 现金三类</td>
-<td>ca-api 负责人（待指派）</td>
-<td><strong>P2 开工前</strong>（不要拖到联调）</td>
-</tr>
-<tr>
-<td>10</td>
 <td>R6「预警通知」能否作为补充来源</td>
 <td>本期只采用已核实的 <code>monitor_fault_records</code></td>
 <td>「预警通知」对应的<strong>表 / 接口是什么、能否取到</strong>？核到证据后再决定是否加回卡片来源列（不得先写进结论）</td>
@@ -1537,7 +1543,7 @@ html,body{height:100%;background:var(--bg)}
 <blockquote>
 <p>跟踪要求：每项「仍待确认」须在<strong>对应里程碑前</strong>给出结论或改期说明；未按期闭环的在下次评审上过一遍，不得静默过期。</p>
 <p>另有 2 条<strong>风险盲区</strong>已登记在《迭代清单 · 落定口径与风险》表：R1「ca-api 不在代码库」、R2「多台循环上架的部分失败反馈」。评审时一并看。
-⚠ <strong>时序提示</strong>：第 9 条（R4 刷卡）必须在 <strong>P2 开工前</strong>闭环 —— 它是 6 张读卡里唯一「换源还是新增接口」长期未定的一项，挂到联调阶段才处理会直接卡住 R4 排期。</p>
+⚠ <strong>时序提示</strong>：第 8 条（跨仓拦截只对 ISP 服务商生效）须在 <strong>1.1 联调前</strong>闭环——它直接决定 §11.1 第 3 条的验收用例写法（须覆盖服务商与非服务商两种场景），不闭环会导致测试用例按「跨仓必拦」单边设计而漏测。</p>
 </blockquote>
 <hr />
 <h2 id="附-关联材料">附：关联材料</h2>
@@ -1583,7 +1589,7 @@ html,body{height:100%;background:var(--bg)}
 <div class="toast" id="toast"></div>
 <script type="text/markdown" id="mdSrc"># 需求说明 —— 大黄鹅 AI 助手 · 1.1 期（小程序端 + 运营商 PC 端）
 
-> **版本** v1.5 ｜ **日期** 2026-10-16 ｜ **适用端** 运营商小程序（移动端）· 运营商 PC 后台
+> **版本** v1.6 ｜ **日期** 2026-10-16 ｜ **适用端** 运营商小程序（移动端）· 运营商 PC 后台
 > **关联文档** 《1.1 期卡片设计稿》（16 卡 + 2 弹层）· 《1.1 期迭代清单》（5 张表）· 可问答原型（小程序端 / PC 端）
 > **不在本期范围** 公司内部 OS 后台智能机器人（维持「只说不做」，见 §2.2）
 
@@ -1596,6 +1602,7 @@ html,body{height:100%;background:var(--bg)}
 | v0.3 | 2026-10-15 | 17 张卡片 + 2 个弹层定稿；三端定位澄清（PC 端＝运营商 PC 端） | 卡片设计稿评审 |
 | **v1.0** | **2026-10-15** | **合并小程序端 + 运营商 PC 端成一份需求说明；补两端差异与验收口径** | 本轮 |
 | **v1.1** | **2026-10-15** | **PC 端交互重做（不是"放大的手机端"）：停靠面板 / 顶栏线上四按钮 + 历史会话 / 挑机器挑商品改内联表 / 机器清单改表格 + 操作列；各卡补 PC 独有字段（补货单加可售库存 · 最大库存等）** | 用户评审意见 |
+| **v1.6** | **2026-10-16** | **定稿前最后 5 处：① §6.4 R4 整段改写为动态枚举，数据源钉死 `machine_sold_group_day_new`，删除「刷卡降级」与「微信 / 支付宝需核映射」；② §12.2 第 9 条（R4 刷卡）关闭移除，原第 10 条重编号为 9；③ §9.2 删 R2 的 PC 端「＋货道 / 层」；④ §6.2 / §10.2 订单明细数据源钉死 micro-service-analysis；⑤ §12 引导语待确认项数改 6–9** | 产品裁决 2026-10-16 |
 | **v1.5** | **2026-10-16** | **第二轮评审收口：① §3.0 波次改三波次，与迭代清单表 1 对齐；② R4 现金口径定案（＝现金总额，不拆纸币 / 硬币）并给出降级方案；③ R6 删除未核的「预警通知」来源，只留故障记录表、预警通知转待确认；④ §5.5 / §11.1 跨仓拦截补 ISP 服务商前提条件；⑤ §8 原则 2 去「将清空 N 件」旧话；⑥ W2-a 范围文案改「全部可上架机型 N 台」；⑦ §3.5 第 2 条去掉「如有」，改为必须核对的 checklist 项** | 第二轮评审 + 产品裁决 2026-10-16 |
 | **v1.4** | **2026-10-16** | **代码侧独立复核后 7 条口径修正：① 下架·售货机改「货道停售」（沿用现有规则，不换默认商品）；② 上架能力明确不支持静态柜；③ R5「铺货 N 台」标注需新增接口（现有接口给的是卖过的机器数）；④ R4 拆分维度明确为微信 / 支付宝 / 现金 / 刷卡等支付渠道；⑤ R6 离线原因来源改为故障记录表（`操作日志` 来源不存在）；⑥ 最大库存口径钉到 `default_goods_stock` 并指定取 analysis 侧真实值；⑦ 新增 §3.5 上线前必改项（前端 AI 定位文案）** | 代码库复核 + 产品裁决 2026-10-16 |
 | **v1.3** | **2026-10-16** | **评审意见落地：① §3.0 补波次里程碑与前置依赖；② §4.4 补路由决策树；③ §9.3 补两端异常处理差异；④ §11.4 补性能验收阈值；⑤ §12.2 待确认项加「负责人 / 预计解决版本」；⑥ §8 补空状态与加载态定则；⑦ §9.1 输入辅助口径修正（PC 端不做语音，同步移除原型语音 UI）** | 网页解析评审意见 |
@@ -1919,6 +1926,9 @@ html,body{height:100%;background:var(--bg)}
 
 **字段**：商品名称 / 商品ID / 单价 / 数量 / 小计 + 合计行。用途：智能柜「拿了货没扣到钱」的**资损核对**。
 
+> ⚠ **数据源取 micro-service-analysis 那一处**（2026-10-16 裁决）：`MachineOrderDetailController` 在 **analysis / data / order-pay 三个微服务里同名共存**，ca-api 须**指定取 analysis 侧**——与 R4 / R5 所用的 `machine_sold_group_day` 系列销售事实表**同源**，口径能对齐。<br>
+> 订单明细是**资损核对**数据，最怕三处口径漂移导致「AI 给出的明细与后台报表对不上」，因此本条不接受「三处均可」的写法。
+
 ### 6.3 R3 按销售额反查机器（C3）
 
 支持**阈值筛选与排序**（「低于 700 的」「上个月低于 1000 的」）；结果可关联补货状态，接着生成补货单。
@@ -1927,13 +1937,11 @@ html,body{height:100%;background:var(--bg)}
 
 **口径：默认给合计，用户要求时才拆分**。拆分维度：**支付方式 / 金额 / 笔数 / 占比** + 合计行。
 
-> **支付方式枚举**（2026-10-16 裁决）：**微信 / 支付宝 / 现金 / 刷卡** 等支付渠道，按**渠道**拆分。
-> **现金口径**（2026-10-16 产品裁决）：**现金就是现金支付总额，不拆纸币 / 硬币**。`OfflinePayRecordController` 里 `pay_type` 1（纸币）/ 2（硬币）同属现金，**取两者合计**，明细层不展示。<br>
-> **数据源分工**（已收敛，不再是「完全悬空」）：
-> 1. **现金** → `OfflinePayRecordController`，`pay_type` 1/2 **合计**，可直接用；
-> 2. **微信 / 支付宝** → 属线上支付流水，需由 ca-api 确认唯一数据源（`RptDayReceivePaymentController` 当前拆的是 `app_id / machine_type / type`，需核实能否映射为渠道）；
-> 3. **刷卡（银行卡）** → 无人售货机场景**极少发生**，能否取到数待确认（§12.2 第 9 条）。<br>
-> **降级方案（先在前端定死，避免拖到 P2 联调才爆）**：若「刷卡」取不到数，R4 只出 **微信 / 支付宝 / 现金** 三类，其余归「其他」并注明；**不允许**为了凑四分类而用错误的近似源。
+> **支付方式枚举＝动态**（2026-10-16 产品裁决）：**只列该商户在统计期内产生过销售额的支付方式**，不写死「微信 / 支付宝 / 现金 / 刷卡」四种。不同商户开通的支付渠道不同，写死会出现零值行 / 空行；统计期内没产生销售额的方式**不出现**。<br>
+> **数据源钉死**（2026-10-16 代码复核）：取 **`machine_sold_group_day_new`** 表，走 `getMachinesSoldSumGroupByDayNew`（`MachineSoldGroupDayService.java:122`，方法注释即「各支付方式收入」）；支付方式名经 **`provide_pay_type.payName`** 映射后展示。<br>
+> **现金口径**（沿用 2026-10-16 裁决）：现金就是一个支付方式条目，＝**现金支付总额**，**不拆纸币 / 硬币**（`OfflinePayRecordController` 的 `pay_type` 1 / 2 同属现金，明细层不展示）。<br>
+> **刷卡是真实存在的支付方式**：`MachineSoldProfitBO.cardTotalAmount`（`MachineSoldProfitBO.java:33-34`）即刷卡收入字段，**不需要**「取不到数就降级」的兜底方案，上一版的降级方案随之作废。<br>
+> ⚠ **上一版「微信 / 支付宝需核实能否映射为渠道」的顾虑作废**：既已定为 `machine_sold_group_day_new` 的 `payType` 维度，微信 / 支付宝自然落在该维度内，无需另行核实映射。
 
 ### 6.5 R5 商品维度销售额（C7）
 
@@ -1948,7 +1956,7 @@ html,body{height:100%;background:var(--bg)}
 
 > ⚠⚠ **2026-10-16 代码复核修正**：原写「预警通知或**操作日志**」——`machine_online_record` 表只有 `id / machine_id / online_status / msg_protocol / gmt_created`，**没有离线原因字段**，「操作日志」这个数据源**不存在**。若按旧口径接，R6 会拿不到数据。
 > ⚠ **2026-10-16 第二轮收口**：上一版把「预警通知」留作第二个来源，但它**同样未被核过**（没有对应的表 / 接口证据），属于与上一条同类的「写进结论却没核实」问题。<br>
-> **本期只保留已核实的一个来源 —— 故障记录表**；卡片「来源」列只写「**故障记录**」。「预警通知」能否作为补充来源转入 §12.2 第 10 条待确认，核到证据后再加回卡片，**不得先写进结论**。
+> **本期只保留已核实的一个来源 —— 故障记录表**；卡片「来源」列只写「**故障记录**」。「预警通知」能否作为补充来源转入 §12.2 第 9 条待确认，核到证据后再加回卡片，**不得先写进结论**。
 
 > 这是**纯只读卡**——不给「查硬件状态 / 远程重启」按钮：卡内已在展示状态，再点「查硬件状态」是循环跳转；重启属另一个能力，用户直接问即可。
 
@@ -2038,7 +2046,7 @@ html,body{height:100%;background:var(--bg)}
 | W4 批量改价 | 商品 / 现价 / 库存 / 目标价 ＋ 副行（ID · 命中 N 台） | ＋**商品ID**、＋**命中机器数**（列内「N 台 ▾」可点开卡内**命中机器明细**）、＋**现价区间**（跨机器同商品现价可能不同，改前必须先知道区间） |
 | **W5 补货单** | 商品 / 缺货数 / 缺货箱数 / 补货量（副行：箱规 · 最大 − 现存 = 补货量） | ＋**可售**、＋**最大**、＋卡头**范围合计**（可售 N 件 · 最大 M 件）；副行信息已提为列，口径写进说明行 |
 | R1 补货记录 | 机器 / 次数 / 最近 / 未补货 ＋ 副行（编号 · 平均） | ＋**线路** |
-| R2 订单明细 | 商品 / 单价 / 数量 / 小计 ＋ 副行（商品ID） | ＋**货道 / 层**（该商品在这台机器上的位置） |
+| R2 订单明细 | 商品 / 单价 / 数量 / 小计 ＋ 副行（商品ID） | —（**无位置维度**：`machine_order_detail` 是订单商品快照，只有商品 / 单价 / 数量，见 §6.2） |
 | R3 机器销售额 | 机器 / 销售额 / 订单 ＋ 副行（编号 · 缺货） | ＋**机型** |
 | R4 支付方式 | 方式 / 金额 / 笔数 / 占比 ＋ 副行（明细） | ＋**笔均**（金额 ÷ 笔数） |
 | R5 商品销售 | 商品 / 单价 / 销量 / 销售额 ＋ 副行（商品ID · 铺货） | ＋**可售库存**（该商品在全部机器上的现存合计） |
@@ -2084,11 +2092,11 @@ html,body{height:100%;background:var(--bg)}
 | 能力 | 接口 / 代码依据 |
 |---|---|
 | 补货记录（B1） | `ReplenishmentDataController.replenishmentPage`（micro-service-analysis / data，`:84-110`，**180 天上限**） |
-| 订单商品明细（B3） | `MachineOrderDetailController`（micro-service-analysis / data / order-pay 三处均有） |
+| 订单商品明细（B3） | `MachineOrderDetailController` **（取 micro-service-analysis 那处）** ⚠ 同名接口在 analysis / data / order-pay 三处共存，须指定 analysis，与 R4 / R5 销售事实表同源（见 §6.2） |
 | 按销售额反查机器（C3） | `MachineSoldGroupDayController`（micro-service-analysis） |
 | 支付方式拆分（C4） | `OfflinePayRecordController`、`RptDayReceivePaymentController`（data / ops） |
 | 商品维度销售额（C7） | `GoodsSoldController`（micro-service-analysis）。⚠ **「铺货机器数」需新增接口**：现有 `soldMachineNumber`＝「有销售记录的机器数」；铺货口径在 `GoodsSoldMapper.xml:280+`（`GoodsDisplay` 服务），Controller 未暴露 |
-| 离线原因（C9） | `MonitorFaultRecordController`（micro-service-data，`monitor_fault_records` · `fault_type='machine_offline'`；建议文案＝nacos 配置 `MonitorFaultRecordServiceImpl.java:130-131`）· `MachineOnlineRecordDataController`（**只有上下线状态，`machine_online_record` 无原因字段**，不能作为原因来源）。⚠ 「预警通知」来源**未核**，本期不采用（§12.2 第 10 条） |
+| 离线原因（C9） | `MonitorFaultRecordController`（micro-service-data，`monitor_fault_records` · `fault_type='machine_offline'`；建议文案＝nacos 配置 `MonitorFaultRecordServiceImpl.java:130-131`）· `MachineOnlineRecordDataController`（**只有上下线状态，`machine_online_record` 无原因字段**，不能作为原因来源）。⚠ 「预警通知」来源**未核**，本期不采用（§12.2 第 9 条） |
 
 ### 10.3 核对边界
 
@@ -2127,7 +2135,7 @@ html,body{height:100%;background:var(--bg)}
 ### 11.3 回归验收
 
 13. 1.0 既有链路（机器列表 / 状态筛选 / 经营只读 / 停售 / 知识问答 / 越界兜底 / 未命中兜底）**全部不受影响**。
-14. 两端原型冒烟：小程序端 **92** 项断言全通过；PC 端 **107** 项断言全通过（含「副行提为列」与「PC 列不得出现在小程序端」双向断言）。
+14. 两端原型冒烟：小程序端 **96** 项断言全通过；PC 端 **110** 项断言全通过（含「副行提为列」与「PC 列不得出现在小程序端」双向断言，以及下架机型分流、空/加载态、R2 无货道列、R4 现金不拆纸币硬币与含刷卡等防回退断言）。
 15. 布局无溢出：卡片、表格、行内元素在两端均无横向溢出。
 
 ### 11.4 性能验收
@@ -2144,7 +2152,8 @@ html,body{height:100%;background:var(--bg)}
 
 ## 12. 待确认项
 
-> 原 7 项中 **1–5 已于 2026-10-16 由产品裁决定稿**（下表「已定稿」）；**6–7 仍待确认**（属技术时序 / 后续版本范围，不影响本期原型）。
+> 原 7 项中 **1–5 已于 2026-10-16 由产品裁决定稿**（下表「已定稿」）；**6–9 仍待确认**（4 项，属技术时序 / 数据源确认 / 后续版本范围，不影响本期原型）。<br>
+> ⚠ 2026-10-16 修正：原写「6–7 仍待确认」，与紧随其后的 §12.2 表实际项数不符（把 4 项说成 2 项）。原第 9 条（R4 刷卡）已于本次定稿关闭，原第 10 条重编号为 9。
 
 ### 12.1 已定稿（2026-10-16 产品裁决）
 
@@ -2155,6 +2164,7 @@ html,body{height:100%;background:var(--bg)}
 | 3 | 多机型批量上架的商品库过滤 | **用交集**：按这批机器的机型交集出商品，交集外的直接不出现；标题写明交集 + 过滤说明行 |
 | 4 | 补货量建议的统计口径 | **不要建议量**：补货量 ＝ 最大库存 − 现存，直接按补满算、不调算法；统计窗口等口径问题全部作废 |
 | 5 | 铺货机器数 | **需要支持**：R5 卡内展示「铺货 N 台」。⚠ 实现方式＝**新增接口**（现有 `soldMachineNumber` 返回的是「有销售记录的机器数」，口径不同，见 §6.5） |
+| 6 | R4 支付方式的枚举方式与数据源（原 §12.2 第 9 条，2026-10-16 关闭） | **动态枚举**：只列统计期内产生过销售额的支付方式；数据源钉死 `machine_sold_group_day_new` + `getMachinesSoldSumGroupByDayNew`，支付方式名经 `provide_pay_type.payName` 映射。刷卡＝真实存在的支付方式（`MachineSoldProfitBO.cardTotalAmount`），**不需要降级方案** |
 
 ### 12.2 仍待确认
 
@@ -2163,13 +2173,12 @@ html,body{height:100%;background:var(--bg)}
 | 6 | 多台循环的部分失败反馈 | 逐台列出失败机器与原因 | 单机循环时被后台校验拦截（不支持机型 / 未绑定 code）的**反馈时序与聚合方式**属前端与 ca-api 交互约定 | ca-api 负责人（待指派） | 1.1 联调前 |
 | 7 | PC 端导出能力 | 本期不做 | PC 端具备导出条件（对账 / 存档场景），**是否纳入 1.2** | 产品 · 王泳瑜 | 1.2 立项评审 |
 | 8 | 跨仓拦截只对 ISP 服务商生效 | 服务端跨仓校验外层包了 `ispReplenishSku` 开关（`ReplenishmentListMasterServiceImpl.java:439-449`），普通运营商跨仓不报错 | **非服务商场景要不要一并按仓分组**？若保持现状（合成一张主单），AI 需在提交前主动提示；若要拦，需后端扩校验范围 | ca-api + 后端负责人（待指派） | 1.1 联调前 |
-| 9 | R4「刷卡」能否取到数 | 枚举含「刷卡（银行卡）」 | 无人售货机场景刷卡极少发生，**是否存在该渠道数据**？取不到则按 §6.4 降级方案只出微信 / 支付宝 / 现金三类 | ca-api 负责人（待指派） | **P2 开工前**（不要拖到联调） |
-| 10 | R6「预警通知」能否作为补充来源 | 本期只采用已核实的 `monitor_fault_records` | 「预警通知」对应的**表 / 接口是什么、能否取到**？核到证据后再决定是否加回卡片来源列（不得先写进结论） | 后端负责人（待指派） | 1.1 联调前 |
+| 9 | R6「预警通知」能否作为补充来源 | 本期只采用已核实的 `monitor_fault_records` | 「预警通知」对应的**表 / 接口是什么、能否取到**？核到证据后再决定是否加回卡片来源列（不得先写进结论） | 后端负责人（待指派） | 1.1 联调前 |
 
 > 跟踪要求：每项「仍待确认」须在**对应里程碑前**给出结论或改期说明；未按期闭环的在下次评审上过一遍，不得静默过期。
 
 > 另有 2 条**风险盲区**已登记在《迭代清单 · 落定口径与风险》表：R1「ca-api 不在代码库」、R2「多台循环上架的部分失败反馈」。评审时一并看。
-> ⚠ **时序提示**：第 9 条（R4 刷卡）必须在 **P2 开工前**闭环 —— 它是 6 张读卡里唯一「换源还是新增接口」长期未定的一项，挂到联调阶段才处理会直接卡住 R4 排期。
+> ⚠ **时序提示**：第 8 条（跨仓拦截只对 ISP 服务商生效）须在 **1.1 联调前**闭环——它直接决定 §11.1 第 3 条的验收用例写法（须覆盖服务商与非服务商两种场景），不闭环会导致测试用例按「跨仓必拦」单边设计而漏测。
 
 ---
 

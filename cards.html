@@ -197,7 +197,7 @@ table.idx th{background:#fafbfd;font-weight:700}
       <tr><td>R1</td><td>补货记录查询</td><td>读·结果</td><td>B1</td><td>「最近一个月哪些机器补过货 / 有没有长时间没补货的」</td></tr>
       <tr><td>R2</td><td>订单商品明细</td><td>读·结果</td><td>B3</td><td>「此单消费者拿去了多少件商品，同步明细」</td></tr>
       <tr><td>R3</td><td>按销售额反查机器</td><td>读·结果</td><td>C3</td><td>「上个月做低于 700 块的机器列出来」</td></tr>
-      <tr><td>R4</td><td>销售额支付方式拆分</td><td>读·结果</td><td>C4</td><td>「现金多少、打卡多少」</td></tr>
+      <tr><td>R4</td><td>销售额支付方式拆分</td><td>读·结果</td><td>C4</td><td>「现金多少、刷卡多少」</td></tr>
       <tr><td>R5</td><td>商品维度销售额</td><td>读·结果</td><td>C7</td><td>「辣媳妇山椒笋尖近三个月销量 / 所有在线机器的」</td></tr>
       <tr><td>R6</td><td>离线原因</td><td>读·结果</td><td>C9</td><td>「什么原因离线」</td></tr>
       <tr><td>P1</td><td>添加商品弹层（商品库选择）</td><td>半屏弹层</td><td>W1 / W2</td><td>卡内点「＋ 添加商品」</td></tr>
@@ -542,7 +542,7 @@ table.idx th{background:#fafbfd;font-weight:700}
       <!-- R4 -->
       <div class="unit">
         <div class="cap"><span class="cd">R4</span><span class="tag r">读</span>销售额支付方式拆分<span class="cd" style="margin-left:4px">C4</span></div>
-        <span class="q">「现金多少，打卡多少，分别是多少」</span>
+        <span class="q">「现金多少，刷卡多少，分别是多少」</span>
         <div class="cardbox">
           <div class="cb-head q"><span class="ttl">💳 销售额构成</span><span class="st">已查询</span></div>
           <div class="kv"><span class="k">时间 / 范围</span><span class="v">今日 · 全部 12 台</span></div>
@@ -550,13 +550,13 @@ table.idx th{background:#fafbfd;font-weight:700}
             <div class="ph"><span class="c1">支付方式</span><span class="c3">金额</span><span class="c4">笔数</span><span class="c5">占比</span></div>
             <div class="pr"><div class="l1"><span class="c1"><span class="nm">微信支付</span></span><span class="c3">¥1,286</span><span class="c4">312</span><span class="c5">48.6%</span></div><div class="ln">线上 · 已到账</div></div>
             <div class="pr"><div class="l1"><span class="c1"><span class="nm">支付宝</span></span><span class="c3">¥742</span><span class="c4">188</span><span class="c5">28.0%</span></div><div class="ln">线上 · 已到账</div></div>
-            <div class="pr"><div class="l1"><span class="c1"><span class="nm">现金 / 投币</span></span><span class="c3">¥386</span><span class="c4">97</span><span class="c5">14.6%</span></div><div class="ln">线下收款 · 以实际清点为准</div></div>
-            <div class="pr"><div class="l1"><span class="c1"><span class="nm">会员储值卡</span></span><span class="c3">¥232</span><span class="c4">41</span><span class="c5">8.8%</span></div><div class="ln">储值卡余额扣减</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">现金</span></span><span class="c3">¥386</span><span class="c4">97</span><span class="c5">14.6%</span></div><div class="ln">线下收款 · 以实际清点为准（不拆纸币 / 硬币）</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">刷卡</span></span><span class="c3">¥232</span><span class="c4">41</span><span class="c5">8.8%</span></div><div class="ln">银行卡 · 已到账</div></div>
             <div class="sumline"><span>合计</span><span>¥2,646</span></div>
           </div>
           <div class="pdiff non">默认给合计；你要求时再按支付方式拆分展示</div>
         </div>
-        <div class="rule">口径：<b>默认合计，用户要求时才拆分</b></div>
+        <div class="rule">口径：<b>默认合计，用户要求时才拆分</b>。<br><b>2026-10-16 裁决</b>：支付方式＝<b>动态枚举</b>——只列统计期内<b>产生过销售额</b>的方式，<b>不写死</b>微信 / 支付宝 / 现金 / 刷卡四种（不同商户开通渠道不同，写死会出零值行）。<br>数据源钉死 <code>machine_sold_group_day_new</code> · <code>getMachinesSoldSumGroupByDayNew</code>（<code>MachineSoldGroupDayService.java:122</code>），方式名经 <code>provide_pay_type.payName</code> 映射。<br><b>刷卡是真实存在的支付方式</b>（<code>MachineSoldProfitBO.cardTotalAmount</code>），不需要「取不到就降级」的兜底；现金＝现金总额，<b>不拆纸币 / 硬币</b>。</div>
       </div>
 
       <!-- R5 -->
