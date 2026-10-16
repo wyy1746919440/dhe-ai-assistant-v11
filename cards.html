@@ -167,6 +167,9 @@ table.idx th{background:#fafbfd;font-weight:700}
 .pickrow.dis{opacity:.5}
 .pickrow.dis .nm{color:#8c9199}
 .blktag{font-style:normal;display:block;font-size:10.5px;line-height:1.4;color:var(--danger);margin-top:2px}
+/* R2 订单明细两段式：最近订单选择列表的可点行（2026-10-16） */
+.ptable .pr.opick{cursor:pointer}
+.ptable .pr.opick:hover{background:#f5f9ff}
 .sh-foot{display:flex;align-items:center;gap:9px;padding:9px 10px;background:#fff;border-top:1px solid #f0f2f5}
 .bag{position:relative;font-size:17px;flex-shrink:0;line-height:1}
 .bag b{position:absolute;top:-3px;right:-7px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:0 4px}
@@ -199,7 +202,7 @@ table.idx th{background:#fafbfd;font-weight:700}
       <tr><td>W6</td><td>批量执行结果（部分失败）</td><td>结果反馈</td><td>A1/C8/C2</td><td>多台循环执行后，部分机器被校验拦截</td></tr>
       <tr><td>W6-b</td><td>成功明细展开（逐台列出）</td><td>结果反馈</td><td>A1/C8/C2</td><td>W6 内点「查看成功明细」</td></tr>
       <tr><td>R1</td><td>补货记录查询</td><td>读·结果</td><td>B1</td><td>「最近一个月哪些机器补过货 / 有没有长时间没补货的」</td></tr>
-      <tr><td>R2</td><td>订单商品明细</td><td>读·结果</td><td>B3</td><td>「此单消费者拿去了多少件商品，同步明细」</td></tr>
+      <tr><td>R2</td><td>订单商品明细（先选单后看明细）</td><td>读·结果</td><td>B3</td><td>泛问「查一下订单明细」→ 先选单；点名「此单…」直接出明细</td></tr>
       <tr><td>R3</td><td>按销售额反查机器</td><td>读·结果</td><td>C3</td><td>「上个月做低于 700 块的机器列出来」</td></tr>
       <tr><td>R4</td><td>销售额支付方式拆分</td><td>读·结果</td><td>C4</td><td>「现金多少、刷卡多少」</td></tr>
       <tr><td>R5</td><td>商品维度销售额</td><td>读·结果</td><td>C7</td><td>「辣媳妇山椒笋尖近三个月销量 / 所有在线机器的」</td></tr>
@@ -507,12 +510,23 @@ table.idx th{background:#fafbfd;font-weight:700}
 
       <!-- R2 -->
       <div class="unit">
-        <div class="cap"><span class="cd">R2</span><span class="tag r">读</span>订单商品明细<span class="cd" style="margin-left:4px">B3</span></div>
-        <span class="q">「此单消费者拿去了多少件商品，请同步商品明细」</span>
+        <div class="cap"><span class="cd">R2</span><span class="tag r">读</span>订单商品明细 · 先选单后看明细<span class="cd" style="margin-left:4px">B3</span></div>
+        <span class="q">泛问「查一下订单明细」/ 点名「此单消费者拿去了多少件商品」</span>
+        <div class="cardbox">
+          <div class="cb-head q"><span class="ttl">🧾 订单商品明细</span><span class="st">请选择订单</span></div>
+          <div class="kv"><span class="k">时间</span><span class="v">最近 5 单<em>近 7 天 · 按时间倒序</em></span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">订单号</span><span class="c3">机器</span><span class="c4">商品</span><span class="c5">金额</span></div>
+            <div class="pr opick"><div class="l1"><span class="c1"><span class="nm">2026101415300012</span></span><span class="c3">欢乐颂 5 号机</span><span class="c4">可口可乐 330ml</span><span class="c5">¥3.00</span></div><div class="ln">10-14 15:30 · 点击查看该单商品明细</div></div>
+            <div class="pr opick"><div class="l1"><span class="c1"><span class="nm">2026101219450007</span></span><span class="c3">南油文化广场</span><span class="c4">百事可乐 500ml</span><span class="c5">¥2.50</span></div><div class="ln">10-12 19:45 · 点击查看该单商品明细</div></div>
+          </div>
+          <div class="pdiff"><div class="r"><span>怎么用</span><span>点任意一单 → 展开该单商品明细；也可直接发订单号</span></div></div>
+          <div class="exec-note">没有要查的单？把订单号发我即可（如「查订单 2026101415300012 的明细」）</div>
+        </div>
         <div class="cardbox">
           <div class="cb-head q"><span class="ttl">🧾 订单商品明细</span><span class="st">已查询</span></div>
-          <div class="kv"><span class="k">订单号</span><span class="v">818086331791620724763</span></div>
-          <div class="kv"><span class="k">机器</span><span class="v">欢乐颂 5 号机<em>10-14 09:12</em></span></div>
+          <div class="kv"><span class="k">订单号</span><span class="v">2026101415300012</span></div>
+          <div class="kv"><span class="k">机器</span><span class="v">欢乐颂 5 号机<em>10-14 15:30</em></span></div>
           <div class="ptable">
             <div class="ph"><span class="c1">商品</span><span class="c3">单价</span><span class="c4">数量</span><span class="c5">小计</span></div>
             <div class="pr"><div class="l1"><span class="c1"><span class="nm">可口可乐 330ml</span></span><span class="c3">¥3.00</span><span class="c4">2</span><span class="c5">¥6.00</span></div><div class="ln">ID 6901234567892</div></div>
@@ -520,9 +534,10 @@ table.idx th{background:#fafbfd;font-weight:700}
             <div class="sumline"><span>合计 3 件</span><span>¥8.50</span></div>
           </div>
           <div class="pdiff"><div class="r"><span>支付方式</span><span>微信支付</span></div><div class="r"><span>订单状态</span><span>已支付</span></div></div>
+          <div class="op-btns"><button class="btn ghost">‹ 返回订单列表</button></div>
           <div class="exec-note">用于核对消费者拿取的商品与扣款是否一致</div>
         </div>
-        <div class="rule">字段：<b>商品名称 / 商品ID / 单价 / 数量 / 小计</b> + 合计行。<br>用途：智能柜「拿了货没扣到钱」的资损核对。</div>
+        <div class="rule"><b>两段式：先选单、后看明细</b>（2026-10-16 产品反馈：这种不应该先问查询哪个订单的明细吗）。① 泛问「查订单明细」→ AI <b>先反问「要查哪一单」</b>，同一条消息给<b>最近订单选择列表</b>（最近 5 单 · 近 7 天 · 按时间倒序，行＝订单号 / 机器 / 商品 / 金额 / 支付 / 状态，<b>行可点</b>，附「可直接发订单号」提示）；② <b>点任意一单 → 展开该单商品明细</b>（字段：商品名称 / 商品ID / 单价 / 数量 / 小计 + 合计行），明细态给<b>「‹ 返回订单列表」</b>可切回重选；③ <b>点名订单号</b>（「查订单 2026…的明细」）或说<b>「此单 / 这笔」</b>（上下文已锁定一单）→ <b>跳过选择直接出明细</b>。用途：智能柜「拿了货没扣到钱」的资损核对。</div>
       </div>
 
       <!-- R3 -->

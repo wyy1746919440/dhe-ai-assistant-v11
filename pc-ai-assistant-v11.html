@@ -428,6 +428,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .pickrow.dis{opacity:.5}
 .pickrow.dis .nm{color:#8c9199}
 .blktag{font-style:normal;display:block;font-size:10.5px;line-height:1.4;color:var(--danger);margin-top:2px}
+/* R2 订单明细两段式：最近订单选择列表的可点行（2026-10-16） */
+.ptable .pr.opick{cursor:pointer}
+.ptable .pr.opick:hover{background:#f5f9ff}
 .sh-foot{display:flex;align-items:center;gap:9px;padding:9px 10px;background:#fff;border-top:1px solid #f0f2f5}
 .bag{position:relative;font-size:17px;flex-shrink:0;line-height:1}
 .bag b{position:absolute;top:-3px;right:-7px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:0 4px}
@@ -982,9 +985,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261016l" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261016l" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261016l" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261016m" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261016m" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261016m" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -2319,26 +2322,62 @@ function cardReplenishRecord(){
   gen.onclick=()=>{const mids=rows.filter(r=>r.on).map(r=>r.mid);cardReplenish(mids)};
   return id;
 }
-/* ---------- R2：订单商品明细（只读）---------- */
-function cardOrderDetail(){
-  const o=ORDER_DETAIL,m=MACHINES[o.mid];
-  const tot=o.items.reduce((a,it)=>a+it.price*it.qty,0);
-  const qty=o.items.reduce((a,it)=>a+it.qty,0);
+/* ---------- R2：订单商品明细（只读 · 两段式：先选单、后看明细）----------
+   2026-10-16 用户反馈：泛问「查订单明细」时不应直接甩一单的明细——
+   先反问「要查哪单」并给最近订单选择列表（点单即查明细、可返回）；
+   用户点名订单号或说「此单 / 这笔」时跳过选择直接出明细。 */
+function orderDetailOf(no){
+  const o=ORDERS.recent.find(x=>x.no===no);
+  if(!o)return null;
+  const mid=Object.keys(MACHINES).find(k=>MACHINES[k].name===o.m)||'hls';
+  return {no:o.no,mid:mid,t:o.t,pay:o.pay,st:o.st||'已支付',items:[{n:o.p,price:o.amt,qty:1}]};
+}
+function cardOrderDetail(pick){
+  /* 先反问、后出卡（bub 必须在 pushCard 之前调用，保证会话顺序＝问句在上） */
+  if(pick==='pick')bub('ai','要查哪一单的商品明细？下面是最近的订单，点一单直接看明细 ↓');
   const id=uid();
-  pushCard(`<div class="cardbox" id="${id}_box">
-    <div class="cb-head q"><span class="ttl">🧾 订单商品明细</span><span class="st">已查询</span></div>
-    <div class="kv"><span class="k">订单号</span><span class="v">${o.no}</span></div>
-    <div class="kv"><span class="k">机器</span><span class="v">${esc(m.name)}<em>${o.t}</em></span></div>
-    <div class="ptable">
-      <div class="ph"><span class="c1">商品</span><span class="c3">单价</span><span class="c4">数量</span><span class="c5">小计</span>${pcHead('商品ID')}</div>
-      ${o.items.map(it=>`<div class="pr"><div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span><span class="c3">${money(it.price)}</span><span class="c4">${it.qty}</span><span class="c5">${money(it.price*it.qty)}</span>${pcCol('ID '+esc((prodByName(it.n)||{}).id||'6901234567892'))}</div>
-        ${pcLn(`ID ${esc((prodByName(it.n)||{}).id||'6901234567892')}`)}</div>`).join('')}
-      <div class="sumline"><span>合计 ${qty} 件</span><span>${money(tot)}</span></div>
-    </div>
-    <div class="pdiff"><div class="r"><span>支付方式</span><span>${o.pay}</span></div><div class="r"><span>订单状态</span><span>${o.st}</span></div></div>
-    <div class="exec-note">用于核对消费者拿取的商品与扣款是否一致</div>
+  const c=pushCard(`<div class="cardbox" id="${id}_box">
+    <div class="cb-head q" id="${id}_head"><span class="ttl">🧾 订单商品明细</span><span class="st" id="${id}_st">已查询</span></div>
+    <div id="${id}_body"></div>
   </div>`);
-  trace('api',`意图 <b>query</b> → GET <b>/ai/tools/order_detail</b>?no=${o.no} · 只读工具，返回商品名称 / 商品ID / 单价 / 数量 / 小计 + 合计行。⚠ 数据源取 micro-service-analysis 侧（与销售事实表同源）；订单是商品快照，**无货道 / 层维度**，PC 端也不补该列。`);
+  const body=c.querySelector('#'+id+'_body'),st=c.querySelector('#'+id+'_st');
+  function renderDetail(o){
+    const m=MACHINES[o.mid];
+    const tot=o.items.reduce((a,it)=>a+it.price*it.qty,0);
+    const qty=o.items.reduce((a,it)=>a+it.qty,0);
+    st.textContent='已查询';
+    body.innerHTML=`
+      <div class="kv"><span class="k">订单号</span><span class="v">${esc(o.no)}</span></div>
+      <div class="kv"><span class="k">机器</span><span class="v">${esc(m.name)}<em>${esc(o.t)}</em></span></div>
+      <div class="ptable">
+        <div class="ph"><span class="c1">商品</span><span class="c3">单价</span><span class="c4">数量</span><span class="c5">小计</span>${pcHead('商品ID')}</div>
+        ${o.items.map(it=>`<div class="pr"><div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span><span class="c3">${money(it.price)}</span><span class="c4">${it.qty}</span><span class="c5">${money(it.price*it.qty)}</span>${pcCol('ID '+esc((prodByName(it.n)||{}).id||'6901234567892'))}</div>
+          ${pcLn(`ID ${esc((prodByName(it.n)||{}).id||'6901234567892')}`)}</div>`).join('')}
+        <div class="sumline"><span>合计 ${qty} 件</span><span>${money(tot)}</span></div>
+      </div>
+      <div class="pdiff"><div class="r"><span>支付方式</span><span>${esc(o.pay)}</span></div><div class="r"><span>订单状态</span><span>${esc(o.st)}</span></div></div>
+      ${pick?'<div class="op-btns"><button class="btn ghost back2list">‹ 返回订单列表</button></div>':''}
+      <div class="exec-note">用于核对消费者拿取的商品与扣款是否一致</div>`;
+    const back=body.querySelector('.back2list');
+    if(back)back.onclick=renderList;
+    trace('api',`意图 <b>query</b> → GET <b>/ai/tools/order_detail</b>?no=${o.no} · 只读工具，返回商品名称 / 商品ID / 单价 / 数量 / 小计 + 合计行。⚠ 数据源取 micro-service-analysis 侧（与销售事实表同源）；订单是商品快照，**无货道 / 层维度**，PC 端也不补该列。`);
+  }
+  function renderList(){
+    st.textContent='请选择订单';
+    body.innerHTML=`
+      <div class="kv"><span class="k">时间</span><span class="v">最近 ${ORDERS.recent.length} 单<em>近 7 天 · 按时间倒序</em></span></div>
+      <div class="ptable">
+        <div class="ph"><span class="c1">订单号</span><span class="c3">机器</span><span class="c4">商品</span><span class="c5">金额</span>${pcHead('支付',64)}${pcHead('状态',56)}</div>
+        ${ORDERS.recent.map(o=>`<div class="pr opick" data-no="${o.no}"><div class="l1"><span class="c1"><span class="nm">${esc(o.no)}</span></span><span class="c3">${esc(o.m)}</span><span class="c4">${esc(o.p)}</span><span class="c5">${money(o.amt)}</span>${pcCol(esc(o.pay),64)}${pcCol(esc(o.st||'已支付'),56)}</div>
+          ${pcLn(`${o.t} · 点击查看该单商品明细`)}</div>`).join('')}
+      </div>
+      <div class="pdiff"><div class="r"><span>怎么用</span><span>点任意一单 → 展开该单商品明细；也可直接发订单号</span></div></div>
+      <div class="exec-note">没有要查的单？把订单号发我即可（如「查订单 ${ORDERS.recent[0].no} 的明细」）</div>`;
+    body.querySelectorAll('.opick').forEach(r=>{r.onclick=()=>renderDetail(orderDetailOf(r.getAttribute('data-no')))});
+    trace('api',`意图 <b>query</b> → 未点名订单 → <b>先反问并给最近订单选择列表</b>（2026-10-16 用户反馈：先问查哪单）GET <b>/ai/tools/order_recent</b>?days=7，点单后才调 <b>order_detail</b>。`);
+  }
+  if(pick==='pick')renderList();
+  else renderDetail(orderDetailOf(pick)||ORDER_DETAIL);
   return id;
 }
 /* ---------- R3：按销售额反查机器（阈值筛选）---------- */
@@ -3217,8 +3256,13 @@ function v11Intent(q){
   }
   /* 补货记录（B1） */
   if(/补货记录|长时间没补|多久没补|没补货|未补货|多久补一次/.test(q))return cardReplenishRecord();
-  /* 订单商品明细（B3） */
-  if(/明细|多少件|拿了什么|拿了哪些|拿了多少/.test(q)&&/订单|单|消费者|拿了/.test(q))return cardOrderDetail();
+  /* 订单商品明细（B3）——两段式（2026-10-16 用户反馈）：泛问先给最近订单选择列表，
+     点名订单号 / 说「此单 / 这笔」才直接出明细 */
+  if(/明细|多少件|拿了什么|拿了哪些|拿了多少/.test(q)&&/订单|单|消费者|拿了/.test(q)){
+    const mno=q.match(/\d{8,}/);
+    if(/此单|这笔|这一单/.test(q)||mno)return cardOrderDetail(mno?mno[0]:null);
+    return cardOrderDetail('pick');
+  }
   /* 按销售额反查机器（C3） */
   const th=pickThreshold(q);
   if(th!=null&&/机器|点位|设备/.test(q))return cardMachineSales(th);
