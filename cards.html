@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大黄鹅 AI 助手 · 1.1 期卡片设计稿（2026-10-15）</title>
+<style>
+:root{
+  --brand:#2B7DF6; --brand-grad:linear-gradient(135deg,#2B7DF6,#4BA2FF);
+  --bg:#f5f6f8; --text:#1f2937; --sub:#8c8c8c; --line:#f0f0f0;
+  --ok:#52c41a; --warn:#fa8c16; --danger:#ff4d4f; --offline:#9aa0a8;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:22px;background:#eceef1;color:var(--text);
+  font:13.5px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-size:20px;margin:0 0 6px}
+.meta{color:#6b7280;font-size:12.5px;margin-bottom:14px}
+.panel{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.panel h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.panel h2 .n{background:var(--brand);color:#fff;font-size:11px;border-radius:8px;padding:2px 8px;font-weight:700}
+table.idx{width:100%;border-collapse:collapse;font-size:12.5px}
+table.idx th,table.idx td{border:1px solid #eef1f5;padding:6px 9px;text-align:left;vertical-align:top}
+table.idx th{background:#fafbfd;font-weight:700}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:8px;padding:1px 7px;margin-right:5px}
+.tag.w{background:#fff7e6;color:#d48806}
+.tag.r{background:#f0f7ff;color:var(--brand)}
+.grid{display:flex;flex-wrap:wrap;gap:18px}
+.unit{width:392px;background:#fff;border-radius:14px;padding:13px 14px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.cap{font-size:12.5px;font-weight:700;margin-bottom:4px}
+.cap .cd{background:#eef2f7;color:#5b6472;border-radius:7px;padding:1px 6px;font-size:11px;margin-right:6px}
+.q{display:block;font-weight:400;color:#8c8c8c;font-size:11.5px;margin:2px 0 8px}
+.rule{font-size:11.5px;color:#5b6472;background:#f8fafd;border-radius:8px;padding:7px 9px;margin-top:9px;line-height:1.65}
+.rule b{color:#1f2937}
+
+/* ---------- 卡片本体（沿用原型 DNA） ---------- */
+.cardbox{width:300px;background:#fff;border:1px solid #eef1f5;border-radius:14px;padding:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);margin:0 auto}
+.cb-head{font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:8px}
+.cb-head.q{color:var(--brand)} .cb-head.c{color:var(--warn)} .cb-head.s{color:var(--ok)} .cb-head.f{color:var(--danger)}
+.cb-head .ttl{white-space:nowrap}
+.cb-head .st{margin-left:auto;flex-shrink:0;font-size:10px;font-weight:700;border-radius:9px;padding:2px 8px;background:#f2f3f5;color:#8c8c8c}
+.cb-head.c .st{background:#fff7e6;color:#d48806}
+.cb-head.s .st{background:#eaf7f0;color:var(--ok)}
+.cb-head.f .st{background:#fdecea;color:var(--danger)}
+.kv{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px dashed #f0f2f5}
+.kv .k{color:var(--sub)} .kv .v{font-weight:600;text-align:right}
+.kv .v em{font-style:normal;color:var(--sub);font-weight:400}
+.ptable{border:1px solid #eef1f5;border-radius:9px;overflow:hidden;margin-top:8px}
+.ptable .ph,.ptable .pr{padding:6px 8px}
+.ptable .ph{display:flex;align-items:center;gap:5px;background:#fafbfd;color:var(--sub);font-size:10.5px;font-weight:700}
+.ptable .pr{border-top:1px solid #f4f6f8}
+.ptable .pr.pre{background:#f5f9ff}
+.ptable .pr.bad{background:#fdf1f0}
+.ptable .l1{display:flex;align-items:center;gap:5px}
+.ptable .c1{flex:1;min-width:0}
+.ptable .c1 .nm{font-size:12px;font-weight:600;color:var(--text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptable .c3{width:46px;flex-shrink:0;text-align:right;font-size:11.5px;color:var(--sub)}
+.ptable .c4{width:52px;flex-shrink:0;text-align:right;font-size:11.5px;color:var(--sub)}
+.ptable .c5{width:60px;flex-shrink:0;text-align:right}
+.ptable .c5 input{width:100%;box-sizing:border-box;border:1px solid #dfe4ea;border-radius:6px;padding:3px 4px;
+  font-size:11.5px;text-align:right;font-family:inherit}
+.ptable .c5 input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 2px rgba(43,125,246,.12)}
+.ptable .c5 input.chg{border-color:var(--brand);background:#f5f9ff;color:var(--brand);font-weight:700}
+.ptable .c5 input.bad{border-color:var(--danger);background:#fdf1f0;color:var(--danger)}
+.ptable .c5 .ck{display:inline-flex;align-items:center;justify-content:flex-end;gap:3px;font-size:11px;color:var(--sub)}
+.ptable .c5 .ck{color:var(--brand);font-size:12px}
+.ptable .c5 .ck.half{color:var(--brand)}
+.ptable .c5 .ck.off{color:#ccd1d9}
+.ptable .c5.stx{font-size:11.5px;font-weight:700}
+.ptable .c5.stx.bad2{color:var(--danger)}
+.ptable .c5.stx.ok2{color:var(--ok)}
+.ptable .c5s{width:52px;flex-shrink:0;text-align:right}
+.ptable .c5s input{width:100%;box-sizing:border-box;border:1px solid #dfe4ea;border-radius:6px;padding:3px 4px;
+  font-size:11.5px;text-align:right;font-family:inherit}
+.ptable .c5s input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 2px rgba(43,125,246,.12)}
+.ptable .c5s input.chg{border-color:var(--brand);background:#f5f9ff;color:var(--brand);font-weight:700}
+.ptable .c5s .txt{font-size:11.5px;color:var(--sub)}
+.csel{width:18px;flex-shrink:0}
+.ptable .csel .ck{color:var(--brand);font-size:12px;line-height:1}
+.ptable .csel .ck.half{color:var(--brand)}
+.ptable .csel .ck.off{color:#ccd1d9}
+.selbar{display:flex;align-items:center;gap:6px;padding:6px 9px;margin-top:8px;
+  background:#f5f9ff;border:1px solid #dbe7fa;border-radius:9px;font-size:11.5px;font-weight:700;color:#3f4a5a}
+.selbar .ck{color:var(--brand);font-size:12px}
+.selbar .ck.half{color:var(--brand)}
+.selbar .ck.off{color:#ccd1d9}
+.selbar .cnt{margin-left:auto;color:var(--sub);font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.chips span{font-size:11px;background:#f2f5f9;border:1px solid #e3e8ef;border-radius:8px;padding:3px 7px;color:#3f4a5a}
+.chips span b{color:#b4bac4;font-weight:400;margin-left:3px}
+.seg span.off{background:#f5f6f8;color:#b4bac4;border-color:#eceef1}
+.hint{font-size:10.5px;color:#aab0b8;margin-top:5px;display:flex;align-items:center;gap:4px}
+.altseg{margin-top:9px;border:1px dashed #e3e8ef;border-radius:9px;padding:7px 9px;background:#fcfdff}
+.altseg .t{font-size:10.5px;color:#8c8c8c;margin-bottom:2px}
+.altseg .seg{margin-top:4px}
+.ptable .ln{font-size:9.5px;color:#b4bac4;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.ptable .ln .reason{color:var(--danger);font-family:inherit}
+.ptable .ln .slot{display:inline-flex;align-items:center;gap:2px;color:var(--brand);font-weight:700;
+  font-family:inherit;font-size:10px;background:#eaf3ff;border:1px solid #bcd9ff;border-radius:7px;padding:0 5px;margin-right:3px}
+.addrow{margin-top:6px;font-size:11.5px;color:var(--brand);cursor:pointer}
+.pdiff{margin-top:8px;background:#f8fafd;border-radius:8px;padding:7px 9px;font-size:11.5px;line-height:1.7;color:#5b6472}
+.pdiff .hd{font-weight:700;color:var(--text)}
+.pdiff .r{display:flex;justify-content:space-between;gap:8px}
+.pdiff .r b{color:var(--brand)}
+.pdiff.non{color:#a8aeb8}
+.pdiff.err{background:#fdf1f0;color:#a8071a}
+/* —— 命中机器明细：卡内展开 / 收起（2026-10-16 新增，批量改价「命中 N 台」点开看机器）——
+   机器多时只给台数会让人不敢点确认，展开后能逐台核对；超过 ~186px 卡内滚动，不把卡片撑长 */
+.mx{margin-top:8px;border:1px solid #eef0f4;border-radius:9px;overflow:hidden}
+.mx-hd{display:flex;align-items:center;gap:6px;padding:7px 9px;background:#fafbfd;
+  font-size:11.5px;color:var(--text);cursor:pointer;border-bottom:1px solid transparent}
+.mx.open .mx-hd{border-bottom-color:#f2f4f7}
+.mx-hd .fg{margin-left:auto;color:var(--brand);font-size:11px;white-space:nowrap}
+.mx-bd{display:none;max-height:186px;overflow-y:auto;background:#fff}
+.mx.open .mx-bd{display:block}
+.mx-gt{padding:5px 9px;font-size:10.5px;color:#8c8c8c;background:#fcfcfd;
+  position:sticky;top:0;z-index:1;border-bottom:1px solid #f6f7f9}
+.mx-r{display:flex;align-items:center;gap:8px;padding:6px 9px;font-size:11.5px;color:#3f4a5a}
+.mx-r+.mx-r{border-top:1px dashed #f2f4f7}
+.mx-r .mxc{width:72px;color:#a8aeb8;font-variant-numeric:tabular-nums}
+.mx-r .mxn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mx-r .mxp{width:52px;text-align:right;font-variant-numeric:tabular-nums}
+.mx-go{color:var(--brand);cursor:pointer;white-space:nowrap}
+.op-btns{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;border:none;border-radius:9px;padding:8px 0;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer}
+.btn.ghost{background:#f2f3f5;color:#666}
+.btn.main{background:var(--brand);color:#fff}
+.btn.main.danger{background:var(--danger)}
+.btn.main[disabled]{background:#d9dde3;color:#fff;cursor:not-allowed}
+.exec-note{font-size:10.5px;color:#aab0b8;margin-top:7px;display:flex;align-items:center;gap:5px}
+.res{background:#f6ffed;border:1px solid #b7eb8f;border-radius:9px;padding:7px 9px;font-size:11.5px;color:#237804;margin-top:8px}
+.fail{background:#fdf1f0;border:1px solid #ffccc7;border-radius:9px;padding:7px 9px;font-size:11.5px;color:#a8071a;margin-top:8px}
+.seg{display:flex;gap:5px;margin-top:8px}
+.seg span{font-size:11px;border:1px solid #dfe4ea;border-radius:8px;padding:3px 8px;color:#5b6472}
+.seg span.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
+.sumline{display:flex;justify-content:space-between;font-size:12px;font-weight:700;padding:6px 8px;background:#fafbfd;border-top:1px solid #f0f2f5}
+/* ---------- 半屏添加弹层（对齐现有系统「添加商品 / 选择机器」页） ---------- */
+.masknote{font-size:10.5px;color:#aab0b8;margin-bottom:6px}
+.sheet{width:300px;background:#fff;border:1px solid #eef1f5;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.14);margin:0 auto;overflow:hidden}
+.sh-hd{display:flex;align-items:center;justify-content:center;position:relative;font-size:12.5px;font-weight:700;padding:10px 12px;border-bottom:1px solid #f0f2f5}
+.sh-hd .x{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#8c8c8c;font-size:12px;cursor:pointer}
+.sh-search{display:flex;align-items:center;gap:6px;margin:9px 10px 7px}
+.sh-input{flex:1;display:flex;align-items:center;gap:5px;background:#f2f3f5;border-radius:9px;padding:6px 9px;font-size:11px;color:#9aa0a8;min-width:0}
+.sh-btn{background:var(--brand);color:#fff;font-size:11px;border-radius:9px;padding:6px 11px;font-weight:700;flex-shrink:0}
+.sh-scan{flex-shrink:0;text-align:center;font-size:9px;color:#8c8c8c;line-height:1.2}
+.sh-scan i{display:block;font-size:13px;font-style:normal}
+.sh-sel{display:inline-flex;align-items:center;gap:5px;border:1px solid #dfe4ea;border-radius:9px;padding:4px 10px;font-size:11px;color:#5b6472;margin:0 10px 8px}
+.grp{font-size:10.5px;color:#8c8c8c;padding:7px 10px;background:#fafbfd;border-top:1px solid #f0f2f5;border-bottom:1px solid #f4f6f8}
+/* 添加商品：机型过滤说明行（2026-10-16 裁决「批量按机型交集出商品」后新增）*/
+.fithint{padding:6px 10px;font-size:10.5px;color:#a8aeb8;line-height:1.6;background:#fcfdff;border-bottom:1px solid #f4f6f8}
+.picklist{border-top:1px solid #f0f2f5}
+.pickrow{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-bottom:1px solid #f4f6f8}
+.pickrow .th{width:38px;height:38px;flex-shrink:0;border-radius:8px;background:#f2f3f5;display:flex;align-items:center;justify-content:center;font-size:17px;border:1px solid #eef1f5}
+.pickrow .c1{flex:1;min-width:0}
+.pickrow .nm{font-size:12px;font-weight:600;color:var(--text);display:block;line-height:1.35}
+.pickrow .sub{font-size:10px;color:#9aa0a8;display:block;margin-top:1px}
+.pickrow .meta{font-size:10px;color:#9aa0a8;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pickrow .prc{color:#FA8C16;font-weight:700;font-size:12px;margin-right:5px}
+.pickrow .addr{font-size:10.5px;color:#5b6472;display:block;margin-top:2px;line-height:1.4}
+.pickrow .rd{width:15px;height:15px;flex-shrink:0;border-radius:50%;border:1.5px solid #d9dde3;margin-top:11px;
+  display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;line-height:1}
+.pickrow.on{background:#f5f9ff}
+.pickrow.on .rd{background:var(--brand);border-color:var(--brand)}
+.pickrow.dim{opacity:.45}
+.sh-foot{display:flex;align-items:center;gap:9px;padding:9px 10px;background:#fff;border-top:1px solid #f0f2f5}
+.bag{position:relative;font-size:17px;flex-shrink:0;line-height:1}
+.bag b{position:absolute;top:-3px;right:-7px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:0 4px}
+.sh-foot .btn{flex:1;width:auto;padding:8px 0;margin:0}
+.sh-foot .btn[disabled]{background:#dbe6fb;color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>大黄鹅 AI 助手 · 1.1 期卡片设计稿</h1>
+  <div class="meta">
+    2026-10-16 ｜ <b>16 张卡片 + 2 个添加弹层</b>：写能力确认卡 8 张（W1 / W1-b / W2-a·b·c / W3 / W4 / W5）+ 结果卡 2 张（W6 结果 / W6-b 成功明细）+ 读能力结果卡 6 张（R1–R6）+ 半屏弹层 P1 添加商品 / P2 添加机器｜<br>
+    <b>2026-10-16 修订</b>：按产品裁决 —— ① W5-a/W5-b <b>合并为 W5</b>（不要算法建议量，补货量＝最大库存−现存）；② W4 命中台数<b>卡内可展开到机器层级</b>；③ 批量上架商品库按机型<b>交集</b>；④ 离线机器也可上架（后端判定）；⑤ R5 <b>保留「铺货 N 台」</b>｜
+    样式沿用引导式原型 <code>mp-ai-assistant-guided.html</code> 的 <code>.cardbox / .ptable / .op-btns</code> 体系 ｜
+    统一字段口径：<b>商品名称 · 价格 · 库存</b> 为基础项，<b>商品ID</b> 按场景取舍（上架 / 下架卡不显示，改价 / 补货 / 订单明细保留），<b>状态一律用文字</b>不用符号
+  </div>
+
+  <div class="panel">
+    <h2><span class="n">索引</span>需要新增 / 改造的卡片清单</h2>
+    <table class="idx">
+      <tr><th style="width:56px">编号</th><th style="width:168px">卡片</th><th style="width:64px">类型</th><th style="width:96px">对应能力</th><th>触发问法 / 触发时机</th></tr>
+      <tr><td>W1</td><td>上架商品 · 单台</td><td>写·确认</td><td>A1</td><td>「帮我在南油文化广场上架康师傅碱性水」</td></tr>
+      <tr><td>W1-b</td><td>上架商品 · 售货机（逐个指定货道）</td><td>写·确认</td><td>A1</td><td>「在南油文化广场 A3 货道上架康师傅碱性水」</td></tr>
+      <tr><td>W2-a</td><td>批量上架 · 全部机器</td><td>写·确认</td><td>A1</td><td>「所有机器都上架百事可乐 500ml」</td></tr>
+      <tr><td>W2-b</td><td>批量上架 · 按线路</td><td>写·确认</td><td>A1</td><td>「南山这条线的机器都上架百事可乐」</td></tr>
+      <tr><td>W2-c</td><td>批量上架 · 自选机器</td><td>写·确认</td><td>A1</td><td>「给这几台机器都上架百事可乐」</td></tr>
+      <tr><td>W3</td><td>下架商品</td><td>写·确认</td><td>C8</td><td>「帮我批量下架可口可乐」</td></tr>
+      <tr><td>W4</td><td>批量改商品价格（跨机器）</td><td>写·确认</td><td>C2</td><td>「把所有点位的雀巢咖啡调整到 5.5」</td></tr>
+      <tr><td>W5</td><td>生成补货单（补货量＝最大库存 − 现存）</td><td>写·确认</td><td>B2</td><td>「给这 3 台机器生成补货单」</td></tr>
+      <tr><td>W6</td><td>批量执行结果（部分失败）</td><td>结果反馈</td><td>A1/C8/C2</td><td>多台循环执行后，部分机器被校验拦截</td></tr>
+      <tr><td>W6-b</td><td>成功明细展开（逐台列出）</td><td>结果反馈</td><td>A1/C8/C2</td><td>W6 内点「查看成功明细」</td></tr>
+      <tr><td>R1</td><td>补货记录查询</td><td>读·结果</td><td>B1</td><td>「最近一个月哪些机器补过货 / 有没有长时间没补货的」</td></tr>
+      <tr><td>R2</td><td>订单商品明细</td><td>读·结果</td><td>B3</td><td>「此单消费者拿去了多少件商品，同步明细」</td></tr>
+      <tr><td>R3</td><td>按销售额反查机器</td><td>读·结果</td><td>C3</td><td>「上个月做低于 700 块的机器列出来」</td></tr>
+      <tr><td>R4</td><td>销售额支付方式拆分</td><td>读·结果</td><td>C4</td><td>「现金多少、打卡多少」</td></tr>
+      <tr><td>R5</td><td>商品维度销售额</td><td>读·结果</td><td>C7</td><td>「辣媳妇山椒笋尖近三个月销量 / 所有在线机器的」</td></tr>
+      <tr><td>R6</td><td>离线原因</td><td>读·结果</td><td>C9</td><td>「什么原因离线」</td></tr>
+      <tr><td>P1</td><td>添加商品弹层（商品库选择）</td><td>半屏弹层</td><td>W1 / W2</td><td>卡内点「＋ 添加商品」</td></tr>
+      <tr><td>P2</td><td>添加机器弹层（多选）</td><td>半屏弹层</td><td>W2-c / W3</td><td>卡内点「＋ 添加机器」</td></tr>
+    </table>
+  </div>
+
+  <!-- ================= 写能力确认卡 ================= -->
+  <div class="panel">
+    <h2><span class="n">一</span>写能力确认卡（两段式：预览 → 确认执行）</h2>
+    <div class="grid">
+
+      <!-- W1 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">W1</span><span class="tag w">写</span>上架商品 · 智能柜（按层）<span class="cd" style="margin-left:4px">A1</span></div>
+        <span class="q">「帮我在南油文化广场上架康师傅碱性水和慕蓝卡苏打水柠檬味」</span>
+        <div class="cardbox">
+          <div class="cb-head c"><span class="ttl">➕ 上架商品</span><span class="st">待确认</span></div>
+          <div class="kv"><span class="k">机器</span><span class="v">南油文化广场<em>（51861091）</em></span></div>
+          <div class="kv"><span class="k">机型</span><span class="v">智能柜 · 双门柜<em>无货道，按层</em></span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">康师傅碱性水 550ml</span></span><span class="c5"><input value="3.00"></span><span class="c5s"><input value="24" class="chg"></span></div><div class="ln"><span class="slot">第 2 层 ▾</span>价格默认取商品库价，可直接改</div></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">慕蓝卡苏打水 柠檬味</span></span><span class="c5"><input value="4.50" class="chg"></span><span class="c5s"><input value="18" class="chg"></span></div><div class="ln"><span class="slot">第 3 层 ▾</span>价格已改：¥4.00 → ¥4.50</div></div>
+          </div>
+          <div class="addrow">＋ 添加商品</div>
+          <div class="pdiff"><div class="hd">将上架 2 项</div>
+            <div class="r"><span>康师傅碱性水</span><span>¥3.00 · <b>24</b> 件</span></div>
+            <div class="r"><span>慕蓝卡苏打水</span><span>¥4.50 · <b>18</b> 件</span></div>
+            <div class="r"><span>价格改动</span><span><b>1 项</b>（慕蓝卡 ¥4.00 → ¥4.50）</span></div>
+          </div>
+          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（2 项）</button></div>
+          <div class="exec-note">🔒 执行将记录操作日志 · 失败的商品会逐项说明原因</div>
+        </div>
+        <div class="rule">字段：<b>商品名称 / 价格（元，可改） / 补货量</b>。价格默认取商品库自身价，改动行蓝框高亮，diff 区列「价格改动 N 项（改前 → 改后）」；不显示库存与商品ID——商品尚未上架，两项均无意义。「＋ 添加商品」呼出 P1 弹层。<br><b>上架位置按机型分两套</b>：智能柜＝<b>层</b>（无货道概念，点层号可改），售货机＝<b>货道</b>（见 W1-b）。</div>
+      </div>
+
+      <!-- W1-b -->
+      <div class="unit">
+        <div class="cap"><span class="cd">W1-b</span><span class="tag w">写</span>上架商品 · 售货机（选货道）<span class="cd" style="margin-left:4px">A1</span></div>
+        <span class="q">「帮我在南油文化广场上架康师傅碱性水和慕蓝卡苏打水柠檬味」</span>
+        <div class="cardbox">
+          <div class="cb-head c"><span class="ttl">➕ 上架商品</span><span class="st">待确认</span></div>
+          <div class="kv"><span class="k">机器</span><span class="v">南油文化广场<em>（51861091）</em></span></div>
+          <div class="kv"><span class="k">机型</span><span class="v">售货机 · 弹簧货道<em>需逐个指定货道</em></span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">康师傅碱性水 550ml</span></span><span class="c5"><input value="3.00"></span><span class="c5s"><input value="24" class="chg"></span></div><div class="ln"><span class="slot">A3 货道 ▾</span>最大 30 · 现存 0</div></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">慕蓝卡苏打水 柠檬味</span></span><span class="c5"><input value="4.50" class="chg"></span><span class="c5s"><input value="18" class="chg"></span></div><div class="ln"><span class="slot">B2 货道 ▾</span>最大 30 · 现存 12</div></div>
+          </div>
+          <div class="pdiff"><div class="hd">将上架 2 项</div>
+            <div class="r"><span>康师傅碱性水</span><span>A3 货道 · ¥3.00 · <b>24</b> 件</span></div>
+            <div class="r"><span>慕蓝卡苏打水</span><span>B2 货道 · ¥4.50 · <b>18</b> 件</span></div>
+          </div>
+          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（2 项）</button></div>
+          <div class="exec-note">🔒 执行将记录操作日志 · 失败的商品会逐项说明原因</div>
+        </div>
+        <div class="rule"><b>售货机必须逐个确认货道</b>：每个商品一行给出货道 chip（默认分配空闲货道），点 chip 弹出货道列表改选，同时显示该货道的最大库存与现存。<br>副行信息＝<b>最大库存 · 现存</b>（最大库存为后台配置）；<b>可售库存不可大于最大库存</b>，超出时标红拦截。<br>智能柜无货道概念，同一张卡只给「层」，见 W1。</div>
+      </div>
+
+      <!-- W2-a -->
+      <div class="unit">
+        <div class="cap"><span class="cd">W2-a</span><span class="tag w">写</span>批量上架 · 全部机器<span class="cd" style="margin-left:4px">A1</span></div>
+        <span class="q">「所有机器都上架百事可乐 500ml」</span>
+        <div class="cardbox">
+          <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
+          <div class="seg"><span class="on">全部机器 12</span><span>按线路</span><span>自选</span></div>
+          <div class="kv"><span class="k">范围</span><span class="v">全部 12 台</span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="30" class="chg"></span></div><div class="ln">对 12 台逐台执行 · 货道自动分配</div></div>
+          </div>
+          <div class="addrow">＋ 添加商品</div>
+          <div class="pdiff"><div class="hd">将上架 12 台 × 1 项 = 12 条</div>
+          </div>
+          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（12 台）</button></div>
+          <div class="exec-note">🔒 部分机器失败会逐台列出原因，其余不受影响</div>
+        </div>
+        <div class="rule">三张批量上架卡<b>共用同一套商品行</b>、仅机器选择区不同，顶部 <code>.seg</code> 切换（全部机器为默认）。与 W1 一致：不显示库存与商品ID、价格可改；<b>范围只写「全部 N 台」</b>，不区分在线 / 离线台数，成败由后端校验透传（<b>已确认 4</b>：离线机器也可上架，由后端判定）。<br><b>批量不逐台指定货道 / 层</b>（各机货道不同、无法在一张卡里逐个指定），按各机自动分配；要精确指定货道用单台卡 W1 / W1-b。</div>
+      </div>
+
+      <!-- W2-b -->
+      <div class="unit">
+        <div class="cap"><span class="cd">W2-b</span><span class="tag w">写</span>批量上架 · 按线路<span class="cd" style="margin-left:4px">A1</span></div>
+        <span class="q">「给南油线路所有机器上架百事可乐」</span>
+        <div class="cardbox">
+          <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
+          <div class="seg"><span>全部机器 12</span><span class="on">按线路</span><span>自选</span></div>
+          <div class="kv"><span class="k">线路</span><span class="v">南油线路 ▾<em>5 台</em></span></div>
+          <div class="chips"><span>欢乐颂 5 号机</span><span>南油文化广场</span><span>兰均三期</span><span>＋2</span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="30" class="chg"></span></div><div class="ln">对该线路 5 台逐台执行</div></div>
+          </div>
+          <div class="addrow">＋ 添加商品</div>
+          <div class="pdiff"><div class="hd">将上架 5 台 × 1 项 = 5 条</div>
+            <div class="r"><span>线路</span><span>南油线路 · 可切换其他线路</span></div>
+          </div>
+          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（5 台）</button></div>
+        </div>
+        <div class="rule"><b>按线路</b>：kv 行为下拉（线路 + 台数），下方 chips 预览该线路机器、可切换线路。</div>
+      </div>
+
+      <!-- W2-c -->
+      <div class="unit">
+        <div class="cap"><span class="cd">W2-c</span><span class="tag w">写</span>批量上架 · 自选<span class="cd" style="margin-left:4px">A1</span></div>
+        <span class="q">「给欢乐颂 5 号机、兰均三期、南油文化广场上架百事可乐」</span>
+        <div class="cardbox">
+          <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
+          <div class="seg"><span>全部机器 12</span><span>按线路</span><span class="on">自选 3</span></div>
+          <div class="kv"><span class="k">已选机器</span><span class="v">3 台</span></div>
+          <div class="chips"><span>欢乐颂 5 号机 <b>✕</b></span><span>兰均三期 <b>✕</b></span><span>南油文化广场 <b>✕</b></span><span>＋ 添加机器</span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="30" class="chg"></span></div><div class="ln">对自选的 3 台逐台执行</div></div>
+          </div>
+          <div class="addrow">＋ 添加商品</div>
+          <div class="pdiff"><div class="hd">将上架 3 台 × 1 项 = 3 条</div>
+            <div class="r"><span>欢乐颂 5 号机</span><span>51890784</span></div>
+            <div class="r"><span>兰均三期</span><span>51839139</span></div>
+            <div class="r"><span>南油文化广场</span><span>51861091</span></div>
+          </div>
+          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（3 台）</button></div>
+          <div class="exec-note">🔒 部分失败会逐台列出原因，成功的不受影响</div>
+        </div>
+        <div class="rule"><b>自选</b>：chips 逐个列出已选机器（带 ✕ 可删）+「＋ 添加机器」；diff 区列出全部机器编号，确认前防选错。「＋ 添加机器」呼出 P2 弹层。</div>
+      </div>
+
+      <!-- W3 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">W3</span><span class="tag w">写</span>下架商品<span class="cd" style="margin-left:4px">C8</span></div>
+        <span class="q">「可以帮我批量下架一些机器可口可乐商品么？」</span>
+        <div class="cardbox">
+          <div class="cb-head c"><span class="ttl">➖ 下架商品</span><span class="st">待确认</span></div>
+          <div class="kv"><span class="k">范围</span><span class="v">4 台机器<em>已选</em></span></div>
+          <div class="kv"><span class="k">商品</span><span class="v">可口可乐 330ml</span></div>
+          <div class="kv"><span class="k">机型</span><span class="v">智能柜 · 双门柜<em>下架＝移除</em></span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">机器 / 商品</span><span class="c3">价格</span><span class="c4">库存</span><span class="c5"><span class="ck half">▣</span></span></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">欢乐颂 5 号机</span></span><span class="c3">¥3.00</span><span class="c4">12</span><span class="c5"><span class="ck">☑</span></span></div><div class="ln">下架后该商品库存清空</div></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">兰均三期</span></span><span class="c3">¥3.00</span><span class="c4">8</span><span class="c5"><span class="ck">☑</span></span></div><div class="ln">—</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">南油文化广场</span></span><span class="c3">¥3.00</span><span class="c4">20</span><span class="c5"><span class="ck off">☐</span></span></div><div class="ln">未勾选，不提交</div></div>
+          </div>
+          <div class="pdiff"><div class="hd">将下架 2 台</div>
+            <div class="r"><span>涉及库存</span><span>12 + 8 = <b>20 件</b>清空</span></div>
+          </div>
+          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main danger demo">确认下架（2 台）</button></div>
+          <div class="exec-note">🔒 下架后该商品在机器上不再售卖，库存清零</div>
+        </div>
+        <div class="altseg">
+          <div class="t">售货机态：下架＝把该货道换成默认商品（不是清空）</div>
+          <div class="hint">A3 货道：可口可乐 330ml → 默认商品，该货道继续售卖</div>
+        </div>
+        <div class="rule">字段：<b>机器 / 商品名称 / 价格 / 库存 / 勾选</b>，不显示商品ID（与 W1 一致）。<b>库存列保留</b>——要告诉用户将清掉多少件，与上架卡「没有库存」相反。<br>默认全选、可逐台取消，未勾选不提交；<b>列头「全选」一键全选 / 再点全不选</b>，部分选中显示半选态。下架按钮用橙色 <code>.btn.main.danger</code>，与改价区分。<br><b>下架处理按机型分两套</b>：智能柜＝移除该商品、<b>库存清零</b>；售货机＝把该货道<b>换成默认商品</b>（不是清空）。</div>
+      </div>
+
+      <!-- W4 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">W4</span><span class="tag w">写</span>批量改商品价格（跨机器）<span class="cd" style="margin-left:4px">C2</span></div>
+        <span class="q">「把所有点位的雀巢咖啡调整到 5.5」</span>
+        <div class="cardbox">
+          <div class="cb-head c"><span class="ttl">💰 批量改商品价格</span><span class="st">待确认</span></div>
+          <div class="kv"><span class="k">范围</span><span class="v">全部 12 台机器</span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">商品</span><span class="c3">现价</span><span class="c4">库存</span><span class="c5">目标价</span></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">雀巢咖啡 268ml</span></span><span class="c3">¥5.00</span><span class="c4">36</span><span class="c5"><input value="5.50" class="chg"></span></div><div class="ln">ID 6912345678901 · 命中 9 台机器</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">雀巢咖啡 180ml</span></span><span class="c3">¥4.00</span><span class="c4">15</span><span class="c5"><input placeholder="—"></span></div><div class="ln">ID 6912345678902 · 命中 4 台机器</div></div>
+          </div>
+          <div class="mx open">
+            <div class="mx-hd">命中机器明细 · 共 13 台次<span class="fg">收起 ▴</span></div>
+            <div class="mx-bd">
+              <div class="mx-g"><div class="mx-gt">雀巢咖啡 268ml · 命中 9 台</div>
+                <div class="mx-r"><span class="mxc">51890784</span><span class="mxn">欢乐颂 5 号机</span><span class="mxp">¥5.00</span></div>
+                <div class="mx-r"><span class="mxc">51860045</span><span class="mxn">深圳湾体育中心</span><span class="mxp">¥5.00</span></div>
+                <div class="mx-r"><span class="mxc">51860056</span><span class="mxn">海岸城购物中心</span><span class="mxp">¥5.00</span></div>
+                <div class="mx-r"><span class="mxc">51861091</span><span class="mxn">南油文化广场</span><span class="mxp">¥5.00</span></div>
+                <div class="mx-r"><span class="mxc">51862310</span><span class="mxn">兰均三期</span><span class="mxp">¥5.00</span></div>
+                <div class="mx-r"><span class="mxc">51860012</span><span class="mxn">科技园 A 栋</span><span class="mxp">¥5.00</span></div>
+                <div class="mx-r"><span class="mxc">51860022</span><span class="mxn">梅林一村</span><span class="mxp">¥5.00</span></div>
+                <div class="mx-r"><span class="mxc">51860078</span><span class="mxn">福田口岸</span><span class="mxp">¥5.00</span></div>
+                <div class="mx-r"><span class="mxc">51860067</span><span class="mxn">大冲商务花园</span><span class="mxp">¥5.00</span></div>
+              </div>
+              <div class="mx-g"><div class="mx-gt">雀巢咖啡 180ml · 命中 4 台</div>
+                <div class="mx-r"><span class="mxc">51860019</span><span class="mxn">大黄鹅办公室的双门柜</span><span class="mxp">¥4.00</span></div>
+                <div class="mx-r"><span class="mxc">51860012</span><span class="mxn">科技园 A 栋</span><span class="mxp">¥4.00</span></div>
+                <div class="mx-r"><span class="mxc">51860078</span><span class="mxn">福田口岸</span><span class="mxp">¥4.00</span></div>
+                <div class="mx-r"><span class="mxc">51861091</span><span class="mxn">南油文化广场</span><span class="mxp">¥4.00</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="pdiff"><div class="hd">已改 1 项</div>
+            <div class="r"><span>雀巢咖啡 268ml</span><span>¥5.00 → <b>¥5.50</b></span></div>
+            <div class="r"><span>影响范围</span><span><b>9 台</b>机器</span></div>
+          </div>
+          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认执行（1 项）</button></div>
+          <div class="exec-note">🔒 执行将记录操作日志 · 改动对 9 台机器同时生效</div>
+        </div>
+        <div class="rule">卡片四字段：<b>商品名称 / 商品ID / 当前价 / 目标价</b>（ID 保留——改价须精确到具体商品），另带库存列与命中机器数。<br>与单机改价（<code>GoodsPriceEditorCard</code>）<b>并存不合并</b>（落定口径 4）。<br><b>2026-10-16 裁决 3</b>：命中台数不再只给一个数字 —— 卡内加 <code>.mx</code> <b>命中机器明细</b>，按商品分组逐台列出<b>编号 + 名称 + 现价</b>。默认<b>收起</b>（只占一行，不把卡片撑长），点标题或 PC 端「命中机器」列里的台数展开；机器多时展开区在卡内<b>滚动</b>（限高 186px），随时可再收起。此图为展开态。<br><b>PC 端</b>：同一份数据，「命中机器」列显示为「9 台 ▾」可点，点开即展开下方明细。</div>
+      </div>
+
+      <!-- W5（W5-a / W5-b 已按 2026-10-16 裁决合并）-->
+      <div class="unit">
+        <div class="cap"><span class="cd">W5</span><span class="tag w">写</span>生成补货单（补货量＝最大库存 − 现存）<span class="cd" style="margin-left:4px">B2</span></div>
+        <span class="q">「给这 3 台机器生成补货单」</span>
+        <div class="cardbox">
+          <div class="cb-head c"><span class="ttl">📋 生成补货单</span><span class="st">待确认</span></div>
+          <div class="kv"><span class="k">机器</span><span class="v">3 台<em>缺货率 ≥30%</em></span></div>
+          <div class="hint">补货量＝最大库存（后台「补满」配置）− 现存，可逐项改</div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">商品</span><span class="c3">缺货数</span><span class="c4">缺货箱数</span><span class="c5">补货量</span></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">可口可乐 330ml</span></span><span class="c3">22</span><span class="c4">1箱10件</span><span class="c5"><input value="22"></span></div><div class="ln">12 件/箱 · 最大 24 − 现存 2 = 22</div></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c3">30</span><span class="c4">2箱6件</span><span class="c5"><input value="32" class="chg"></span></div><div class="ln">12 件/箱 · 最大 30 − 现存 0 = 30 → 已改 32</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">康师傅冰红茶</span></span><span class="c3">18</span><span class="c4">1箱3件</span><span class="c5"><input value="18"></span></div><div class="ln">15 件/箱 · 最大 24 − 现存 6 = 18</div></div>
+          </div>
+          <div class="pdiff"><div class="hd">共 3 项 · 合计 72 件</div>
+            <div class="r"><span>生成结果</span><span><b>1 张</b>补货单 · 含 3 台机器子单</span></div>
+            <div class="r"><span>已手改</span><span><b>1 项</b></span></div>
+          </div>
+          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认生成补货单</button></div>
+          <div class="exec-note">🔒 补货量可逐项手改</div>
+        </div>
+        <div class="altseg">
+          <div class="t">生成结构：一主多子（一次补货只出一张主单）</div>
+          <div class="hint">主单 1 张 · 3 台机器各挂一条子单：100-1 欢乐颂 5 号机 / 100-2 兰均三期 / 100-3 南油文化广场</div>
+          <div class="hint">3 台同属一个车线路仓 → 可合并；跨仓需按仓分别提交</div>
+        </div>
+        <div class="rule">字段：<b>商品名称 / 缺货数 / 缺货箱数 / 补货量</b>；<b>不显示价格与商品ID</b>——补货下单只看「缺多少、缺几箱、补多少」，价格用不到（用户口径 2026-10-15）；箱规（<b>N 件/箱</b>）放名称下方副行。<br>缺货箱数＝缺货数 ÷ 箱规，按「<b>N 箱 M 件</b>」展示（箱规取自商品资料）。<br><b>2026-10-16 裁决 6</b>：<b>不要算法建议量</b>。补货量一律＝<b>最大库存（后台「补满」配置值）− 现存</b>，缺货数同口径，因此「缺货数」与「补货量默认值」相等；补货量仍可逐项手改，只是不再有算法建议兜底。原「按销量 / 按补满库存」<b>模式二选一（<code>.seg</code>）随之取消</b>，W5-a / W5-b 合并为 W5；原「静态柜固定按销量」的约束一并移除（不再有模式可切）。<br><b>生成口径</b>：一次生成<b>一张补货单（主单）</b>，每台机器挂一条<b>子单</b>（子单号＝主单号-序号），<b>不是逐台各出一张</b>。<br><b>约束</b>：合并的多台机器须同属一个车线路仓，跨仓时按仓分开提交（后端直接报错拦截）。</div>
+      </div>
+
+      <!-- W6 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">W6</span><span class="tag w">结果</span>批量执行结果（部分失败）<span class="cd" style="margin-left:4px">风险 R2</span></div>
+        <span class="q">多台循环上架执行后返回：成功 10 台 / 失败 2 台</span>
+        <div class="cardbox">
+          <div class="cb-head f"><span class="ttl">⚠️ 批量上架结果</span><span class="st">部分失败</span></div>
+          <div class="kv"><span class="k">成功</span><span class="v" style="color:var(--ok)">10 台</span></div>
+          <div class="kv"><span class="k">失败</span><span class="v" style="color:var(--danger)">2 台 · 待重试</span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">失败项</span><span class="c3">对象</span><span class="c5">状态</span></div>
+            <div class="pr bad"><div class="l1"><span class="c1"><span class="nm">格子柜 A 座</span></span><span class="c3">机器</span><span class="c5 stx bad2">失败</span></div><div class="ln reason">不支持在该机型售卖（后端校验拦截）</div></div>
+            <div class="pr bad"><div class="l1"><span class="c1"><span class="nm">慕蓝卡苏打水 柠檬味</span></span><span class="c3">商品</span><span class="c5 stx bad2">失败</span></div><div class="ln reason">未绑定可售机型商品 code（待建模）</div></div>
+          </div>
+          <div class="fail">已成功的 10 台不受影响；失败原因见表，可点「重试失败 2 台」。</div>
+          <div class="op-btns"><button class="btn ghost">查看成功明细</button><button class="btn main">重试失败 2 台</button></div>
+          <div class="exec-note">🔒 每次重试同样记录操作日志</div>
+        </div>
+        <div class="rule">状态列用文字「<b>失败 / 成功</b>」，不用 ✕ ✓；失败原因放名称下方副行（红色 <code>.ln.reason</code>），机器级与商品级分开标「对象」。<br>多台执行时<b>逐条列出失败项 + 原因</b>，不得整批报失败；原因文案直接透传后端原文（证据：<code>SmartAilseInfoController:232-237</code> / <code>AbstractSmartAisleInfoService:610-616</code>）。<br>「查看成功明细」的落点＝<b>W6-b 成功明细卡</b>，不是弹窗、也不是空按钮——结果卡两个动作都要有下文。</div>
+      </div>
+
+      <!-- W6-b -->
+      <div class="unit">
+        <div class="cap"><span class="cd">W6-b</span><span class="tag w">结果</span>成功明细展开<span class="cd" style="margin-left:4px">风险 R2</span></div>
+        <span class="q">W6 内点「查看成功明细」后返回</span>
+        <div class="cardbox">
+          <div class="cb-head s"><span class="ttl">✅ 上架成功明细</span><span class="st">已查询</span></div>
+          <div class="kv"><span class="k">操作</span><span class="v">批量上架商品<em>10-15 16:20</em></span></div>
+          <div class="kv"><span class="k">成功</span><span class="v" style="color:var(--ok)">10 台 · 共 25 个商品</span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">机器</span><span class="c3">商品数</span><span class="c5">状态</span></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">欢乐颂 5 号机</span></span><span class="c3">3</span><span class="c5 stx ok2">成功</span></div><div class="ln">51890784 · 售货机</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">兰均三期</span></span><span class="c3">3</span><span class="c5 stx ok2">成功</span></div><div class="ln">51862310 · 智能柜</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">南油文化广场</span></span><span class="c3">2</span><span class="c5 stx ok2">成功</span></div><div class="ln">51861091 · 售货机</div></div>
+          </div>
+          <div class="pdiff"><div class="hd">共 10 台 · 25 个商品全部成功</div>
+            <div class="r"><span>执行时间</span><span>10-15 16:20</span></div>
+            <div class="r"><span>操作日志</span><span>已写入，可按机器回溯</span></div>
+          </div>
+          <div class="res">10 台全部上架成功，列表可在卡内上下滑动查看。</div>
+          <div class="op-btns"><button class="btn main">返回执行结果</button></div>
+        </div>
+        <div class="rule">成功与失败<b>同源同批</b>：同一次执行按台拆开，<b>成功台数 + 失败台数 = 命中总数</b>，不允许只报一边。<br>字段：<b>机器名称 / 商品数 / 状态</b>，副行给机器编号 + 机型；状态列同样<b>用文字不用符号</b>（与 W6 一致）。<br>这是<b>只读卡</b>，不带「确认执行」，底部只给「返回执行结果」。<b>移动端不做导出 / 下载</b>——完整清单直接在卡内滚动展示，不生成文件。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 读能力结果卡 ================= -->
+  <div class="panel">
+    <h2><span class="n">二</span>读能力结果卡（只读展示，无确认按钮）</h2>
+    <div class="grid">
+
+      <!-- R1 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">R1</span><span class="tag r">读</span>补货记录查询<span class="cd" style="margin-left:4px">B1</span></div>
+        <span class="q">「有没有机器长时间没补货？」</span>
+        <div class="cardbox">
+          <div class="cb-head q"><span class="ttl">🚚 补货记录（近 30 天）</span><span class="st">已查询</span></div>
+          <div class="kv"><span class="k">统计范围</span><span class="v">12 台<em>未补货时长倒序</em></span></div>
+          <div class="ptable">
+            <div class="ph"><span class="csel"><span class="ck half">▣</span></span><span class="c1">机器</span><span class="c3">次数</span><span class="c4">最近</span><span class="c5">未补货</span></div>
+            <div class="pr pre"><div class="l1"><span class="csel"><span class="ck">☑</span></span><span class="c1"><span class="nm">格子柜 A 座</span></span><span class="c3">0 次</span><span class="c4">—</span><span class="c5" style="color:var(--danger);font-weight:700">26 天</span></div><div class="ln">51839134 · 从未补货</div></div>
+            <div class="pr pre"><div class="l1"><span class="csel"><span class="ck">☑</span></span><span class="c1"><span class="nm">欢乐颂 5 号机</span></span><span class="c3">2 次</span><span class="c4">10-02</span><span class="c5" style="color:var(--warn);font-weight:700">13 天</span></div><div class="ln">51890784 · 平均 15 天 / 次</div></div>
+            <div class="pr"><div class="l1"><span class="csel"><span class="ck off">☐</span></span><span class="c1"><span class="nm">南油文化广场</span></span><span class="c3">6 次</span><span class="c4">10-14</span><span class="c5" style="color:var(--ok)">0 天</span></div><div class="ln">51861091 · 平均 5 天 / 次</div></div>
+          </div>
+          <div class="pdiff"><div class="hd">已选 2 台 · 均 7 天以上未补货</div>
+            <div class="r"><span>建议</span><span>可直接生成补货单 ↓</span></div>
+          </div>
+          <div class="op-btns"><button class="btn main">为这 2 台生成补货单</button></div>
+          <div class="exec-note">最多可查近 180 天的补货记录</div>
+        </div>
+        <div class="rule">口径：① 最近一个月补过货的机器 + ② 各自补货次数；③ <b>未补货时长从长到短倒序</b>。<br>行可勾选，<b>默认勾中 7 天以上未补货的机器</b>（其余不勾）；表头 <b>全选</b> 一键全选 / 再点全不选，部分选中时表头显示半选态。<br>选中数实时回显到 diff 区与底部按钮；卡片只展示倒序前的若干行，<b>全选作用于卡内全部行</b>。<br>底部直连 W5 补货单卡，形成「查 → 补」闭环。</div>
+      </div>
+
+      <!-- R2 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">R2</span><span class="tag r">读</span>订单商品明细<span class="cd" style="margin-left:4px">B3</span></div>
+        <span class="q">「此单消费者拿去了多少件商品，请同步商品明细」</span>
+        <div class="cardbox">
+          <div class="cb-head q"><span class="ttl">🧾 订单商品明细</span><span class="st">已查询</span></div>
+          <div class="kv"><span class="k">订单号</span><span class="v">818086331791620724763</span></div>
+          <div class="kv"><span class="k">机器</span><span class="v">欢乐颂 5 号机<em>10-14 09:12</em></span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">商品</span><span class="c3">单价</span><span class="c4">数量</span><span class="c5">小计</span></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">可口可乐 330ml</span></span><span class="c3">¥3.00</span><span class="c4">2</span><span class="c5">¥6.00</span></div><div class="ln">ID 6901234567892</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">辣媳妇山椒笋尖 75g</span></span><span class="c3">¥2.50</span><span class="c4">1</span><span class="c5">¥2.50</span></div><div class="ln">ID 6971234567890</div></div>
+            <div class="sumline"><span>合计 3 件</span><span>¥8.50</span></div>
+          </div>
+          <div class="pdiff"><div class="r"><span>支付方式</span><span>微信支付</span></div><div class="r"><span>订单状态</span><span>已支付</span></div></div>
+          <div class="exec-note">用于核对消费者拿取的商品与扣款是否一致</div>
+        </div>
+        <div class="rule">字段：<b>商品名称 / 商品ID / 单价 / 数量 / 小计</b> + 合计行。<br>用途：智能柜「拿了货没扣到钱」的资损核对。</div>
+      </div>
+
+      <!-- R3 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">R3</span><span class="tag r">读</span>按销售额反查机器<span class="cd" style="margin-left:4px">C3</span></div>
+        <span class="q">「上个月做低于 700 块的机器列出来」</span>
+        <div class="cardbox">
+          <div class="cb-head q"><span class="ttl">📊 机器销售额</span><span class="st">已查询</span></div>
+          <div class="kv"><span class="k">时间</span><span class="v">2026-09<em>阈值 &lt; ¥700</em></span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">机器</span><span class="c3">销售额</span><span class="c4">订单</span></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">格子柜 A 座</span></span><span class="c3">¥312</span><span class="c4">41</span></div><div class="ln">51839134 · 缺货 26 天</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">欢乐颂 5 号机</span></span><span class="c3">¥688</span><span class="c4">96</span></div><div class="ln">51890784 · 缺货 13 天</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">南油文化广场</span></span><span class="c3">¥5,240</span><span class="c4">612</span></div><div class="ln">51861091 · 未命中阈值（仅作对比）</div></div>
+          </div>
+          <div class="pdiff"><div class="hd">命中 2 台</div><div class="r"><span>共同特征</span><span>均已 <b>13 天以上</b>未补货</span></div></div>
+        </div>
+        <div class="rule"><b>按销售额反查机器</b>：支持阈值筛选与排序（如「低于 700 的」「上个月低于 1000 的」）；结果可关联补货状态，接着生成补货单。</div>
+      </div>
+
+      <!-- R4 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">R4</span><span class="tag r">读</span>销售额支付方式拆分<span class="cd" style="margin-left:4px">C4</span></div>
+        <span class="q">「现金多少，打卡多少，分别是多少」</span>
+        <div class="cardbox">
+          <div class="cb-head q"><span class="ttl">💳 销售额构成</span><span class="st">已查询</span></div>
+          <div class="kv"><span class="k">时间 / 范围</span><span class="v">今日 · 全部 12 台</span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">支付方式</span><span class="c3">金额</span><span class="c4">笔数</span><span class="c5">占比</span></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">微信支付</span></span><span class="c3">¥1,286</span><span class="c4">312</span><span class="c5">48.6%</span></div><div class="ln">线上 · 已到账</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">支付宝</span></span><span class="c3">¥742</span><span class="c4">188</span><span class="c5">28.0%</span></div><div class="ln">线上 · 已到账</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">现金 / 投币</span></span><span class="c3">¥386</span><span class="c4">97</span><span class="c5">14.6%</span></div><div class="ln">线下收款 · 以实际清点为准</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">会员储值卡</span></span><span class="c3">¥232</span><span class="c4">41</span><span class="c5">8.8%</span></div><div class="ln">储值卡余额扣减</div></div>
+            <div class="sumline"><span>合计</span><span>¥2,646</span></div>
+          </div>
+          <div class="pdiff non">默认给合计；你要求时再按支付方式拆分展示</div>
+        </div>
+        <div class="rule">口径：<b>默认合计，用户要求时才拆分</b></div>
+      </div>
+
+      <!-- R5 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">R5</span><span class="tag r">读</span>商品维度销售额<span class="cd" style="margin-left:4px">C7</span></div>
+        <span class="q">「查询所有在线机器近三个月以来辣媳妇山椒笋尖 75g 的销售量」</span>
+        <div class="cardbox">
+          <div class="cb-head q"><span class="ttl">🏷️ 商品销售</span><span class="st">已查询</span></div>
+          <div class="kv"><span class="k">时间</span><span class="v">近 3 个月</span></div>
+          <div class="kv"><span class="k">范围</span><span class="v">全部在线机器<em>9 台</em></span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">商品</span><span class="c3">单价</span><span class="c4">销量</span><span class="c5">销售额</span></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">辣媳妇山椒笋尖 75g</span></span><span class="c3">¥2.50</span><span class="c4">486</span><span class="c5">¥1,215</span></div><div class="ln">ID 6971234567890 · 铺货 7 台</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">可口可乐 330ml</span></span><span class="c3">¥3.00</span><span class="c4">1,024</span><span class="c5">¥3,072</span></div><div class="ln">ID 6901234567892 · 铺货 9 台</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">雀巢咖啡 268ml</span></span><span class="c3">¥5.00</span><span class="c4">193</span><span class="c5">¥965</span></div><div class="ln">ID 6912345678901 · 铺货 5 台</div></div>
+          </div>
+          <div class="pdiff"><div class="r"><span>销量最高</span><span><b>可口可乐 330ml</b></span></div></div>
+        </div>
+        <div class="rule">字段：<b>商品名称 / 商品ID / 单价 / 销量 / 销售额</b> + 铺货机器数。<br>支持限定「所有在线机器」范围；<b>铺货机器数保留</b>（已确认 7：需要支持，后端按商品反查铺货机器数）。</div>
+      </div>
+
+      <!-- R6 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">R6</span><span class="tag r">读</span>离线原因<span class="cd" style="margin-left:4px">C9</span></div>
+        <span class="q">「什么原因离线」</span>
+        <div class="cardbox">
+          <div class="cb-head q"><span class="ttl">🔌 离线原因</span><span class="st">已查询</span></div>
+          <div class="kv"><span class="k">离线机器</span><span class="v">2 台<em>共 12 台</em></span></div>
+          <div class="ptable">
+            <div class="ph"><span class="c1">机器</span><span class="c3">离线于</span><span class="c4">时长</span><span class="c5">状态</span></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">格子柜 A 座</span></span><span class="c3">10-14 03:41</span><span class="c4">6 小时</span><span class="c5" style="color:var(--danger);font-size:10.5px">离线</span></div><div class="ln">原因：网络信号中断 · 来源 预警通知 03:42</div></div>
+            <div class="pr"><div class="l1"><span class="c1"><span class="nm">兰均三期</span></span><span class="c3">10-13 22:10</span><span class="c4">11 小时</span><span class="c5" style="color:var(--danger);font-size:10.5px">离线</span></div><div class="ln">原因：断电 · 来源 操作日志（最后心跳 22:08）</div></div>
+          </div>
+        </div>
+        <div class="rule">口径：原因取自<b>预警通知或操作日志</b>，并标注来源与时间；无记录时给「暂无原因记录，建议查硬件状态 / 提交工单」。<br>这是<b>纯只读卡</b>——不给「查硬件状态 / 远程重启」按钮：卡内已在展示状态，再点「查硬件状态」是循环跳转；重启属另一个能力，用户直接问即可。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 添加弹层 ================= -->
+  <div class="panel">
+    <h2><span class="n">三</span>「＋ 添加商品 / 添加机器」弹层（半屏，底部弹出）</h2>
+    <div class="grid">
+
+      <!-- P1 添加商品 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">P1</span>添加商品 · 私有商品库选择</div>
+        <span class="q">W1 / W2-a·b·c 内点「＋ 添加商品」呼出</span>
+        <div class="masknote">半屏底部弹出 · 点遮罩或 ✕ 关闭，已填内容不变</div>
+        <div class="sheet">
+          <div class="sh-hd">添加商品<span class="x">✕</span></div>
+          <div class="sh-search">
+            <span class="sh-input">🔍 请输入商品名称/扫描条码搜索</span>
+            <span class="sh-btn">搜索</span>
+            <span class="sh-scan"><i>⛶</i>扫码</span>
+          </div>
+          <div class="grp">私有商品库（仅展示当前机型的可售商品）</div>
+          <div class="fithint">已按本机机型过滤 0 件（本机机型支持全部商品）｜批量上架时此处改为「本批 N 台机器机型的交集」，交集外的商品直接不出现在列表里</div>
+          <div class="selbar"><span class="ck half">◍</span>全选<span class="cnt">已选 2 件</span></div>
+          <div class="picklist">
+            <div class="pickrow on"><span class="th">🥤</span><div class="c1"><span class="nm">优好滋100%芒果汁 500ml</span><span class="sub">优好滋　500ml</span><span class="meta"><span class="prc">¥5.00</span>售货机/动态柜X/鹅小柜/智能柜D</span></div><span class="rd">✓</span></div>
+            <div class="pickrow"><span class="th">🧋</span><div class="c1"><span class="nm">喜多多仙草丸子凉茶植物饮料200g</span><span class="sub">喜多多　200g</span><span class="meta"><span class="prc">¥1.00</span>售货机/动态柜X/鹅小柜/智能柜D/便利店</span></div><span class="rd"></span></div>
+            <div class="pickrow"><span class="th">🍟</span><div class="c1"><span class="nm">素味居香辣土豆70g</span><span class="sub">素味居　70g</span><span class="meta"><span class="prc">¥3.00</span>售货机/动态柜X/鹅小柜/智能柜D/便利店</span></div><span class="rd">✓</span></div>
+            <div class="pickrow dim"><span class="th">🧃</span><div class="c1"><span class="nm">宜个果源青柠柚子混合果汁430ml</span><span class="sub">已在本卡</span><span class="meta"><span class="prc">¥4.50</span>售货机/动态柜X/鹅小柜/智能柜D</span></div><span class="rd"></span></div>
+          </div>
+          <div class="sh-foot"><span class="bag">🛍<b>2</b></span><button class="btn main">加入卡片</button></div>
+        </div>
+        <div class="rule"><b>沿用现有「添加商品」页</b>：搜索（名称 / 条码）+ 搜索按钮 + 扫码、分组标题（私有商品库·仅当前机型可售）、行结构（缩略图 + 商品名 + 品牌规格 + 橙色价格 + 适用机型）、圆形勾选、底栏数量角标与购物袋。<br><b>本场景差异</b>：① 主按钮「加入卡片」——弹层只往卡片加项，无下一步；② 带价入卡后默认取商品库价、可改；③ 已在本卡的商品置灰（不参与全选）；④ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧。<br><b>已确认 5（2026-10-16）</b>：多机型批量上架时商品库按<b>机型交集</b>出商品（能提前挡掉「选完即失败」）；标题写明本批机器机型的交集，下方加过滤说明行。</div>
+      </div>
+
+      <!-- P2 添加机器 -->
+      <div class="unit">
+        <div class="cap"><span class="cd">P2</span>添加机器 · 编号 + 名称 + 地址</div>
+        <span class="q">W2-c / W3 内点「＋ 添加机器」呼出</span>
+        <div class="masknote">半屏底部弹出 · 点遮罩或 ✕ 关闭，已勾选保留</div>
+        <div class="sheet">
+          <div class="sh-hd">添加机器<span class="x">✕</span></div>
+          <div class="sh-search">
+            <span class="sh-input">🔍 请输入机器编号或名称搜索</span>
+            <span class="sh-btn">搜索</span>
+          </div>
+          <div><span class="sh-sel">南油线路 ▾</span></div>
+          <div class="selbar"><span class="ck half">◍</span>全选<span class="cnt">已选 2 台</span></div>
+          <div class="picklist">
+            <div class="pickrow on"><span class="rd">✓</span><div class="c1"><span class="nm">(81800012)欢乐颂 5 号机</span><span class="addr">广东省深圳市南山区打石一路中兴通讯员工宿舍南196米</span></div></div>
+            <div class="pickrow on"><span class="rd">✓</span><div class="c1"><span class="nm">(81800013)测试嗨便利刷脸</span><span class="addr">广东省深圳市南山区打石一路深圳市第二高级中学北229米</span></div></div>
+            <div class="pickrow"><span class="rd"></span><div class="c1"><span class="nm">(81800019)大黄鹅办公室的双门柜</span><span class="addr">广东省深圳市南山区打石一路深南山创新学校内测试</span></div></div>
+            <div class="pickrow dim"><span class="rd"></span><div class="c1"><span class="nm">(81800014)动态柜360</span><span class="addr">已在本卡 · 广东省深圳市南山区高新南七道2号深圳国家工程实验室大楼内</span></div></div>
+          </div>
+          <div class="sh-foot"><span class="bag">🛍<b>2</b></span><button class="btn main">加入卡片</button></div>
+        </div>
+        <div class="rule"><b>沿用现有「选择机器」页</b>：搜索（编号 / 名称）+ 搜索按钮、筛选下拉、行结构「(编号)名称 + 地址全称」（按需求不展示机器图片）、圆形勾选、底栏数量角标。<br><b>本场景差异</b>：① 主按钮「加入卡片」——无关联等后续流程；② 现有为单选一台，本场景改<b>多选</b>以支持批量上下架；③ 已在本卡的机器置灰；④ 地址<b>完整展示</b>、可换行，不省略；⑤ 已在本卡的机器置灰（不参与全选）；⑥ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 设计原则 ================= -->
+  <div class="panel">
+    <h2><span class="n">四</span>统一设计原则与待确认项裁决（原 7 项已全部定稿）</h2>
+    <table class="idx">
+      <tr><th style="width:130px">项</th><th>口径</th></tr>
+      <tr><td>统一字段</td><td><b>商品名称 · 价格 · 库存</b> 是基础项；<b>商品ID 按场景取舍</b>——上架 / 下架卡<b>不显示</b>（商品还没上架，ID 对运营商无意义），<b>补货卡也不显示</b>（改看箱规），改价 / 订单明细卡<b>保留</b>（放名称下方副行，等宽灰字，与现有 <code>.ln</code> 一致）。</td></tr>
+      <tr><td>补货卡字段</td><td>补货单卡<b>不显示价格与商品ID</b>，核心只讲三件事：<b>缺货数 / 缺货箱数 / 补货量</b>；箱规（<b>N 件/箱</b>）放名称下方副行，缺货箱数＝缺货数 ÷ 箱规、按「<b>N 箱 M 件</b>」展示。口径与现有系统「库存查询 → 生成补货单」页一致（价格不参与补货）。</td></tr>
+      <tr><td>库存列取舍</td><td>按「这个场景有没有库存可言」判断：<b>上架</b>＝没有（不显示）；<b>下架</b>＝显示现有库存（还要标「将清空 N 件」）；<b>改价</b>＝显示现存；<b>补货</b>＝显示<b>缺货数 / 缺货箱数</b>（补货员关心的是缺口，不是存量）。</td></tr>
+      <tr><td>价格可编辑</td><td>上架卡价格<b>默认取商品库自身价</b>，但必须<b>可改</b>；改动行加 <code>input.chg</code> 蓝框，diff 区单独列「价格改动 N 项（改前 → 改后）」。</td></tr>
+      <tr><td>状态文案</td><td>状态列一律<b>用文字不用符号</b>：<span style="color:var(--ok);font-weight:700">成功</span> / <span style="color:var(--danger);font-weight:700">失败</span>，禁止 ✕ ✓；失败原因放名称下方副行红色 <code>.ln.reason</code>，机器级与商品级分开标「对象」。</td></tr>
+      <tr><td>补货量口径</td><td><b>2026-10-16 定</b>：<b>不用算法建议量</b>，补货量＝<b>最大库存（后台「补满」配置值）− 现存</b>，缺货数同口径；补货量可逐项手改。<b>不再有模式切换</b>（原「按销量 / 按补满库存」<code>.seg</code> 二选一取消，「静态柜固定按销量」的约束一并移除）。</td></tr>
+      <tr><td>卡片宽度</td><td>由原 262px 调整为 <b>300px</b>（375 屏内可用宽约 308px）；若实际渲染仍挤，商品ID 缩为副行 + 价格/库存合并成「¥3.00 · 12」。</td></tr>
+      <tr><td>两段式写卡</td><td>预览（可编辑表格 + 改动 diff）→ 点击确认才调用写接口；只对改动过的行签发 confirm_id；取消则什么都不发生。沿用 <code>cardPriceTable / cardStockTable</code> 逻辑。</td></tr>
+      <tr><td>校验与失败</td><td>AI 侧不重写校验：适用机型、建模、价格区间、库存上下限全部由后端判定，卡片只负责<b>标红 + 原样透传原因</b>。</td></tr>
+      <tr><td>多台执行</td><td>统一为 ca-api 单机循环；结果卡必须<b>逐台列出成功/失败与原因</b>（W6），不得整批报失败、也不得静默跳过。</td></tr>
+      <tr><td>下架处理</td><td><b>按机型分两套</b>：智能柜＝移除该商品、<b>库存清零</b>；售货机＝把该货道<b>换成默认商品</b>（不清空，货道继续售卖）。</td></tr>
+      <tr><td>上架位置</td><td><b>按机型分两套</b>：售货机＝<b>货道</b>，逐个指定（默认分配空闲货道、可点选改，副行给最大库存与现存）；智能柜＝<b>层</b>（无货道概念）。<br><b>批量上架</b>不逐台指定，按各机自动分配；需精确指定走单台卡。</td></tr>
+      <tr><td>读卡操作位</td><td>读卡<b>不带「确认执行」按钮</b>；<b>只在确有明确下一步、且是该条数据的自然延续时才给按钮</b>（如补货记录 → 生成补货单）。卡内已有信息不做循环跳转（离线原因卡不再给「查硬件状态」），跨能力动作不硬凑（需要重启直接问即可）；<b>没有下一步就不给按钮区</b>。</td></tr>
+      <tr><td>结果卡闭环</td><td>结果卡（W6）<b>不能只报失败</b>——成功 / 失败两个动作都要有下文：失败项可重试，成功项可展开明细（W6-b），两者<b>同源同批</b>，成功台数 + 失败台数 = 命中总数。<br>明细卡是只读卡，不带「确认执行」；完整清单在<b>卡内滚动展示</b>。</td></tr>
+      <tr><td>说明行（exec-note）</td><td>卡片底部灰色说明行<b>只承载本条数据的口径</b>——能查多久、数据来源、默认给什么（如「最多可查近 180 天」「默认给合计」）。<b>不写「你可以接着问我…」这类引导话术</b>：用户想追问直接打字就行，卡片不需要教他怎么说。</td></tr>
+      <tr><td>移动端不做导出</td><td><b>一律不提供「导出 / 下载」</b>——这是移动端，不是 PC 端；卡片内的列表直接在卡内滚动看全量，不生成文件。需要留存的场景（对账、存档）引导到 PC 端管理后台。</td></tr>
+      <tr><td>多选与全选</td><td>凡是逐行勾选的表格 / 列表，<b>列头（表格）或列表顶部（弹层）必须给「全选」控件</b>，不允许只能逐行点。三态：<b>表格</b>用方框 <code>☑</code> 全选 / <code>▣</code> 半选 / <code>☐</code> 未选；<b>弹层</b>用圆形 <code>◉</code> / <code>◍</code> / <code>○</code>（与行内圆勾选一致）。品牌色描边。<br>选中数<b>实时回显</b>到 diff 区标题与按钮文案（如「为这 2 台生成补货单」）；弹层回显在右上角计数。<br>默认态按场景给：补货记录<b>默认勾中 7 天以上未补货的</b>，下架<b>默认全选</b>。</td></tr>
+      <tr><td style="color:var(--ok);font-weight:700">已确认 3</td><td><b>要展开到机器层级</b>（2026-10-16 产品裁决）。W4 加卡内 <code>.mx</code> <b>命中机器明细</b>：按商品分组、逐台给<b>编号 + 名称 + 现价</b>；默认<b>收起</b>只占一行，点标题展开，机器多时展开区<b>卡内滚动</b>（限高 186px）、随时可收起。<br>PC 端「命中机器」列显示为「N 台 ▾」可点，点开即展开。</td></tr>
+      <tr><td style="color:var(--ok);font-weight:700">已确认 4</td><td><b>离线机器也支持上架</b>，<b>是否可上架由后端判定</b>（2026-10-16 产品裁决）。AI / 前端<b>不做在线状态门槛</b>，卡片口径照旧：范围只写「<b>全部 N 台</b>」，不区分在线 / 离线台数，成败一律由后端校验结果透传（失败原因原样展示在 W6）。</td></tr>
+      <tr><td style="color:var(--ok);font-weight:700">已确认 5</td><td><b>用交集</b>（2026-10-16 产品裁决）。现有「添加商品」页展示的是<b>私有商品库（仅当前机型可售）</b>；批量上架覆盖多种机型时，商品库按这批机器的<b>机型交集</b>出商品——交集能提前挡掉「选完即失败」，比并集稳。<br>弹层标题写明「本批 N 台机器机型的交集：售货机 · 智能柜」，下方加一行过滤说明（被滤掉的商品逐个列出）。单台上架＝交集退化为该机机型，与现有页一致。</td></tr>
+      <tr><td style="color:var(--ok);font-weight:700">已确认 6</td><td><b>不需要建议量</b>（2026-10-16 产品裁决）：补货量＝<b>最大库存 − 现存</b>，直接按补满算，<b>不调算法</b>。因此统计窗口 / 是否取整 / 是否扣现存这些问题全部作废，卡片不再出现「系统建议」字样。</td></tr>
+      <tr><td style="color:var(--ok);font-weight:700">已确认 7</td><td><b>需要支持</b>（2026-10-16 产品裁决）：R5 商品维度销售额卡内展示「<b>铺货 N 台</b>」，后端按商品反查铺货机器数。</td></tr>
+    </table>
+  </div>
+
+</div>
+<script>
+/* 演示用：点击「确认执行」把卡片切到已执行态，验证两段式流转 */
+document.querySelectorAll('.btn.main.demo').forEach(function(b){
+  b.addEventListener('click',function(){
+    var box=b.closest('.cardbox'), head=box.querySelector('.cb-head'), st=box.querySelector('.st');
+    head.className='cb-head s'; st.textContent='已执行';
+    var wrap=box.querySelector('.op-wrap')||box;
+    var note=document.createElement('div');
+    note.className='res';
+    note.innerHTML='✅ 已执行 · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})+' · 操作已记录日志';
+    b.parentNode.parentNode.insertBefore(note,b.parentNode);
+    b.parentNode.remove();
+    box.querySelectorAll('input').forEach(function(i){i.disabled=true});
+  });
+});
+</script>
+</body>
+</html>
