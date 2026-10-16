@@ -895,9 +895,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261016c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261016c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261016c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261016d" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261016d" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261016d" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1021,10 +1021,10 @@ const PAY_SPLIT=[{n:'微信支付',amt:1286,cnt:312,sub:'线上 · 已到账'},{
   {n:'现金 / 投币',amt:386,cnt:97,sub:'线下收款 · 以实际清点为准'},{n:'会员储值卡',amt:232,cnt:41,sub:'储值卡余额扣减'}];
 /* R5 商品维度销售额（近 3 个月 · 全部在线机器） */
 const SALES_P=[{n:'辣媳妇山椒笋尖 75g',price:2.50,qty:486,mach:7},{n:'可口可乐 330ml',price:3.00,qty:1024,mach:9},{n:'雀巢咖啡 268ml',price:5.00,qty:193,mach:5}];
-/* R6 离线原因（原因取自预警通知或操作日志，标注来源与时间） */
+/* R6 离线原因（⚠ 2026-10-16 代码复核：来源＝故障记录 monitor_fault_records[fault_type='machine_offline']，建议文案取自 nacos；「操作日志」来源不存在） */
 const OFFLINE_REASON=[
   {mid:'gzg',at:'10-14 03:41',dur:'6 小时',why:'网络信号中断',src:'预警通知 03:42'},
-  {mid:'lj3',at:'10-13 22:10',dur:'11 小时',why:'断电',src:'操作日志（最后心跳 22:08）'}
+  {mid:'lj3',at:'10-13 22:10',dur:'11 小时',why:'断电',src:'故障记录（最后心跳 22:08）'}
 ];
 /* W5 补货单候选
    ⚠ 2026-10-16 裁决（产品）：**不要「系统建议量」**，补货量一律＝最大库存（后台补满配置值）− 现存。
@@ -1175,7 +1175,7 @@ function demoEmptyState(){
   pushEmpty('📊','📊 机器销售额','没有低于 '+money0(700)+' 的机器',
     '2026-09 全部机器销售额均 ≥ '+money0(700)+' · 可以把阈值调高再查');
   pushEmpty('🔌','🔌 离线原因','当前没有离线机器',
-    '全部 '+Object.keys(MACHINES).length+' 台设备通信正常 · 离线原因取自预警通知或操作日志');
+    '全部 '+Object.keys(MACHINES).length+' 台设备通信正常 · 离线原因取自故障记录或预警通知');
   trace('guide','边界态演示 · <b>空状态</b>：读卡无数据统一走 emptyCard()，文案只说「现在是什么情况 + 为什么」，不出现实现语言。');
 }
 function demoLoadingState(){
@@ -1915,7 +1915,7 @@ function cardOffshelf(mids,pname){
     const lane=g?laneIds(g)[0]:'';
     const isVm=m.kind==='vm';
     return {mid:k,on:true,stock:stock,lane:lane,isVm:isVm,
-      ln:isVm?(lane?`${lane}：${shortName(pname)} → 默认商品，该货道继续售卖`:'该商品未铺货'):'下架后该商品库存清空'};
+      ln:isVm?(lane?`${lane}：${shortName(pname)} → 该货道停售（库存保留）`:'该商品未铺货'):'下架后该商品库存清零'};
   });
   const c=pushCard(`<div class="cardbox" id="${id}_box">
     <div class="cb-head c" id="${id}_head"><span class="ttl">➖ 下架商品</span><span class="st" id="${id}_st">待确认</span></div>
@@ -1941,15 +1941,15 @@ function cardOffshelf(mids,pname){
   function refresh(){
     const on=rows.filter(r=>r.on);
     const tot=on.reduce((a,r)=>a+r.stock,0);
-    pv.innerHTML=`<div class="hd">将下架 ${on.length} 台</div><div class="r"><span>涉及库存</span><span>${on.map(r=>r.stock).join(' + ')||0} = <b>${tot} 件</b>${rows.some(r=>r.isVm)?'（售货机换默认商品，不清空）':'清空'}</span></div>`;
+    pv.innerHTML=`<div class="hd">将下架 ${on.length} 台</div><div class="r"><span>涉及库存</span><span>${on.map(r=>r.stock).join(' + ')||0} = <b>${tot} 件</b>${rows.some(r=>r.isVm)?'（售货机货道停售，不清空）':'清空'}</span></div>`;
     okBtn.disabled=!on.length;
     okBtn.textContent=`确认下架（${on.length} 台）`;
     allBtn.className='ck'+(on.length===0?' off':(on.length===rows.length?'':' half'));
     allBtn.textContent=on.length===rows.length?'☑':(on.length===0?'☐':'▣');
     c.querySelector('#'+id+'_cnt').textContent=on.length;
     alt.innerHTML=rows.some(r=>r.isVm)
-      ? `<div class="t">售货机态：下架＝把该货道换成默认商品（不是清空）</div>
-         ${rows.filter(r=>r.isVm&&r.lane).map(r=>`<div class="hint">${esc(r.lane)}：${esc(shortName(pname))} → 默认商品，该货道继续售卖</div>`).join('')}`
+      ? `<div class="t">售货机态：下架＝把该商品所在货道<b>停售</b>（不是清空、也不换商品）</div>
+         ${rows.filter(r=>r.isVm&&r.lane).map(r=>`<div class="hint">${esc(r.lane)}：${esc(shortName(pname))} → 该货道<b>停售</b>（库存保留）</div>`).join('')}`
       : `<div class="t">智能柜态：下架＝移除该商品，库存清零</div>`;
   }
   function bind(){
@@ -1968,7 +1968,7 @@ function cardOffshelf(mids,pname){
     const add=sel.filter(k=>!rows.some(r=>r.mid===k));
     add.forEach(k=>{const m=MACHINES[k];const g=m.products.find(x=>x.n===pname);const st=g?pStock(g):0;const lane=g?laneIds(g)[0]:'';
       rows.push({mid:k,on:true,stock:st,lane:lane,isVm:m.kind==='vm',
-        ln:m.kind==='vm'?(lane?`${lane}：${shortName(pname)} → 默认商品，该货道继续售卖`:'该商品未铺货'):'下架后该商品库存清空'})});
+        ln:m.kind==='vm'?(lane?`${lane}：${shortName(pname)} → 该货道停售（库存保留）`:'该商品未铺货'):'下架后该商品库存清零'})});
     c.querySelector('#'+id+'_rows').innerHTML=rows.map((r,i)=>rowHtml(r,i)).join('');
     bind();refresh();
   });
@@ -1984,11 +1984,11 @@ function cardOffshelf(mids,pname){
     setTimeout(()=>{
       on.forEach(r=>{const m=MACHINES[r.mid];const g=m.products.find(x=>x.n===pname);
         if(!g)return;
-        if(r.isVm){(g.lanes||[]).forEach(l=>l.stock=0);g.n=g.n+'（已换默认商品）'}
+        if(r.isVm){g.stopped=true;g.n=g.n+'（货道停售）'}
         else m.products=m.products.filter(x=>x.n!==pname);});
       finishOp(id,'ok',`已在 <b>${on.length}</b> 台机器下架「${esc(shortName(pname))}」`,
-        `<div class="res-list">${on.map(r=>`<div class="r"><span>${esc(MACHINES[r.mid].name)}</span><span>${r.isVm?'货道换默认商品':'库存清零'}</span></div>`).join('')}</div>
-         <div class="res-sub">智能柜移除并清零；售货机换成默认商品、货道继续售卖</div>`,
+        `<div class="res-list">${on.map(r=>`<div class="r"><span>${esc(MACHINES[r.mid].name)}</span><span>${r.isVm?'货道停售':'库存清零'}</span></div>`).join('')}</div>
+         <div class="res-sub">智能柜移除并清零；售货机该商品货道停售、库存保留</div>`,
         `工具返回 <b>{code:0, message:"ok"}</b> · 逐台提交，已写入审计日志。`);
       syncHomeStats();
     },1100);
