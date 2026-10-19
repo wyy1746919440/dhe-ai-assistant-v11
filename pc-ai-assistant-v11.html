@@ -994,9 +994,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261019b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261019b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261019b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261019c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261019c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261019c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -3403,7 +3403,13 @@ function machineFilterAnswer(q){
 }
 function kbAnswer(q){
   const q2=String(q).replace(/[?？]/g,'');
-  if(/机器/.test(q2)&&(/哪些/.test(q2)||/列表/.test(q2)||/所有/.test(q2)||/我有/.test(q2)||/我的/.test(q2)||/在线/.test(q2)||/几台/.test(q2)||/多少台/.test(q2))){
+  /* 机器清单类（1.0 既有 · 2026-10-19 用户反馈「查我机器都查不了」补裸问法）：
+     「查我机器 / 查询机器 / 查机器 / 我的机器」这类不带「哪些 / 列表」的短问法也直出机器列表，
+     不再落知识问答模糊命中；⚠ 带「库存 / 缺货 / 销售 / 订单 / 价格 / 商品 / 温度 / 音量」的仍走各自链路。 */
+  const bareList=/^(帮我|请|麻烦)?(查(询|看|一下)?|看|看看|打开|给我看?)?(我|我名下)?(的|全部|所有)?(机器|设备|售货机|智能柜)$/.test(q2)
+    ||/^(我的机器|机器列表|机器清单|查我机器)$/.test(q2);
+  if(/机器|设备/.test(q2)&&(bareList||/哪些|列表|所有|我有|我的|在线|几台|多少台|清单/.test(q2))
+     &&!/库存|缺货|销售|订单|价格|商品|温度|音量/.test(q2)){
     machineListAnswer(q);return;
   }
   const {e,s}=resolveKB(q);
@@ -3573,8 +3579,11 @@ const SKILL_GUIDE={
   '设置机器温度':{kind:'temp'},'设置机器音量':{kind:'volume'},
   '查询机器库存':{kind:'stockQuery'}
 };
+/* 开场示例问法（2026-10-19 用户反馈：把 1.0 的查询操作也放进 1.1 开场交互）：
+   前 6 条＝1.1 新能力演示；后 6 条＝1.0 已上线的查询 / 问答高频问法。 */
 const OPEN_GUIDE_CHIPS=['在南油文化广场上架康师傅碱性水','所有机器都上架百事可乐 500ml',
-  '帮我批量下架一些机器的可口可乐','有没有机器长时间没补货？','什么原因离线','把机器停售'];
+  '帮我批量下架一些机器的可口可乐','有没有机器长时间没补货？','什么原因离线','把机器停售',
+  '查我的机器','查询机器库存','今天的销售额','最近的订单','查看补货记录','售货机和智能柜有什么区别？'];
 /* 1.0 遗留兼容：技能清单里「生成补货单」走 1.1 的补货单卡 */
 function cardReplenishConfirm(scope){
   return cardReplenish(scope&&scope!=='multi'?[scope]:['hls','lj3','nwhh']);
