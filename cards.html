@@ -46,6 +46,15 @@ table.idx th{background:#fafbfd;font-weight:700}
 .kv{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px dashed #f0f2f5}
 .kv .k{color:var(--sub)} .kv .v{font-weight:600;text-align:right}
 .kv .v em{font-style:normal;color:var(--sub);font-weight:400}
+/* 线路真下拉（2026-10-19 用户反馈）：点 kv 行展开，列出商户下全部线路机构，点选直接切换 */
+.kv .v.ldsel{cursor:pointer;color:var(--pri)}
+.linedrop{border:1px solid #dbe3ee;border-radius:8px;background:#fff;box-shadow:0 6px 18px rgba(31,42,68,.10);margin-top:6px;overflow:hidden;position:relative;z-index:5}
+.lopt{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;font-size:12.5px;cursor:pointer;color:#3f4a5a}
+.lopt+.lopt{border-top:1px solid #eef2f7}
+.lopt em{font-style:normal;color:var(--sub);font-size:11px}
+.lopt:hover{background:#f2f6ff}
+.lopt.on{color:var(--pri);font-weight:600;background:#f2f6ff}
+.lopt.on::after{content:'✓';font-size:12px}
 .ptable{border:1px solid #eef1f5;border-radius:9px;overflow:hidden;margin-top:8px}
 .ptable .ph,.ptable .pr{padding:6px 8px}
 .ptable .ph{display:flex;align-items:center;gap:5px;background:#fafbfd;color:var(--sub);font-size:10.5px;font-weight:700}
@@ -293,19 +302,25 @@ table.idx th{background:#fafbfd;font-weight:700}
         <div class="cardbox">
           <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
           <div class="seg"><span>全部机器 12</span><span class="on">按线路</span><span>自选</span></div>
-          <div class="kv"><span class="k">线路</span><span class="v">南油线路 ▾<em>5 台</em></span></div>
-          <div class="chips"><span>欢乐颂 5 号机</span><span>南油文化广场</span><span>兰均三期</span><span>＋2</span></div>
+          <div class="kv"><span class="k">线路</span><span class="v ldsel">南油线路 ▾<em>3 台</em></span></div>
+          <div class="linedrop">
+            <div class="lopt on"><span>南油线路</span><em>3 台</em></div>
+            <div class="lopt"><span>科技园线路</span><em>3 台</em></div>
+            <div class="lopt"><span>福田线路</span><em>3 台</em></div>
+            <div class="lopt"><span>南山线路</span><em>3 台</em></div>
+          </div>
+          <div class="chips"><span>欢乐颂 5 号机</span><span>南油文化广场</span><span>兰均三期</span></div>
           <div class="ptable">
             <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
-            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="30" class="chg"></span></div><div class="ln">对该线路 5 台逐台执行</div></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="18" class="chg"></span></div><div class="ln">对该线路 3 台逐台执行</div></div>
           </div>
           <div class="addrow">＋ 添加商品</div>
-          <div class="pdiff"><div class="hd">将上架 5 台 × 1 项 = 5 条</div>
-            <div class="r"><span>线路</span><span>南油线路 · 可切换其他线路</span></div>
+          <div class="pdiff"><div class="hd">将上架 3 台 × 1 项 = 3 条</div>
+            <div class="r"><span>线路</span><span>南油线路 · 点线路名可下拉切换</span></div>
           </div>
-          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（5 台）</button></div>
+          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（3 台）</button></div>
         </div>
-        <div class="rule"><b>按线路</b>：kv 行为下拉（线路 + 台数），下方 chips 预览该线路机器、可切换线路。</div>
+        <div class="rule"><b>按线路</b>：kv 行是<b>真下拉</b>——点开列出该商户下<b>全部线路机构</b>（线路 + 台数），<b>点选直接切换</b>目标线路；不是点一下循环切到下一条（用户没法直接选定）。点卡片外任意处收起；下方 chips 预览该线路机器。</div>
       </div>
 
       <!-- W2-c -->

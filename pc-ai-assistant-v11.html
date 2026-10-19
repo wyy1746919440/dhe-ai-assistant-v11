@@ -307,6 +307,15 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .kv{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px dashed #f0f2f5}
 .kv .k{color:var(--sub)} .kv .v{font-weight:600;text-align:right}
 .kv .v em{font-style:normal;color:var(--sub);font-weight:400}
+/* 线路真下拉（2026-10-19 用户反馈）：点 kv 行展开，列出商户下全部线路机构，点选直接切换 */
+.kv .v.ldsel{cursor:pointer;color:var(--pri)}
+.linedrop{border:1px solid #dbe3ee;border-radius:8px;background:#fff;box-shadow:0 6px 18px rgba(31,42,68,.10);margin-top:6px;overflow:hidden;position:relative;z-index:5}
+.lopt{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;font-size:12.5px;cursor:pointer;color:#3f4a5a}
+.lopt+.lopt{border-top:1px solid #eef2f7}
+.lopt em{font-style:normal;color:var(--sub);font-size:11px}
+.lopt:hover{background:#f2f6ff}
+.lopt.on{color:var(--pri);font-weight:600;background:#f2f6ff}
+.lopt.on::after{content:'✓';font-size:12px}
 .ptable{border:1px solid #eef1f5;border-radius:9px;overflow:hidden;margin-top:8px}
 .ptable .ph,.ptable .pr{padding:6px 8px}
 .ptable .ph{display:flex;align-items:center;gap:5px;background:#fafbfd;color:var(--sub);font-size:10.5px;font-weight:700}
@@ -985,9 +994,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261016n" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261016n" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261016n" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261019a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261019a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261019a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1832,8 +1841,13 @@ function onshelfGoodsBlocked(mid,mids,n){
 }
 
 /* ---------- W2-a / W2-b / W2-c：批量上架（范围三选一）----------
+   2026-10-19 用户反馈：线路选择必须是**真下拉**——点开列出商户下全部线路机构（线路 + 台数），
+   点选直接切换目标线路；不能是「点一下循环切到下一条」（用户无法直接选定要切到哪条）。
+   下拉卡片外点击自动收起（全局只绑一次）。
    ⚠ 三张卡共用同一套商品行，仅机器选择区不同；顶部 .seg 切换
    ⚠ 批量不逐台指定货道 / 层，由各机自动分配 */
+if(typeof document!=='undefined'&&!window.__lineDropClose){window.__lineDropClose=1;
+  document.addEventListener('click',()=>{document.querySelectorAll('.linedrop').forEach(d=>{d.style.display='none'})});}
 function cardBatchOnshelf(scope,items){
   const all=Object.keys(MACHINES);
   let mids=[];
@@ -1872,8 +1886,10 @@ function cardBatchOnshelf(scope,items){
   const state={scope:scope,mids:mids,items:items};
   function rangeHtml(){
     if(state.scope==='all')return `<div class="kv"><span class="k">范围</span><span class="v">全部 ${all.length} 台</span></div>`;
-    if(state.scope==='line')return `<div class="kv"><span class="k">线路</span><span class="v">${scopeLine||LINES[0]} ▾<em>${lineCount(scopeLine||LINES[0])} 台</em></span></div>
-      <div class="chips">${lineMachines(scopeLine||LINES[0]).slice(0,3).map(([,m])=>`<span>${esc(m.name)}</span>`).join('')}${lineCount(scopeLine||LINES[0])>3?`<span>＋${lineCount(scopeLine||LINES[0])-3}</span>`:''}</div>`;
+    if(state.scope==='line'){const ln=scopeLine||LINES[0];
+      return `<div class="kv"><span class="k">线路</span><span class="v ldsel" id="${id}_ltop">${esc(ln)} ▾<em>${lineCount(ln)} 台</em></span></div>
+      <div class="linedrop" id="${id}_ldrop" style="display:none">${LINES.map(l=>`<div class="lopt${l===ln?' on':''}" data-l="${esc(l)}"><span>${esc(l)}</span><em>${lineCount(l)} 台</em></div>`).join('')}</div>
+      <div class="chips">${lineMachines(ln).slice(0,3).map(([,m])=>`<span>${esc(m.name)}</span>`).join('')}${lineCount(ln)>3?`<span>＋${lineCount(ln)-3}</span>`:''}</div>`}
     return `<div class="kv"><span class="k">已选机器</span><span class="v">${state.mids.length} 台</span></div>
       <div class="chips">${state.mids.map(k=>`<span>${esc(MACHINES[k].name)} <b data-x="${k}">✕</b></span>`).join('')}<span id="${id}_addm">＋ 添加机器</span></div>`;
   }
@@ -1883,10 +1899,14 @@ function cardBatchOnshelf(scope,items){
     if(lm)lm.onclick=()=>sheetAddMachine(state.mids,sel=>{state.mids=sel;renderRange();refresh()});
     box.querySelectorAll('[data-x]').forEach(b=>{b.onclick=e=>{e.stopPropagation();
       state.mids=state.mids.filter(k=>k!==b.getAttribute('data-x'));renderRange();refresh()}});
-    const kvLine=box.querySelector('.kv .v');
-    if(state.scope==='line'&&kvLine)kvLine.onclick=()=>{
-      const i=LINES.indexOf(scopeLine||LINES[0]);scopeLine=LINES[(i+1)%LINES.length];
-      state.mids=lineMachines(scopeLine).map(([k])=>k);renderRange();refresh()};
+    /* 线路下拉：点 kv 行开合，点选项直接切换该线路（不再循环切换） */
+    const lt=box.querySelector('#'+id+'_ltop'),ld=box.querySelector('#'+id+'_ldrop');
+    if(lt&&ld){
+      lt.onclick=e=>{e.stopPropagation();ld.style.display=(ld.style.display==='none'?'block':'none')};
+      ld.querySelectorAll('.lopt').forEach(o=>{o.onclick=e=>{e.stopPropagation();
+        scopeLine=o.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);
+        renderRange();refresh()}});
+    }
   }
   const pv=c.querySelector('#'+id+'_pv'),okBtn=c.querySelector('#'+id+'_ok');
   function refresh(){
@@ -1896,7 +1916,7 @@ function cardBatchOnshelf(scope,items){
     c.querySelectorAll('.cnt').forEach(e=>e.textContent=state.mids.length);
     const bad=state.items.some(it=>!(Number(it.price)>0))||state.items.some(it=>!(Number(it.qty)>=0))||!state.mids.length;
     let h=`<div class="hd">将上架 ${state.mids.length} 台 × ${state.items.length} 项 = ${state.mids.length*state.items.length} 条</div>`;
-    if(state.scope==='line')h+=`<div class="r"><span>线路</span><span>${scopeLine||LINES[0]} · 可切换其他线路</span></div>`;
+    if(state.scope==='line')h+=`<div class="r"><span>线路</span><span>${esc(scopeLine||LINES[0])} · 点线路名可下拉切换</span></div>`;
     if(state.scope==='pick')state.mids.forEach(k=>{h+=`<div class="r"><span>${esc(MACHINES[k].name)}</span><span>${MACHINES[k].code}</span></div>`});
     pv.className='pdiff'+(bad?' err':'');
     pv.innerHTML=bad?(state.mids.length?'价格需为大于 0 的数字、补货量需为不小于 0 的整数':'请先选择机器'):h;
