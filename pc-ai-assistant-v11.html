@@ -994,9 +994,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261019a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261019a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261019a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261019b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261019b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261019b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1887,9 +1887,11 @@ function cardBatchOnshelf(scope,items){
   function rangeHtml(){
     if(state.scope==='all')return `<div class="kv"><span class="k">范围</span><span class="v">全部 ${all.length} 台</span></div>`;
     if(state.scope==='line'){const ln=scopeLine||LINES[0];
-      return `<div class="kv"><span class="k">线路</span><span class="v ldsel" id="${id}_ltop">${esc(ln)} ▾<em>${lineCount(ln)} 台</em></span></div>
-      <div class="linedrop" id="${id}_ldrop" style="display:none">${LINES.map(l=>`<div class="lopt${l===ln?' on':''}" data-l="${esc(l)}"><span>${esc(l)}</span><em>${lineCount(l)} 台</em></div>`).join('')}</div>
-      <div class="chips">${lineMachines(ln).slice(0,3).map(([,m])=>`<span>${esc(m.name)}</span>`).join('')}${lineCount(ln)>3?`<span>＋${lineCount(ln)-3}</span>`:''}</div>`}
+      /* 2026-10-19 用户反馈：移动端选择类交互没有「卡内嵌下拉」的先例（P1/P2 都是半屏弹层）
+         → 移动端＝点「线路」行呼出**半屏弹层**选线路；PC 端＝卡内真下拉。 */
+      return `<div class="kv"><span class="k">线路</span><span class="v ldsel" id="${id}_ltop">${esc(ln)} ▾<em>${lineCount(ln)} 台</em></span></div>`+
+        (PCW?`<div class="linedrop" id="${id}_ldrop" style="display:none">${LINES.map(l=>`<div class="lopt${l===ln?' on':''}" data-l="${esc(l)}"><span>${esc(l)}</span><em>${lineCount(l)} 台</em></div>`).join('')}</div>`:'')+
+        `<div class="chips">${lineMachines(ln).slice(0,3).map(([,m])=>`<span>${esc(m.name)}</span>`).join('')}${lineCount(ln)>3?`<span>＋${lineCount(ln)-3}</span>`:''}</div>`}
     return `<div class="kv"><span class="k">已选机器</span><span class="v">${state.mids.length} 台</span></div>
       <div class="chips">${state.mids.map(k=>`<span>${esc(MACHINES[k].name)} <b data-x="${k}">✕</b></span>`).join('')}<span id="${id}_addm">＋ 添加机器</span></div>`;
   }
@@ -1899,13 +1901,26 @@ function cardBatchOnshelf(scope,items){
     if(lm)lm.onclick=()=>sheetAddMachine(state.mids,sel=>{state.mids=sel;renderRange();refresh()});
     box.querySelectorAll('[data-x]').forEach(b=>{b.onclick=e=>{e.stopPropagation();
       state.mids=state.mids.filter(k=>k!==b.getAttribute('data-x'));renderRange();refresh()}});
-    /* 线路下拉：点 kv 行开合，点选项直接切换该线路（不再循环切换） */
-    const lt=box.querySelector('#'+id+'_ltop'),ld=box.querySelector('#'+id+'_ldrop');
-    if(lt&&ld){
-      lt.onclick=e=>{e.stopPropagation();ld.style.display=(ld.style.display==='none'?'block':'none')};
-      ld.querySelectorAll('.lopt').forEach(o=>{o.onclick=e=>{e.stopPropagation();
-        scopeLine=o.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);
-        renderRange();refresh()}});
+    /* 线路选择：PC＝卡内下拉（点 kv 行开合，点选项直接切换）；移动端＝半屏弹层（同 P1/P2 形态，2026-10-19 用户反馈） */
+    const lt=box.querySelector('#'+id+'_ltop');
+    if(lt&&PCW){
+      const ld=box.querySelector('#'+id+'_ldrop');
+      if(ld){
+        lt.onclick=e=>{e.stopPropagation();ld.style.display=(ld.style.display==='none'?'block':'none')};
+        ld.querySelectorAll('.lopt').forEach(o=>{o.onclick=e=>{e.stopPropagation();
+          scopeLine=o.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);
+          renderRange();refresh()}});
+      }
+    }else if(lt){
+      lt.onclick=()=>{
+        const ln=scopeLine||LINES[0];
+        const mask=openSheet(`<div class="sh-hd">选择线路<span class="x">✕</span></div><div class="picklist">${
+          LINES.map(l=>`<div class="lopt${l===ln?' on':''}" data-l="${esc(l)}"><span>${esc(l)}</span><em>${lineCount(l)} 台</em></div>`).join('')}</div>`);
+        const x=mask.querySelector('.sh-hd .x');if(x)x.onclick=()=>closeSheet();
+        mask.querySelectorAll('.lopt').forEach(r=>{r.onclick=()=>{
+          scopeLine=r.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);
+          closeSheet();renderRange();refresh()}});
+      };
     }
   }
   const pv=c.querySelector('#'+id+'_pv'),okBtn=c.querySelector('#'+id+'_ok');
