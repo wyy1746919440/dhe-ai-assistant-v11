@@ -472,6 +472,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .demo-btns .dbtn{font-size:11.5px;padding:5px 11px;border-radius:6px;cursor:pointer;
   border:1px solid #d6dce4;background:#fff;color:#42526e}
 .demo-btns .dbtn:hover{background:#f3f7ff;border-color:#a9c8f5;color:#1668dc}
+/* —— 机器列表行内「选这台」（2026-10-19 用户反馈：对齐线上小程序）—— */
+.m-act{flex:none;font-size:11px;color:#1668dc;border:1px solid #aac9f7;border-radius:6px;padding:3px 9px;cursor:pointer;background:#fff}
+.m-act:active{background:#eef5ff}
 
 /* —— 卡片边界状态：空状态 / 加载中（统一出口，见 emptyCard / loadingCard）——
    读卡查不到数据时不给空表（空表＝像坏了），给一句「现在是什么情况 + 为什么」；
@@ -505,9 +508,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261019c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261019c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261019c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261019d" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261019d" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261019d" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -3041,12 +3044,23 @@ function machineListAnswer(q){
   }
   const list=Object.entries(MACHINES).map(([id,m])=>{
     const status=m.online?'<span style="color:#52c41a">● 在线</span>':'<span style="color:#9aa0a8">● 离线</span>';
-    return `<div class="mini-row" style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px"><span><b>${m.icon} ${m.name}</b> <span style="color:#8c8c8c;font-size:11px">${m.code}</span><br><span style="color:#8c8c8c;font-size:11px">${m.type} · ${m.line}</span></span><span>${status}${bizTag(id)}</span></div>`;
+    return `<div class="mini-row" style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px"><span><b>${m.icon} ${m.name}</b> <span style="color:#8c8c8c;font-size:11px">${m.code}</span><br><span style="color:#8c8c8c;font-size:11px">${m.type} · ${m.line}</span></span><span style="display:flex;align-items:center;gap:7px;white-space:nowrap">${status}${bizTag(id)}<span class="m-act" data-mid="${id}">选这台</span></span></div>`;
   }).join('');
-  const html=`<b>您共有 ${BIZ.total} 台机器</b><div style="margin:4px 0 10px;color:#8c8c8c;font-size:12px">在线 ${BIZ.online} 台 · 离线 ${BIZ.offline} 台 · 已停售 ${BIZ.stopped} 台 · 故障 ${BIZ.fault} 台</div><div>${list}</div><div class="guide-tail">想接着看哪台机器，或者按状态筛一遍，直接说就行。</div>`;
+  const html=`<b>您共有 ${BIZ.total} 台机器</b><div style="margin:4px 0 10px;color:#8c8c8c;font-size:12px">在线 ${BIZ.online} 台 · 离线 ${BIZ.offline} 台 · 已停售 ${BIZ.stopped} 台 · 故障 ${BIZ.fault} 台</div><div>${list}</div><div class="guide-tail">点「选这台」选中机器，或直接说机器名继续。</div>`;
   bub('ai',html);
+  bindPickMachine();
   chatBody.scrollTop=chatBody.scrollHeight;
   trace('api',`意图 <b>query</b> → GET <b>/ai/tools/machine_list</b> · 只读工具，返回 <b>${BIZ.total}</b> 台 · <b>不走向量检索，不生成文案</b>。`);
+}
+/* 机器列表行内「选这台」（2026-10-19 用户反馈：对齐线上小程序——查机器后每行可直接点选）。
+   点击＝以该机器继续对话：确认选中并追问「要做什么」（1.0 引导第 2 步 askAction）。 */
+function bindPickMachine(){
+  document.querySelectorAll('.m-act').forEach(b=>{b.onclick=()=>{
+    const id=b.getAttribute('data-mid');
+    if(!MACHINES[id])return;
+    bub('user',esc(MACHINES[id].name));
+    clearCtx();askAction(id);
+  }});
 }
 function machineFilterAnswer(q){
   let want=null;
@@ -3067,10 +3081,11 @@ function machineFilterAnswer(q){
     return;
   }
   const body=hit.length
-    ? hit.map(([id,m])=>`<div class="mini-row" style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px"><span><b>${m.icon} ${m.name}</b> <span style="color:#8c8c8c;font-size:11px">${m.code}</span><br><span style="color:#8c8c8c;font-size:11px">${m.type}</span></span><span style="white-space:nowrap">${m.online?'<span style="color:#52c41a">● 在线</span>':'<span style="color:#9aa0a8">● 离线</span>'}${bizTag(id)}</span></div>`).join('')
+    ? hit.map(([id,m])=>`<div class="mini-row" style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px"><span><b>${m.icon} ${m.name}</b> <span style="color:#8c8c8c;font-size:11px">${m.code}</span><br><span style="color:#8c8c8c;font-size:11px">${m.type}</span></span><span style="display:flex;align-items:center;gap:7px;white-space:nowrap">${m.online?'<span style="color:#52c41a">● 在线</span>':'<span style="color:#9aa0a8">● 离线</span>'}${bizTag(id)}<span class="m-act" data-mid="${id}">选这台</span></span></div>`).join('')
     : `<div style="color:#8c8c8c;font-size:12px;padding:8px 0">当前没有${label}</div>`;
   const html=`<b>${label} · ${hit.length} 台</b><div style="margin:4px 0 10px;color:#8c8c8c;font-size:12px">统计范围：本账号已绑定的 ${Object.keys(MACHINES).length} 台演示机器</div><div>${body}</div>`;
   bub('ai',html);
+  bindPickMachine();
   chatBody.scrollTop=chatBody.scrollHeight;
   trace('api',`意图 <b>query</b> → GET <b>/ai/tools/machine_list?state=${want}</b> · 只读工具按状态筛选，返回 <b>${hit.length}</b> 台。`);
 }
