@@ -405,6 +405,16 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .seg span{font-size:11px;border:1px solid #dfe4ea;border-radius:8px;padding:3px 8px;color:#5b6472}
 .seg span.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
 .sumline{display:flex;justify-content:space-between;font-size:12px;font-weight:700;padding:6px 8px;background:#fafbfd;border-top:1px solid #f0f2f5}
+/* ---------- 知识答案 + 底部「去操作」入口（2026-10-21 覆盖率复核后补） ---------- */
+.kbbox{background:#fff;border:1px solid #eef1f5;border-radius:10px;padding:11px 12px;font-size:11.5px;color:#333;line-height:1.8}
+.kbbox .kb-hd{font-size:12.5px;font-weight:700;margin-bottom:5px}
+.kbbox .kb-pt{display:flex;gap:6px;margin-top:3px}
+.kbbox .kb-pt .n{width:14px;height:14px;border-radius:50%;background:var(--brand);color:#fff;font-size:9.5px;
+  display:flex;align-items:center;justify-content:center;flex:none;margin-top:4px}
+.kbbox .kb-src{margin-top:7px;font-size:10px;color:#aab0b8}
+.kb-jump{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:8px 11px;border:1px solid #aac9f7;background:#f5f9ff;border-radius:8px;cursor:pointer;font-size:12px;color:#1668dc}
+.kb-jump em{font-style:normal;font-size:10.5px;color:#8c8c8c;white-space:nowrap}
 /* ---------- 半屏添加弹层（对齐现有系统「添加商品 / 选择机器」页） ---------- */
 .masknote{font-size:10.5px;color:#aab0b8;margin-bottom:6px}
 .sheet{width:300px;background:#fff;border:1px solid #eef1f5;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.14);margin:0 auto;overflow:hidden}
@@ -839,6 +849,13 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
 .pc-modal .pm-page select{height:26px;border:1px solid #dfe4ea;border-radius:4px;font-size:12.5px;
         font-family:inherit;color:#5b6472;margin-left:6px;background:#fff;outline:none}
 
+/* —— 知识答案底部「去操作」跳转入口（2026-10-21 覆盖率复核后补）——
+   PC 抽屉里 AI 消息无气泡，入口要收在 620px 内，右对齐一点更像「按钮」。 */
+.pc-drawer .kb-jump{max-width:620px;margin-top:10px;padding:8px 13px;font-size:13px;
+  border-color:#cfe3ff;background:#fff}
+.pc-drawer .kb-jump:hover{background:#f2f7ff;border-color:#1677ff}
+.pc-drawer .kb-jump em{font-size:12px}
+
 /* —— 校验前移：机型 / 商品级不可上架行置灰标原因（2026-10-16）—— */
 .pc-modal .pm-table tr.disrow td{color:#bfbfbf;background:#fafafa}
 .pc-modal .pm-table tr.disrow{cursor:not-allowed}
@@ -994,9 +1011,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261019d" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261019d" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261019d" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261021a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261021a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261021a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -3368,12 +3385,23 @@ function machineListAnswer(q){
   }
   const list=Object.entries(MACHINES).map(([id,m])=>{
     const status=m.online?'<span style="color:#52c41a">● 在线</span>':'<span style="color:#9aa0a8">● 离线</span>';
-    return `<div class="mini-row" style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px"><span><b>${m.icon} ${m.name}</b> <span style="color:#8c8c8c;font-size:11px">${m.code}</span><br><span style="color:#8c8c8c;font-size:11px">${m.type} · ${m.line}</span></span><span>${status}${bizTag(id)}</span></div>`;
+    return `<div class="mini-row" style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px"><span><b>${m.icon} ${m.name}</b> <span style="color:#8c8c8c;font-size:11px">${m.code}</span><br><span style="color:#8c8c8c;font-size:11px">${m.type} · ${m.line}</span></span><span style="display:flex;align-items:center;gap:7px;white-space:nowrap">${status}${bizTag(id)}<span class="m-act" data-mid="${id}">选这台</span></span></div>`;
   }).join('');
-  const html=`<b>您共有 ${BIZ.total} 台机器</b><div style="margin:4px 0 10px;color:#8c8c8c;font-size:12px">在线 ${BIZ.online} 台 · 离线 ${BIZ.offline} 台 · 已停售 ${BIZ.stopped} 台 · 故障 ${BIZ.fault} 台</div><div>${list}</div><div class="guide-tail">想接着看哪台机器，或者按状态筛一遍，直接说就行。</div>`;
+  const html=`<b>您共有 ${BIZ.total} 台机器</b><div style="margin:4px 0 10px;color:#8c8c8c;font-size:12px">在线 ${BIZ.online} 台 · 离线 ${BIZ.offline} 台 · 已停售 ${BIZ.stopped} 台 · 故障 ${BIZ.fault} 台</div><div>${list}</div><div class="guide-tail">点「选这台」选中机器，或直接说机器名继续。</div>`;
   bub('ai',html);
+  bindPickMachine();
   chatBody.scrollTop=chatBody.scrollHeight;
   trace('api',`意图 <b>query</b> → GET <b>/ai/tools/machine_list</b> · 只读工具，返回 <b>${BIZ.total}</b> 台 · <b>不走向量检索，不生成文案</b>。`);
+}
+/* 机器列表行内「选这台」（2026-10-19 用户反馈：对齐线上小程序——查机器后每行可直接点选）。
+   点击＝以该机器继续对话：确认选中并追问「要做什么」（1.0 引导第 2 步 askAction）。 */
+function bindPickMachine(){
+  document.querySelectorAll('.m-act').forEach(b=>{b.onclick=()=>{
+    const id=b.getAttribute('data-mid');
+    if(!MACHINES[id])return;
+    bub('user',esc(MACHINES[id].name));
+    clearCtx();askAction(id);
+  }});
 }
 function machineFilterAnswer(q){
   let want=null;
@@ -3394,12 +3422,64 @@ function machineFilterAnswer(q){
     return;
   }
   const body=hit.length
-    ? hit.map(([id,m])=>`<div class="mini-row" style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px"><span><b>${m.icon} ${m.name}</b> <span style="color:#8c8c8c;font-size:11px">${m.code}</span><br><span style="color:#8c8c8c;font-size:11px">${m.type}</span></span><span style="white-space:nowrap">${m.online?'<span style="color:#52c41a">● 在线</span>':'<span style="color:#9aa0a8">● 离线</span>'}${bizTag(id)}</span></div>`).join('')
+    ? hit.map(([id,m])=>`<div class="mini-row" style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px"><span><b>${m.icon} ${m.name}</b> <span style="color:#8c8c8c;font-size:11px">${m.code}</span><br><span style="color:#8c8c8c;font-size:11px">${m.type}</span></span><span style="display:flex;align-items:center;gap:7px;white-space:nowrap">${m.online?'<span style="color:#52c41a">● 在线</span>':'<span style="color:#9aa0a8">● 离线</span>'}${bizTag(id)}<span class="m-act" data-mid="${id}">选这台</span></span></div>`).join('')
     : `<div style="color:#8c8c8c;font-size:12px;padding:8px 0">当前没有${label}</div>`;
   const html=`<b>${label} · ${hit.length} 台</b><div style="margin:4px 0 10px;color:#8c8c8c;font-size:12px">统计范围：本账号已绑定的 ${Object.keys(MACHINES).length} 台演示机器</div><div>${body}</div>`;
   bub('ai',html);
+  bindPickMachine();
   chatBody.scrollTop=chatBody.scrollHeight;
   trace('api',`意图 <b>query</b> → GET <b>/ai/tools/machine_list?state=${want}</b> · 只读工具按状态筛选，返回 <b>${hit.length}</b> 台。`);
+}
+/* ===== 1.1 KB 补丁层（2026-10-21 覆盖率复核后补）=====
+   ⚠ 1.0 源里的 KB 区块由 build_kb_data.py 从条目表**自动生成、请勿手改**，
+      所以这里用补丁层叠加，不动原数据：
+      ① KB11_ENTRIES —— 条目表里没有、但真实问法高频的条目（本期＝「新增商品」）
+      ② KB11_ALIAS   —— 条目已存在、只缺口语同义词（注册机器 / 控制温度 / 账实不符）
+      ③ 条目带 j 字段 —— 答案底部出「去操作」跳转入口（答案讲完怎么做，直接给入口）
+   检索出口统一走 resolveKB11（补丁条目 + 原条目取最高分），kbAnswer 不再直接调 resolveKB。 */
+const KB11_ENTRIES=[
+  {n:'新增商品（商品库入库）',c:'商品与库存（补货链路）',s:'商品管理',
+   a:'新增商品是把商品建进你的商品库（私有库），建好后才能往机器上架。填商品名称、品牌、单件规格与商品图片即可；标品可以直接从公有库引入，不用自己重录。智能柜商品在新增后还要做商品建模，建模通过才能在机器上架售卖。',
+   p:'小程序端：商品库 → 添加商品；PC 端：商品管理 → 新增商品',
+   w:'新增商品 ≠ 上架到机器：先在商品库里新增，再到机器上架，两步不能跳。智能柜不建模就上架，识别不了也无法扣款。',
+   k:['怎么新增商品','新增商品','怎么添加商品','添加商品','怎么新增一个商品','怎么建商品','商品怎么录入','怎么上新商品','怎么创建商品','商品怎么新增','新增商品在哪'],
+   j:{t:'去新增商品',p:'商品管理 → 新增商品'}}
+];
+/* 条目表里已有的条目补口语同义词：键＝条目名，值＝追加的 key（已存在的不重复加） */
+const KB11_ALIAS={
+  /* ⚠ 别加「怎么注册一台机器」这种长 key：LCS 会拿「一台机器」跟「有一台机器离线了」匹配出 0.45，
+     越过 0.42 阈值，把离线陈述句误答成设备注册（实测踩到）。key 只留「注册」这个动作词。 */
+  '设备注册（新机绑定）':['怎么注册机器','注册机器','机器怎么注册','新机怎么注册','设备怎么注册','设备注册'],
+  '温度设置':['怎么控制温度','温度怎么控制','怎么调温度','机器温度怎么调','温度怎么调低','温度怎么调高','控制温度'],
+  '库存盘点':['库存账实不符','账实不符','账实不符怎么处理','库存账实不符怎么处理','库存和实际对不上','账面和实物不一致','账实不一致']
+};
+Object.keys(KB11_ALIAS).forEach(function(n){
+  const e=KB_ENTRIES.find(function(x){return x.n===n});
+  if(!e)return;
+  e.k=e.k.concat(KB11_ALIAS[n].filter(function(k){return e.k.indexOf(k)<0}));
+});
+function resolveKB11(q){
+  const r=resolveKB(q);
+  let best=r.e,bs=r.s;
+  for(const e of KB11_ENTRIES){
+    for(const k of e.k){const s=kbScore(q,k);if(s>bs){bs=s;best=e}}
+  }
+  return {e:best,s:bs};
+}
+/* 「去操作」入口：答案讲完怎么做，底部给一个能点的跳转入口。
+   原型内为**模拟跳转**（没有真实后台页面），只回一句「已为你打开 + 路径」，不发起任何写操作。 */
+function bindKbJump(){
+  document.querySelectorAll('.kb-jump').forEach(function(el){
+    if(el.getAttribute('data-b'))return;
+    el.setAttribute('data-b','1');
+    el.onclick=function(){
+      const t=el.getAttribute('data-jt'),p=el.getAttribute('data-jp');
+      bub('user',t);
+      bub('ai',`已为你打开「<b>${esc(t)}</b>」<div style="margin-top:4px;font-size:12px;color:#8c8c8c">路径：${esc(p)}</div><div class="guide-tail">按页面提示填写就行；建好后回来告诉我，我可以直接帮你把它上架到机器。</div>`);
+      chatBody.scrollTop=chatBody.scrollHeight;
+      trace('api',`意图 <b>navigate</b> → 知识答案底部「去操作」入口被点击 → 打开 <b>${esc(p)}</b>（原型内为模拟跳转，不发起写操作）。`);
+    };
+  });
 }
 function kbAnswer(q){
   const q2=String(q).replace(/[?？]/g,'');
@@ -3412,9 +3492,13 @@ function kbAnswer(q){
      &&!/库存|缺货|销售|订单|价格|商品|温度|音量/.test(q2)){
     machineListAnswer(q);return;
   }
-  const {e,s}=resolveKB(q);
+  const {e,s}=resolveKB11(q);
   if(e&&s>=KB_META.th){
-    bub('ai',renderKB(e));
+    /* 条目带 j（去操作入口）时，答案底部追加一个可点入口：讲完怎么做，直接给跳转 */
+    let html=renderKB(e);
+    if(e.j)html+=`<div class="kb-jump" data-jt="${esc(e.j.t)}" data-jp="${esc(e.j.p)}"><span>${esc(e.j.t)}</span><em>${esc(e.j.p)} ›</em></div>`;
+    bub('ai',html);
+    if(e.j)bindKbJump();
     chatBody.scrollTop=chatBody.scrollHeight;
     trace('rag',`意图 <b>qa</b> → 定向检索 mp_kb · 命中条目「${e.n}」（${e.c} / ${e.s}）· 匹配度 <b>${Math.min(0.99,s).toFixed(2)}</b> · 按「无来源不回复」只依据召回片段作答，来源只标条目名 + 版本号。`);
     return;
@@ -3488,7 +3572,12 @@ function handleIntent(q){
      关键词与写判定重叠，顺序错了就会把查询弹成确认卡。
      ⚠ 这一条刻意不受 howTo 影响：运营商习惯给清单类问题加问号（「哪些机器离线了？」），
        按 howTo 放过就会掉到知识问答，答成「您共有 12 台机器…」而不是按状态筛。 */
-  if(!mid&&/哪些|哪几台|有哪|列出|多少台|几台/.test(q)&&/停售|故障|离线|在线/.test(q))return machineFilterAnswer(q);
+  /* ⚠「缺货」优先于状态筛选：「那些在线的机器缺货百分之四十以上」问的是**缺货清单**，
+     不是在线机器清单 —— 只认状态词会答成「在线机器 · N 台」，答非所问。带缺货的清单句先给缺货清单。 */
+  if(!mid&&/哪些|那些|哪几台|那几台|有哪|有那|列出|需要|待补货|多少台|几台/.test(q)&&/缺货|空货/.test(q)&&!/补货单/.test(q))return cardLackList();
+  /* ⚠ 「那些 / 那几台 / 有那」是真实问法里的高频口误写法（654 条里出现 3 次「那些机器离线了」），
+     与「哪些」同等对待；后半段仍要求命中 停售 / 故障 / 离线 / 在线，所以「那些机器的库存」不会被吞。 */
+  if(!mid&&/哪些|那些|哪几台|那几台|有哪|有那|列出|多少台|几台/.test(q)&&/停售|故障|离线|在线/.test(q))return machineFilterAnswer(q);
   /* 5.1 未点名机器：反问机器 */
   if(!mid&&!howTo){
     if(/恢复营业|开始营业/.test(q))return askMachine('请问要恢复哪台机器营业？','resume');

@@ -144,6 +144,16 @@ table.idx th{background:#fafbfd;font-weight:700}
 .seg span{font-size:11px;border:1px solid #dfe4ea;border-radius:8px;padding:3px 8px;color:#5b6472}
 .seg span.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
 .sumline{display:flex;justify-content:space-between;font-size:12px;font-weight:700;padding:6px 8px;background:#fafbfd;border-top:1px solid #f0f2f5}
+/* ---------- 知识答案 + 底部「去操作」入口（2026-10-21 覆盖率复核后补） ---------- */
+.kbbox{background:#fff;border:1px solid #eef1f5;border-radius:10px;padding:11px 12px;font-size:11.5px;color:#333;line-height:1.8}
+.kbbox .kb-hd{font-size:12.5px;font-weight:700;margin-bottom:5px}
+.kbbox .kb-pt{display:flex;gap:6px;margin-top:3px}
+.kbbox .kb-pt .n{width:14px;height:14px;border-radius:50%;background:var(--brand);color:#fff;font-size:9.5px;
+  display:flex;align-items:center;justify-content:center;flex:none;margin-top:4px}
+.kbbox .kb-src{margin-top:7px;font-size:10px;color:#aab0b8}
+.kb-jump{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:8px 11px;border:1px solid #aac9f7;background:#f5f9ff;border-radius:8px;cursor:pointer;font-size:12px;color:#1668dc}
+.kb-jump em{font-style:normal;font-size:10.5px;color:#8c8c8c;white-space:nowrap}
 /* ---------- 半屏添加弹层（对齐现有系统「添加商品 / 选择机器」页） ---------- */
 .masknote{font-size:10.5px;color:#aab0b8;margin-bottom:6px}
 .sheet{width:300px;background:#fff;border:1px solid #eef1f5;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.14);margin:0 auto;overflow:hidden}
@@ -627,6 +637,21 @@ table.idx th{background:#fafbfd;font-weight:700}
           </div>
         </div>
         <div class="rule">口径：原因取自<b><code>monitor_fault_records</code> 故障记录</b>（<code>fault_type='machine_offline'</code>），建议文案取自 <b>nacos 配置</b>；并标注来源与时间。<br>⚠⚠ <b>2026-10-16 代码复核修正</b>：原「操作日志」来源<b>不存在</b>——<code>machine_online_record</code> 只有 online_status 等字段、<b>无原因字段</b>。卡片「来源」列只可能出现<b>故障记录 / 预警通知</b>两类；无记录时给「暂无原因记录，建议查硬件状态 / 提交工单」。<br>这是<b>纯只读卡</b>——不给「查硬件状态 / 远程重启」按钮：卡内已在展示状态，再点「查硬件状态」是循环跳转；重启属另一个能力，用户直接问即可。</div>
+      </div>
+
+      <!-- K1 知识答案 + 「去操作」入口（2026-10-21 覆盖率复核后补） -->
+      <div class="unit">
+        <div class="cap"><span class="cd">K1</span><span class="tag r">知识</span>知识答案 · 底部「去操作」入口</div>
+        <span class="q">「怎么新增商品」（654 条真实问法里出现 44 次，1.0 是<b>写能力不接 + KB 不命中</b>的双落空）</span>
+        <div class="kbbox">
+          <div class="kb-hd">新增商品（商品库入库）</div>
+          <div class="kb-a">新增商品是把商品建进你的商品库（私有库），建好后才能往机器上架。填商品名称、品牌、单件规格与商品图片即可；标品可以直接从公有库引入，不用自己重录。智能柜商品在新增后还要做商品建模，建模通过才能在机器上架售卖。</div>
+          <div class="kb-pt"><span class="n">1</span><span><b>操作路径</b>：小程序端：商品库 → 添加商品；PC 端：商品管理 → 新增商品</span></div>
+          <div class="kb-pt"><span class="n">2</span><span><b>注意</b>：新增商品 ≠ 上架到机器——先在商品库新增，再到机器上架，两步不能跳；智能柜不建模就上架，识别不了也无法扣款。</span></div>
+          <div class="kb-jump"><span>去新增商品</span><em>商品管理 → 新增商品 ›</em></div>
+          <div class="kb-src">📖 来源：知识条目「新增商品（商品库入库）」· 最终版 · 2026-09-15</div>
+        </div>
+        <div class="rule"><b>知识答案讲完「怎么做」之后，直接给入口，不再让用户自己找页面。</b>① 只有<b>答案讲的是某个后台页面上的操作</b>才挂入口（本期＝新增商品）；纯概念解释（「售货机和智能柜有什么区别」）不挂，避免答案底部长出按钮森林。② 入口＝<b>动作名</b>（去新增商品）＋<b>路径副标</b>，不超过一行；③ 点击＝<b>跳转到对应页面</b>，AI <b>不代填、不发写操作</b>，跳完补一句「建好后回来告诉我，我可以直接帮你把它上架到机器」形成闭环；④ 入口由<b>条目数据</b>（<code>j</code> 字段）驱动，不是写死在某几条文案里——后续哪个条目要挂，加字段即可。</div>
       </div>
 
     </div>
