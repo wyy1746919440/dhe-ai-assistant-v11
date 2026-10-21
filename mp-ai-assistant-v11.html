@@ -524,9 +524,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261021b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261021b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261021b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261021c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261021c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261021c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -708,7 +708,7 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
    kind: vm=售货机（按**货道**）｜cab=智能柜（按**层**，无货道概念）
    ⚠ 上下架卡按机型分两套：智能柜给「层」，售货机给「货道」+ 最大库存/现存。 */
 const MACHINES = {
-  hls:{name:'欢乐颂 5 号机',code:'51890784',kind:'vm',type:'售货机 · 弹簧货道',icon:'🥤',online:true,biz:'营业中',line:'南油线路',
+  hls:{name:'欢乐颂 5 号机',code:'51890784',kind:'vm',type:'售货机 · 弹簧机',icon:'🥤',online:true,biz:'营业中',line:'南油线路',
     addr:'广东省深圳市南山区打石一路中兴通讯员工宿舍南196米',lack:true,lackRate:'42%',sales:'¥128.0',orders:15,
     products:[{n:'可口可乐 330ml',price:3.0,lanes:[{id:'A3',stock:12,max:30}]},
               {n:'辣媳妇山椒笋尖 75g',price:2.5,lanes:[{id:'A1',stock:8,max:30}]},
@@ -753,7 +753,7 @@ const MACHINES = {
     addr:'广东省深圳市南山区南山文体中心游泳馆入口左侧',lack:true,lackRate:'56%',sales:'¥42.0',orders:6,
     products:[{n:'毛巾',price:15.0,lanes:[{id:'格1',stock:1,max:10}]},
               {n:'雨伞',price:20.0,lanes:[{id:'格3',stock:0,max:10}]}]},
-  hwy:{name:'深圳湾体育中心',code:'51860045',kind:'vm',type:'售货机 · 弹簧货道',icon:'🥤',online:true,biz:'营业中',line:'南山线路',
+  hwy:{name:'深圳湾体育中心',code:'51860045',kind:'vm',type:'售货机 · 弹簧机',icon:'🥤',online:true,biz:'营业中',line:'南山线路',
     addr:'广东省深圳市南山区深圳湾体育中心北门内广场',lack:false,lackRate:'11%',sales:'¥158.0',orders:19,
     products:[{n:'可口可乐 330ml',price:3.0,lanes:[{id:'A1',stock:16,max:30}]},
               {n:'雀巢咖啡 268ml',price:5.0,lanes:[{id:'B1',stock:6,max:30}]}]},
