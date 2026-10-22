@@ -524,9 +524,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261022a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261022a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261022a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261022b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261022b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261022b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -3178,6 +3178,23 @@ function resolveKB11(q){
     for(const k of e.k){const s=kbScore(q,k);if(s>bs){bs=s;best=e}}
   }
   return {e:best,s:bs};
+}
+/* ---------- 1.0 兼容补丁：looksLikeOtherIntent 覆盖（本文件在装配序里位于 1.0 段之后，后声明生效）----------
+   ⚠ 2026-10-22 用户反馈：开场引导挂着「等机器名」槽位（guideStart 里 ctx={slot:'machine'}），
+   此时点开场快捷问法「帮我批量下架一些机器的可口可乐」——1.0 版操作意图白名单没有「上架 / 下架」，
+   整句被判为「在回答机器槽位」→ 回「还是没认出是哪台机器」（冒烟此前没抓到：jsdom 里 guideStart
+   未随载入执行、ctx 为 null，正好绕开了这条路径；评审真机一点就中）。
+   v11 覆盖口径：① 操作意图白名单补 上架 / 下架 / 铺货，并把 补货单 放宽为 补货（覆盖「长时间没补货」类问法）；
+   ② 知识命中出口改走 resolveKB11（含 KB 补丁层条目）。其余与 1.0 版逐条同源；改 1.0 版时要同步这里。 */
+function looksLikeOtherIntent(q){
+  if(/转人工|人工客服|找客服|联系客服/.test(q))return true;
+  if(bizAsk(q))return true;                                              /* 经营 / 订单只读查询 */
+  if(/哪些|哪几台|有哪|列出|待补货/.test(q)&&/缺货|补货|停售|故障|离线|在线/.test(q))return true;
+  if(!findMachine(q)&&/机器|设备/.test(q)
+     &&/列表|清单|哪些|哪几台|有哪|几台|多少台|我的|我有|所有|在线|离线|停售|故障|状态/.test(q))return true;
+  if(!findMachine(q)&&/上架|下架|铺货|停售|恢复营业|开始营业|温度|音量|价格|改价|调价|库存|补货|销量/.test(q))return true;
+  if(/补货单/.test(q))return true;
+  const r=resolveKB11(q);return !!(r.e&&r.s>=KB_META.th);               /* 知识问答能稳定命中 */
 }
 /* 「去操作」入口：答案讲完怎么做，底部给一个能点的跳转入口。
    原型内为**模拟跳转**（没有真实后台页面），只回一句「已为你打开 + 路径」，不发起任何写操作。 */
