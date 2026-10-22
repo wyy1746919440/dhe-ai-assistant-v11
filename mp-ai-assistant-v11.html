@@ -524,9 +524,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261022b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261022b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261022b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261022c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261022c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261022c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1391,6 +1391,68 @@ function laneOfProd(mid,n){const m=MACHINES[mid];if(!m)return '';const p=m.produ
 function laneMax(it,isVm){return (it.ln&&it.ln.max)?it.ln.max:(isVm?30:'—')}
 function laneNow(it){return (it.ln&&it.ln.stock!=null)?it.ln.stock:0}
 function slotCol(it){return `<span class="slot">${esc(it.slot)} ▾</span>`}
+/* ---------- W1 位置选择弹层（2026-10-22 用户反馈：点「第 2 层 ▾」原来只 toast，没有真实交互）----------
+   列出该机器的全部层 / 货道：已铺商品的标「已有：商品名」（售货机再带 最大/现存），空闲的标「空闲」。
+   点选即回填卡片，售货机副行「最大 · 现存」联动刷新；移动端＝半屏弹层、PC 端＝居中弹窗（同 P1/P2 形态）。 */
+function slotOptions(mid,isVm){
+  const m=MACHINES[mid];const used={};const opts=[];
+  m.products.forEach(p=>(p.lanes||[]).forEach(l=>{
+    if(!used[l.id]){used[l.id]=1;opts.push({id:l.id,used:true,by:p.n,max:l.max,stock:l.stock})}
+  }));
+  (isVm?nextFreeLane(m,8):nextFreeLayer(m,8)).forEach(id=>{if(!used[id]){used[id]=1;opts.push({id:id,used:false})}});
+  return opts;
+}
+function sheetPickSlot(mid,isVm,cur,cb){
+  if(PCW)return modalPickSlot(mid,isVm,cur,cb);
+  const unit=isVm?'货道':'层';
+  const opts=slotOptions(mid,isVm);
+  const inner=`<div class="sh-hd">选择${unit}<span class="x">✕</span></div>
+    <div class="picklist" id="sl_list">
+      ${opts.map(o=>`<div class="pickrow${o.id===cur?' on':''}" data-id="${esc(o.id)}"><span class="rd">${o.id===cur?'✓':''}</span>
+        <div class="c1"><span class="nm">${esc(o.id)}</span><span class="addr">${o.used?('已有：'+esc(shortName(o.by))+(isVm&&o.max?' · 最大 '+o.max+' · 现存 '+o.stock:'')):'空闲'}</span></div></div>`).join('')}
+    </div>`;
+  const mask=openSheet(inner);
+  mask.querySelectorAll('#sl_list .pickrow').forEach(r=>{
+    r.onclick=()=>{const v=r.getAttribute('data-id');closeSheet();if(cb)cb(v)};
+  });
+  mask.querySelector('.sh-hd .x').onclick=closeSheet;
+  return mask;
+}
+function modalPickSlot(mid,isVm,cur,cb){
+  const unit=isVm?'货道':'层';
+  const opts=slotOptions(mid,isVm);
+  const mask=elx(`<div class="pc-modal-mask"><div class="pc-modal" role="dialog">
+    <div class="pm-hd">选择${unit}<span class="x" title="关闭">✕</span></div>
+    <div class="pm-table-wrap"><table class="pm-table">
+      <thead><tr><th>${unit}</th><th>状态</th></tr></thead>
+      <tbody id="sl_rows">${opts.map(o=>`<tr data-id="${esc(o.id)}" class="${o.id===cur?'onrow':''}"><td>${esc(o.id)}</td><td>${o.used?('已有：'+esc(shortName(o.by))+(isVm&&o.max?' · 最大 '+o.max+' · 现存 '+o.stock:'')):'空闲'}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <div class="pm-ft"><span class="pm-selcnt">点选一行完成选择</span><button class="btn ghost" id="sl_cancel">取 消</button></div>
+  </div></div>`);
+  document.body.appendChild(mask);
+  mask.querySelectorAll('#sl_rows tr').forEach(r=>{
+    r.onclick=()=>{const v=r.getAttribute('data-id');mask.remove();if(cb)cb(v)};
+  });
+  mask.querySelector('.pm-hd .x').onclick=()=>mask.remove();
+  mask.querySelector('#sl_cancel').onclick=()=>mask.remove();
+  mask.addEventListener('click',e=>{if(e.target===mask)mask.remove()});
+  return mask;
+}
+/* 把卡片里所有「层 / 货道 ▾」chip 绑到选择弹层；选完回填 slot 并整卡重渲染（副行联动） */
+function bindSlotPicker(c,id,state,refresh){
+  const m=MACHINES[state.mid];const isVm=m.kind==='vm';
+  c.querySelectorAll('.slot').forEach(s=>{
+    s.onclick=()=>{
+      const row=s.closest('.pr');const i=+(row&&row.getAttribute('data-i'));
+      if(!(i>=0&&state.items[i]))return;
+      sheetPickSlot(state.mid,isVm,state.items[i].slot,newSlot=>{
+        const it=state.items[i];it.slot=newSlot;
+        it.ln=isVm?(laneOf(m,newSlot)||{max:30,stock:0}):null;
+        rerenderOnshelf(c,id,state,refresh);
+      });
+    };
+  });
+}
 
 /* ---------- W1 / W1-b：上架商品（单台）----------
    ⚠ 上架位置按机型分两套：智能柜＝层，售货机＝货道（+ 最大/现存）
@@ -1453,7 +1515,7 @@ function cardOnshelf(mid,items){
   }
   [...c.querySelectorAll('.pin')].forEach(i=>{i.oninput=refresh;i.classList.toggle('chg',Math.abs(Number(i.value)-Number(i.getAttribute('data-lib')))>1e-9)});
   [...c.querySelectorAll('.qin')].forEach(i=>{i.oninput=refresh});
-  c.querySelectorAll('.slot').forEach(s=>{s.onclick=()=>toastMsg(`切换${unit}（演示）：${s.textContent.replace(' ▾','')}`)});
+  bindSlotPicker(c,id,state,refresh);
   c.querySelector('#'+id+'_add').onclick=()=>sheetAddProduct(mid,picks=>{
     if(!picks.length)return;
     const cur=state.items.map(x=>x.n);
@@ -1505,7 +1567,7 @@ function rerenderOnshelf(c,id,state,refresh){
   </div>`).join('');
   [...c.querySelectorAll('.pin')].forEach(i=>{i.oninput=refresh;i.classList.toggle('chg',Math.abs(Number(i.value)-Number(i.getAttribute('data-lib')))>1e-9)});
   [...c.querySelectorAll('.qin')].forEach(i=>{i.oninput=refresh});
-  c.querySelectorAll('.slot').forEach(s=>{s.onclick=()=>toastMsg('切换位置（演示）：'+s.textContent.replace(' ▾',''))});
+  bindSlotPicker(c,id,state,refresh);
   refresh();
 }
 function shortName(n){return String(n||'').length>14?String(n).slice(0,13)+'…':n}
@@ -1770,6 +1832,20 @@ function cardSuccessDetail(r){
 function cardOffshelf(mids,pname){
   mids=(mids&&mids.length)?mids:['hls','lj3','nwhh'];
   pname=pname||'可口可乐 330ml';
+  /* 2026-10-22 用户反馈：预览里只列**还在售该商品**的机器——已下架过的（智能柜移除 / 售货机货道停售）
+     再列出来就是「¥0.00 · 库存 0 · 未铺货」的空行。命中 0 台时走空状态卡，不给 0/0 空表。 */
+  const rawN=mids.length;
+  mids=mids.filter(k=>{const m=MACHINES[k];if(!m)return false;
+    const g=m.products.find(x=>x.n===pname);return !!g&&!(m.kind==='vm'&&g.stopped)});
+  const skipped=rawN-mids.length;
+  if(!mids.length){
+    /* ⚠ 必须 return 出卡片容器（不能 return null）：v11Intent 的返回值就是「有没有命中意图」，
+       返回 null 会让路由以为没命中，掉进兜底话术「暂时无法回答」——空状态也是一次正常应答。 */
+    const ec=pushEmpty('📦','➖ 下架商品','没有可下架的机器',
+      '「'+pname+'」在这些机器上已不在售（智能柜下架即移除并清零，售货机为货道停售）；要重新售卖请用「上架商品」');
+    trace('write',`下架预览 → 该商品在命中机器上均已不在售（<b>0 台</b>）→ 走空状态卡，不渲染 0/0 空行。`);
+    return ec;
+  }
   const id=uid();
   const rows=mids.map(k=>{
     const m=MACHINES[k];
@@ -1795,7 +1871,7 @@ function cardOffshelf(mids,pname){
       <div class="addrow" id="${id}_addm">＋ 添加机器</div>
       <div class="pdiff" id="${id}_pv"></div>
       <div class="op-btns" id="${id}_btns"><button class="btn ghost" id="${id}_cancel">取消</button><button class="btn main danger" id="${id}_ok">确认下架</button></div>
-      <div class="exec-note">🔒 下架后该商品在机器上不再售卖</div>
+      <div class="exec-note">${skipped?`已跳过 <b>${skipped}</b> 台未铺该商品的机器 · `:''}🔒 下架后该商品在机器上不再售卖</div>
     </div>
     <div class="altseg" id="${id}_alt"></div>
   </div>`);
@@ -1847,7 +1923,9 @@ function cardOffshelf(mids,pname){
     setTimeout(()=>{
       on.forEach(r=>{const m=MACHINES[r.mid];const g=m.products.find(x=>x.n===pname);
         if(!g)return;
-        if(r.isVm){g.stopped=true;g.n=g.n+'（货道停售）'}
+        /* ⚠ 2026-10-22 修正：售货机停售只打 stopped 标记，**不改写商品名**——
+           原来把 n 改成「…（货道停售）」会让后续按原名检索全部落空（下架预览出现 0/0 空行的根因之一） */
+        if(r.isVm){g.stopped=true}
         else m.products=m.products.filter(x=>x.n!==pname);});
       finishOp(id,'ok',`已在 <b>${on.length}</b> 台机器下架「${esc(shortName(pname))}」`,
         `<div class="res-list">${on.map(r=>`<div class="r"><span>${esc(MACHINES[r.mid].name)}</span><span>${r.isVm?'货道停售':'库存清零'}</span></div>`).join('')}</div>
