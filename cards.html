@@ -250,13 +250,13 @@ table.idx th{background:#fafbfd;font-weight:700}
             <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">慕蓝卡苏打水 柠檬味</span></span><span class="c5"><input value="4.50" class="chg"></span><span class="c5s"><input value="18" class="chg"></span></div><div class="ln"><span class="slot">第 3 层 ▾</span>价格已改：¥4.00 → ¥4.50</div></div>
           </div>
           <div class="addrow">＋ 添加商品</div>
-          <div class="pdiff"><div class="hd">将上架 2 项</div>
-            <div class="r"><span>价格改动</span><span><b>1 项</b>（慕蓝卡 ¥4.00 → ¥4.50）</span></div>
+          <div class="pdiff"><div class="hd">价格改动</div>
+            <div class="r"><span>慕蓝卡苏打水 柠檬味</span><span>¥4.00 → ¥4.50</span></div>
           </div>
           <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（2 项）</button></div>
           <div class="exec-note">🔒 执行将记录操作日志 · 失败的商品会逐项说明原因</div>
         </div>
-        <div class="rule">字段：<b>商品名称 / 价格（元，可改） / 补货量</b>。价格默认取商品库自身价，改动行蓝框高亮，diff 区列「价格改动 N 项（改前 → 改后）」；不显示库存与商品ID——商品尚未上架，两项均无意义。「＋ 添加商品」呼出 P1 弹层。<br><b>补货量默认值（2026-10-16 产品确认）＝商品箱规 × 1.5</b>（四舍五入取整，添加商品后带出、可逐项手改）；<b>箱规为 0 或未配置 → 补货量展示 0</b>，不做其他兜底。<br><b>上架位置按机型分两套</b>：智能柜＝<b>层</b>（无货道概念，点层号可改），售货机＝<b>货道</b>（见 W1-b）。</div>
+        <div class="rule">字段：<b>商品名称 / 价格（元，可改） / 补货量</b>。价格默认取商品库自身价，改动行蓝框高亮；<b>diff 区（2026-10-22）＝标题「价格改动」+ 逐行列出改价商品与改前 → 改后价格，无价格改动时整块不展示</b>（件数由按钮「确认上架（N 项）」承担）；不显示库存与商品ID——商品尚未上架，两项均无意义。「＋ 添加商品」呼出 P1 弹层。<br><b>补货量默认值（2026-10-16 产品确认）＝商品箱规 × 1.5</b>（四舍五入取整，添加商品后带出、可逐项手改）；<b>箱规为 0 或未配置 → 补货量展示 0</b>，不做其他兜底。<br><b>上架位置按机型分两套</b>：智能柜＝<b>层</b>（无货道概念，点层号可改），售货机＝<b>货道</b>（见 W1-b）。</div>
       </div>
 
       <!-- W1-b -->
@@ -272,8 +272,8 @@ table.idx th{background:#fafbfd;font-weight:700}
             <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">康师傅碱性水 550ml</span></span><span class="c5"><input value="3.00"></span><span class="c5s"><input value="24" class="chg"></span></div><div class="ln"><span class="slot">A3 货道 ▾</span>最大 30 · 现存 0</div></div>
             <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">慕蓝卡苏打水 柠檬味</span></span><span class="c5"><input value="4.50" class="chg"></span><span class="c5s"><input value="18" class="chg"></span></div><div class="ln"><span class="slot">B2 货道 ▾</span>最大 30 · 现存 12</div></div>
           </div>
-          <div class="pdiff"><div class="hd">将上架 2 项</div>
-            <div class="r"><span>价格改动</span><span><b>1 项</b>（慕蓝卡 ¥4.00 → ¥4.50）</span></div>
+          <div class="pdiff"><div class="hd">价格改动</div>
+            <div class="r"><span>慕蓝卡苏打水 柠檬味</span><span>¥4.00 → ¥4.50</span></div>
           </div>
           <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（2 项）</button></div>
           <div class="exec-note">🔒 执行将记录操作日志 · 失败的商品会逐项说明原因</div>
@@ -381,7 +381,7 @@ table.idx th{background:#fafbfd;font-weight:700}
           <div class="t">售货机态：下架＝把该商品所在<b>货道停售</b>（不是清空、也不换商品）</div>
           <div class="hint">A3 货道：可口可乐 330ml → 该货道<b>停售</b>（库存原样保留）</div>
         </div>
-        <div class="rule">字段：<b>机器 / 商品名称 / 价格 / 库存 / 勾选</b>，不显示商品ID（与 W1 一致）。<b>库存列保留</b>——要告诉用户将清掉多少件，与上架卡「没有库存」相反。<br>默认全选、可逐台取消，未勾选不提交；<b>列头「全选」一键全选 / 再点全不选</b>，部分选中显示半选态。下架按钮用橙色 <code>.btn.main.danger</code>，与改价区分。<br><b>下架处理按机型分两套</b>：智能柜＝移除该商品、<b>库存清零</b>；售货机＝把该商品所在<b>货道停售</b>（<code>is_sale_enabled='N'</code>，不清空、不换商品）。<br><b>2026-10-16 代码复核修正</b>：原「换默认商品」有误——<code>deleteMachineGoods</code> 售货机分支只做 <code>updateAisleToEnable(DISABLE_AILSE)</code>，不动 sku 不动库存；「换默认商品」只发生在平台商品删除与审核驳回两条独立路径。</div>
+        <div class="rule">字段：<b>机器 / 商品名称 / 价格 / 库存 / 勾选</b>，不显示商品ID（与 W1 一致）。<b>库存列保留</b>——要告诉用户将清掉多少件，与上架卡「没有库存」相反。<br>默认全选、可逐台取消，未勾选不提交；<b>列头「全选」一键全选 / 再点全不选</b>，部分选中显示半选态。下架按钮用橙色 <code>.btn.main.danger</code>，与改价区分。<br><b>下架处理按机型分两套</b>：智能柜＝移除该商品、<b>库存清零</b>；售货机＝把该商品所在<b>货道停售</b>（<code>is_sale_enabled='N'</code>，不清空、不换商品）。<br><b>2026-10-16 代码复核修正</b>：原「换默认商品」有误——<code>deleteMachineGoods</code> 售货机分支只做 <code>updateAisleToEnable(DISABLE_AILSE)</code>，不动 sku 不动库存；「换默认商品」只发生在平台商品删除与审核驳回两条独立路径。<br><b>「＋ 添加机器」（P2）只列已铺该商品的机器</b>（2026-10-22）——没有该商品的机器不出现在弹层里：没铺货无从下架。</div>
       </div>
 
       <!-- W4 -->
@@ -708,7 +708,7 @@ table.idx th{background:#fafbfd;font-weight:700}
           </div>
           <div class="sh-foot"><span class="bag">🛍<b>2</b></span><button class="btn main">加入卡片</button></div>
         </div>
-        <div class="rule"><b>沿用现有「选择机器」页</b>：搜索（编号 / 名称）+ 搜索按钮、筛选下拉、行结构「(编号)名称 + 地址全称」（按需求不展示机器图片）、圆形勾选、底栏数量角标。<br><b>本场景差异</b>：① 主按钮「加入卡片」——无关联等后续流程；② 现有为单选一台，本场景改<b>多选</b>以支持批量上下架；③ 已在本卡的机器置灰；④ 地址<b>完整展示</b>、可换行，不省略；⑤ 已在本卡的机器置灰（不参与全选）；⑥ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧；⑦ <b>PC 端形态（2026-10-16 用户反馈）</b>：改<b>居中弹窗</b>，对齐现有系统「选择机器」弹窗——筛选（机器名称 / 编号 + 商户名称 + 搜索 / 重置）+ 表格（勾选 / 机器编号 / 机器名称 / 所属商户 / 详细地址）+ 分页（共 N 条 · 前往 N 页 · N 条/页可切）+ 底栏「已选 N 台机器」+ 取消 / 确定；勾选跨页保留，已在本卡的机器默认勾选。<br>⑧ <b>校验前移 · 机型级（2026-10-16 产品反馈）</b>：机型<b>不支持上架</b>的机器（如格子柜）在选择弹层里直接<b>置灰、标注「⛔ 不可上架：不支持在该机型售卖」</b>，不可勾选、不进全选——机型级拦截在选择机器阶段就挡掉；「全部机器 / 按线路」范围仍可能带入不支持机器，执行后由结果卡（W6）逐台透传后端原因兜底。</div>
+        <div class="rule"><b>沿用现有「选择机器」页</b>：搜索（编号 / 名称）+ 搜索按钮、筛选下拉、行结构「(编号)名称 + 地址全称」（按需求不展示机器图片）、圆形勾选、底栏数量角标。<br><b>本场景差异</b>：① 主按钮「加入卡片」——无关联等后续流程；② 现有为单选一台，本场景改<b>多选</b>以支持批量上下架；③ 已在本卡的机器置灰；④ 地址<b>完整展示</b>、可换行，不省略；⑤ 已在本卡的机器置灰（不参与全选）；⑥ <b>列表顶部「全选」一键全选 / 取消全选</b>，部分选中显示半选态 ◍，已选数回显在右侧；⑦ <b>PC 端形态（2026-10-16 用户反馈）</b>：改<b>居中弹窗</b>，对齐现有系统「选择机器」弹窗——筛选（机器名称 / 编号 + 商户名称 + 搜索 / 重置）+ 表格（勾选 / 机器编号 / 机器名称 / 所属商户 / 详细地址）+ 分页（共 N 条 · 前往 N 页 · N 条/页可切）+ 底栏「已选 N 台机器」+ 取消 / 确定；勾选跨页保留，已在本卡的机器默认勾选。<br>⑧ <b>校验前移 · 机型级（2026-10-16 产品反馈）</b>：机型<b>不支持上架</b>的机器（如格子柜）在选择弹层里直接<b>置灰、标注「⛔ 不可上架：不支持在该机型售卖」</b>，不可勾选、不进全选——机型级拦截在选择机器阶段就挡掉；「全部机器 / 按线路」范围仍可能带入不支持机器，执行后由结果卡（W6）逐台透传后端原因兜底。<br>⑨ <b>下架场景过滤（2026-10-22 用户反馈）</b>：W3 内呼出时<b>只列出已铺该商品的机器</b>——没有该商品的机器不出现在弹层里（没铺货无从下架）；上架场景（W2-c）不适用此过滤。</div>
       </div>
 
     </div>
@@ -722,7 +722,7 @@ table.idx th{background:#fafbfd;font-weight:700}
       <tr><td>统一字段</td><td><b>商品名称 · 价格 · 库存</b> 是基础项；<b>商品ID 按场景取舍</b>——上架 / 下架卡<b>不显示</b>（商品还没上架，ID 对运营商无意义），<b>补货卡也不显示</b>（改看箱规），改价 / 订单明细卡<b>保留</b>（放名称下方副行，等宽灰字，与现有 <code>.ln</code> 一致）。</td></tr>
       <tr><td>补货卡字段</td><td>补货单卡<b>不显示价格与商品ID</b>，核心只讲三件事：<b>缺货数 / 缺货箱数 / 补货量</b>；箱规（<b>N 件/箱</b>）放名称下方副行，缺货箱数＝缺货数 ÷ 箱规、按「<b>N 箱 M 件</b>」展示。口径与现有系统「库存查询 → 生成补货单」页一致（价格不参与补货）。</td></tr>
       <tr><td>库存列取舍</td><td>按「这个场景有没有库存可言」判断：<b>上架</b>＝没有（不显示）；<b>下架</b>＝显示现有库存（还要标「将清空 N 件」）；<b>改价</b>＝显示现存；<b>补货</b>＝显示<b>缺货数 / 缺货箱数</b>（补货员关心的是缺口，不是存量）。</td></tr>
-      <tr><td>价格可编辑</td><td>上架卡价格<b>默认取商品库自身价</b>，但必须<b>可改</b>；改动行加 <code>input.chg</code> 蓝框，diff 区单独列「价格改动 N 项（改前 → 改后）」。</td></tr>
+      <tr><td>价格可编辑</td><td>上架卡价格<b>默认取商品库自身价</b>，但必须<b>可改</b>；改动行加 <code>input.chg</code> 蓝框，diff 区＝标题「价格改动」+ 逐行「商品 改前 → 改后」（2026-10-22，无改动整块不展示）。</td></tr>
       <tr><td>状态文案</td><td>状态列一律<b>用文字不用符号</b>：<span style="color:var(--ok);font-weight:700">成功</span> / <span style="color:var(--danger);font-weight:700">失败</span>，禁止 ✕ ✓；失败原因放名称下方副行红色 <code>.ln.reason</code>，机器级与商品级分开标「对象」。</td></tr>
       <tr><td>补货量口径</td><td><b>2026-10-16 定</b>：<b>不用算法建议量</b>，补货量＝<b>最大库存（后台「补满」配置值）− 现存</b>，缺货数同口径；补货量可逐项手改。<b>不再有模式切换</b>（原「按销量 / 按补满库存」<code>.seg</code> 二选一取消，「静态柜固定按销量」的约束一并移除）。</td></tr>
       <tr><td>卡片宽度</td><td>由原 262px 调整为 <b>300px</b>（375 屏内可用宽约 308px）；若实际渲染仍挤，商品ID 缩为副行 + 价格/库存合并成「¥3.00 · 12」。</td></tr>

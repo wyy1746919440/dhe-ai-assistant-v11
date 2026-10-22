@@ -524,9 +524,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261021d" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261021d" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261021d" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261022a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261022a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261022a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1020,7 +1020,30 @@ function cardLackList(){
 function cardBizData(kind){
   const note=`数据截至 ${BIZ.updated} 更新 · 统计范围：本商户全部机器`;
   let head,rows,link,api;
-  if(kind==='orders'){
+  /* 2026-10-22 用户反馈：销售 / 订单卡支持时间范围（sales:Nd / sales:month / orders:Nd / orders:month），
+     「最近30天的销售额」就答近 30 天口径，不再一律答今日。
+     数据与 BIZ 同源（由订单明细派生）；演示「今天」＝10-14，与 BIZ 的今日过滤保持一致。 */
+  const rm=(typeof kind==='string')?kind.match(/^(sales|orders):(\d+)d$/):null;
+  const isMon=kind==='sales:month'||kind==='orders:month';
+  if(rm||isMon){
+    const base=rm?rm[1]:'sales';
+    const days=rm?+rm[2]:0;
+    const label=days?('近 '+days+' 天'):'本月';
+    const inR=ORDERS.recent.filter(o=>{const t=String(o.t);const mo=+t.slice(0,2),dd=+t.slice(3,5);
+      return days?((10-mo)*30+(14-dd))<days:mo===10;});
+    const s=inR.reduce((a,o)=>a+Number(o.amt||0),0);
+    if(base==='sales'){
+      head=`📊 销售数据 · ${label}`;
+      rows=[[label+'销售额',`<b>${money(s)}</b>`],[label+'订单量',`${inR.length} 单`],
+            ['今日销售额',money(BIZ.todaySales)],['昨日销售额',money(BIZ.yestSales)]];
+      link='查看销售统计 ›';api=`/ai/tools/merchant_sales?range=${days?days+'d':'month'}`;
+    }else{
+      head=`🧾 订单量 · ${label}`;
+      rows=[[label+'订单量',`<b>${inR.length}</b> 单`],[label+'销售额',money(s)],
+            ['今日订单量',`${BIZ.todayOrders} 单`],['昨日订单量',`${BIZ.yestOrders} 单`]];
+      link='查看销售统计 ›';api=`/ai/tools/merchant_orders?range=${days?days+'d':'month'}`;
+    }
+  }else if(kind==='orders'){
     head='🧾 订单量 · 今日';
     rows=[['今日订单量',`<b>${BIZ.todayOrders}</b> 单`],['昨日订单量',`${BIZ.yestOrders} 单`]];
     link='查看销售统计 ›';api='/ai/tools/merchant_orders?range=today';
@@ -1419,9 +1442,10 @@ function cardOnshelf(mid,items){
     qins.forEach(i=>{const k=+i.getAttribute('data-i');state.items[k].qty=i.value.trim()});
     const bad=state.items.some(it=>!(Number(it.price)>0)&&it.price!=='')||state.items.some(it=>!(Number(it.qty)>=0)&&it.qty!=='');
     const chg=state.items.filter(it=>Math.abs(Number(it.price)-Number(it.lib))>1e-9);
-    let h=`<div class="hd">将上架 ${state.items.length} 项</div>`;
-    /* 2026-10-22 用户反馈：diff 区不再逐商品重复「价格 · 件数」（上方表格已有），只列价格改动 */
-    if(chg.length)h+=`<div class="r"><span>价格改动</span><span><b>${chg.length} 项</b>（${chg.map(it=>`${shortName(it.n)} ¥${Number(it.lib).toFixed(2)} → ¥${Number(it.price).toFixed(2)}`).join('；')}）</span></div>`;
+    /* 2026-10-22 用户反馈（第 2 轮）：diff 区标题直接叫「价格改动」，下面逐行列出改价商品与改前 → 改后；
+       没有价格改动时整块不展示（件数由按钮「确认上架（N 项）」承担），不再保留「将上架 N 项」标题。 */
+    let h=chg.length?`<div class="hd">价格改动</div>`+
+      chg.map(it=>`<div class="r"><span>${esc(shortName(it.n))}</span><span>¥${Number(it.lib).toFixed(2)} → ¥${Number(it.price).toFixed(2)}</span></div>`).join(''):'';
     pv.className='pdiff'+(bad?' err':'');
     pv.innerHTML=bad?'价格需为大于 0 的数字、补货量需为不小于 0 的整数':h;
     okBtn.disabled=bad;
@@ -1810,7 +1834,7 @@ function cardOffshelf(mids,pname){
         ln:m.kind==='vm'?(lane?`${lane}：${shortName(pname)} → 该货道停售（库存保留）`:'该商品未铺货'):'下架后该商品库存清零'})});
     c.querySelector('#'+id+'_rows').innerHTML=rows.map((r,i)=>rowHtml(r,i)).join('');
     bind();refresh();
-  });
+  },pname);
   function rowHtml(r,i){return `<div class="pr${r.on?' pre':''}" data-i="${i}">
     <div class="l1"><span class="c1"><span class="nm">${esc(MACHINES[r.mid].name)}</span></span><span class="c3">${money((MACHINES[r.mid].products.find(x=>x.n===pname)||{price:0}).price)}</span><span class="c4">${r.stock}</span>${pcCol(r.lane||'—',100)}
     <span class="c5"><span class="ck${r.on?'':' off'}" data-k="${i}">${r.on?'☑':'☐'}</span></span></div>
@@ -2369,10 +2393,12 @@ function modalAddProduct(mid,cb,mids,cur){
    ⚠ 所属商户为演示数据（按线路给运营点名）；真实实现取机器归属商户字段。
    ⚠ 机型级校验前移（2026-10-16）：不支持上架的机器（ONSHELF_BLOCK）在本弹窗内
      直接置灰、标原因、checkbox 禁用，全选跳过；执行层 W6 仅作兜底。 */
-function modalAddMachine(current,cb){
+function modalAddMachine(current,cb,pname){
   const MER={'南油线路':'南油运营点','科技园线路':'科技园运营点','福田线路':'福田运营点','南山线路':'南山运营点'};
-  /* 机型级校验前移：不支持上架的机器置灰标原因、不可勾选、不进全选（2026-10-16 产品反馈） */
-  const rows=Object.entries(MACHINES).map(([k,m])=>({k:k,m:m,mer:MER[m.line]||'—',blk:onshelfMachineBlocked(k)}));
+  /* 机型级校验前移：不支持上架的机器置灰标原因、不可勾选、不进全选（2026-10-16 产品反馈）
+     2026-10-22 用户反馈：下架场景（传 pname）只列出**已铺该商品**的机器 —— 没有该商品无从下架 */
+  const rows=Object.entries(MACHINES).filter(([k,m])=>!pname||m.products.some(x=>x.n===pname))
+    .map(([k,m])=>({k:k,m:m,mer:MER[m.line]||'—',blk:onshelfMachineBlocked(k)}));
   const sel=new Set((current||[]).filter(k=>!onshelfMachineBlocked(k)));
   let kwM='',kwB='',page=1,size=5;
   const mask=elx(`<div class="pc-modal-mask"><div class="pc-modal" role="dialog">
@@ -2447,9 +2473,9 @@ function modalAddMachine(current,cb){
   return mask;
 }
 /* ---------- P2：添加机器（编号 + 名称 + 地址完整展示）---------- */
-function sheetAddMachine(current,cb){
+function sheetAddMachine(current,cb,pname){
   /* PC 端：改用居中弹窗（对齐现有系统「选择机器」弹窗，2026-10-16 用户反馈） */
-  if(PCW)return modalAddMachine(current,cb);
+  if(PCW)return modalAddMachine(current,cb,pname);
   /* 机型级校验前移：不支持上架的机器直接置灰标原因、不可勾选（2026-10-16 产品反馈） */
   const sel=new Set((current||[]).filter(k=>!onshelfMachineBlocked(k)));
   const inner=`
@@ -2461,7 +2487,7 @@ function sheetAddMachine(current,cb){
     <div><span class="sh-sel">南油线路 ▾</span></div>
     <div class="selbar"><span class="ck off" id="m_all">○</span>全选<span class="cnt" id="m_cnt">已选 0 台</span></div>
     <div class="picklist" id="m_list">
-      ${Object.entries(MACHINES).map(([k,m])=>{const blk=onshelfMachineBlocked(k);
+      ${Object.entries(MACHINES).filter(([k,m])=>!pname||m.products.some(x=>x.n===pname)).map(([k,m])=>{const blk=onshelfMachineBlocked(k);
         return `<div class="pickrow${blk?' dis':''}" data-k="${k}"><span class="rd"></span>
         <div class="c1"><span class="nm">(${m.code})${esc(m.name)}</span><span class="addr">${esc(m.addr)}</span>${blk?`<em class="blktag">⛔ 不可上架：${esc(blk)}</em>`:''}</div><span class="row-act">加入</span></div>`}).join('')}
     </div>
@@ -3009,9 +3035,21 @@ function bizAsk(q){
   const raw=String(q||'');
   if(/怎么|如何|为什么|口径|规则|区别|类型|步骤|流程|在哪|哪里|算法|公式|定义|是什么意思/.test(raw))return null;
   if(/异常订单|客诉订单|待处理订单/.test(raw))return 'abnormal';
-  if(/销售|营业额|营收|收入|流水|卖了多少钱/.test(raw))return 'sales';
+  /* 2026-10-22 用户反馈：「最近30天的销售额」不能答成今日 —— 解析时间范围并透传（sales:Nd / sales:month） */
+  if(/销售|营业额|营收|收入|流水|卖了多少钱/.test(raw)){
+    if(/本月|这个月|当月/.test(raw))return 'sales:month';
+    const dm=raw.match(/(?:最近|近)\s*(\d{1,3})\s*天/)||raw.match(/(\d{1,3})\s*天内/);
+    if(dm)return 'sales:'+dm[1]+'d';
+    return 'sales';
+  }
   if(/经营|营业数据|数据概览|整体数据|今日数据|今天的数据/.test(raw))return 'overview';
-  if(/(订单|交易)/.test(raw)&&/多少|几|量|数/.test(raw))return 'orders';
+  if(/(订单|交易)/.test(raw)&&/多少|几|量|数/.test(raw)){
+    /* 同上：订单量也支持时间范围（orders:Nd / orders:month），不再一律答今日 */
+    if(/本月|这个月|当月/.test(raw))return 'orders:month';
+    const dmo=raw.match(/(?:最近|近)\s*(\d{1,3})\s*天/)||raw.match(/(\d{1,3})\s*天内/);
+    if(dmo)return 'orders:'+dmo[1]+'d';
+    return 'orders';
+  }
   if(/(订单|交易)/.test(raw)&&/查|看|列表|明细|最近|最新|今天|今日|列出|给我|有哪|找/.test(raw))return 'order_list';
   if(/货道|库存|缺货|补货|故障|退款|客诉|分账|提现|对账|合同|扣款|商品|机器|设备/.test(raw))return null;
   return null;
