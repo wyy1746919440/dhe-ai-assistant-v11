@@ -413,6 +413,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .mx-hd .mh-code{color:#a8aeb8;font-size:10.5px;font-variant-numeric:tabular-nums}
 .mx-hd .mh-kind{margin-left:auto;color:#8c8c8c;font-size:10.5px;white-space:nowrap}
 .mx-hd .mh-kind+.fg{margin-left:8px}
+/* —— 第 1 步商品行「移除」（2026-10-28 定稿 #23）—— */
+.pr .pdel{display:inline-block;margin-left:6px;padding:0 3px;color:#b9bfc9;font-size:11px;cursor:pointer;font-weight:400}
+.pr .pdel:active{color:var(--danger)}
 .op-btns{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;border:none;border-radius:9px;padding:8px 0;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer}
 .btn.ghost{background:#f2f3f5;color:#666}
@@ -545,9 +548,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261028f" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261028f" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261028f" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261028g" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261028g" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261028g" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1681,10 +1684,22 @@ if(typeof document!=='undefined'&&!window.__lineDropClose){window.__lineDropClos
    点位置 chip 走 sheetPickSlot / modalPickSlot（定稿 #13 已有），改完全卡价预览联动。
    ⚠ opts.lane：第 2 条「按货道批量上架」复用本卡 —— 位置锁定为固定货道号，不再自动分配，
      且机器范围只留售货机（智能柜没有 A1 货道这种编号）。 */
+/* ---------- 辅助：从某个起始货道开始，给一台机器连续分配 n 个空闲货道 ----------
+   2026-10-28 定稿 #21：第 3 步改成「按机型统一设置」后，售货机只需要给一个**起始货道**，
+   每台机器各自从这个起点往后取自己的空闲货道（各机占用不同，不能给同一个货道号）。 */
+function lanesFrom(m,start,n){
+  const used={};m.products.forEach(p=>(p.lanes||[]).forEach(l=>used[l.id]=1));
+  const A='ABCDEFGH',allL=[];
+  for(let r=0;r<A.length;r++)for(let c=1;c<=6;c++)allL.push(A[r]+c+' 货道');
+  let st=allL.indexOf(start);if(st<0)st=0;
+  const free=allL.slice(st).filter(id=>!used[id]);
+  const out=[];for(let i=0;i<n;i++)out.push(free[i]||free[free.length-1]||start);
+  return out;
+}
 function cardBatchOnshelf(scope,items,opts){
   opts=opts||{};
   const all=Object.keys(MACHINES);
-  const lane=opts.lane||null;                     /* 指定货道（第 2 条） */
+  const lane=opts.lane||null;                     /* 指定货道（按货道上架 W2-d） */
   const fixed=opts.mids||null;                    /* 指定货道场景下由路由限定好的机器 */
   const skipNote=opts.skipNote||'';               /* 「已跳过 N 台非售货机」这类说明 */
   const title=opts.title||'➕ 批量上架商品';
@@ -1693,12 +1708,14 @@ function cardBatchOnshelf(scope,items,opts){
   if(!items.length){const p=prodByName('百事可乐 500ml');
     items=[{n:'百事可乐 500ml',price:p.price,lib:p.price,qty:suggestQty(p)}]}
   const id=uid();
-  const state={step:1,items:items,mids:[],scope:scope||'all',lane:lane,conf:{},open:{}};
+  /* ⚠ 2026-10-28 定稿 #22：机器范围**不再有「全部机器」这一档** —— 批量上架必须让客户
+     明确按线路或自选，避免「一点就把 12 台全改了」。默认落「按线路」（预选第一条线路），
+     因为空自选会让第 3 步没有机器、确认按钮直接不可点。 */
+  const sc0=(scope==='pick'||scope==='line')?scope:'line';
+  const state={step:1,items:items,mids:[],scope:sc0,lane:lane,cfg:{}};
   if(fixed)state.mids=fixed.slice();
-  else if(state.scope==='all')state.mids=all.slice();
-  else if(state.scope==='line')state.mids=lineMachines(scopeLine||LINES[0]).map(([k])=>k);
+  else if(sc0==='line')state.mids=lineMachines(scopeLine||LINES[0]).map(([k])=>k);
   else state.mids=batchPickCache.length?batchPickCache.slice():['hls','lj3','nwhh'];
-  if(state.mids.length)state.open[state.mids[0]]=true;
   const c=pushCard(`<div class="cardbox" id="${id}_box">
     <div class="cb-head c" id="${id}_head"><span class="ttl">${esc(title)}</span><span class="st" id="${id}_st">待确认</span></div>
     <div class="steps" id="${id}_steps">
@@ -1712,60 +1729,71 @@ function cardBatchOnshelf(scope,items,opts){
     <div class="exec-note" id="${id}_note"></div>
   </div>`);
   const pv=c.querySelector('#'+id+'_pv'),btns=c.querySelector('#'+id+'_btns'),note=c.querySelector('#'+id+'_note');
-  /* 位置默认值：智能柜＝第 1 层；售货机＝下一个空闲货道；指定货道场景直接锁定 */
-  function defSlot(mid){
-    if(lane)return lane;
-    const m=MACHINES[mid];
-    if(m.kind!=='vm')return '第 1 层';
-    return nextFreeLane(m,8)[0]||'A1 货道';
+  /* ---------- 机型分组（第 3 步的粒度＝机型，不是逐台） ---------- */
+  function kindOf(mid){return MACHINES[mid].kind==='vm'?'vm':'cab'}
+  function kindsIn(){const o={};state.mids.forEach(k=>{o[kindOf(k)]=1});return Object.keys(o)}
+  function sample(kind){return state.mids.filter(k=>kindOf(k)===kind)[0]}
+  function cfgOf(kind,i){
+    if(!state.cfg[kind])state.cfg[kind]={};
+    if(!state.cfg[kind][i]){
+      let slot='第 1 层';
+      if(lane)slot=lane;
+      else if(kind==='vm'){
+        const mid=sample('vm'),m=MACHINES[mid];
+        slot=(m&&nextFreeLane(m,Math.max(items.length,2))[0])||'A1 货道';
+      }
+      state.cfg[kind][i]={slot:slot,price:state.items[i].price,qty:state.items[i].qty};
+    }
+    return state.cfg[kind][i];
   }
-  function confOf(mid,i){
-    if(!state.conf[mid])state.conf[mid]={};
-    if(!state.conf[mid][i])state.conf[mid][i]={slot:defSlot(mid),price:state.items[i].price,qty:state.items[i].qty};
-    return state.conf[mid][i];
-  }
-  /* ================= Step 1：选商品 ================= */
+  /* ================= Step 1：选商品（可增可删） ================= */
   function html1(){
-    return `<div class="ptable" id="${id}_tb">
-      <div class="ph"><span class="c1">商品</span>${pcHead('商品库价',88)}<span class="c5">价格（元）</span><span class="c5s">补货量</span>${pcHead('箱规',68)}</div>
-      <div id="${id}_rows">${state.items.map((it,i)=>`<div class="pr pre" data-i="${i}">
-        <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>${pcCol(money(it.lib),88)}
+    const rows=state.items.map((it,i)=>`<div class="pr pre" data-i="${i}">
+        <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span><b class="pdel" data-i="${i}">✕</b></span>${pcCol(money(it.lib),88)}
           <span class="c5"><input class="pin" data-i="${i}" data-lib="${it.lib}" value="${Number(it.price).toFixed(2)}" inputmode="decimal"></span>
           <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(boxOf(it.n)+' 件/箱',68)}</div>
-        ${pcLn(`箱规 ${boxOf(it.n)} 件/箱 · 默认价 ${money(it.lib)}`)}
-      </div>`).join('')}</div>
+        ${pcLn(`箱规 ${boxOf(it.n)} 件/箱 · 默认价 ${money(it.lib)} · 点 ✕ 可移除`)}
+      </div>`).join('');
+    /* 2026-10-28 定稿 #23：允许把商品删到 0，给明确空态而不是留一张空表 */
+    if(!state.items.length)return `<div class="hint">还没有商品 —— 点下面「＋ 添加商品」挑一个</div>
+      <div class="addrow" id="${id}_add">＋ 添加商品</div>`;
+    return `<div class="ptable" id="${id}_tb">
+      <div class="ph"><span class="c1">商品</span>${pcHead('商品库价',88)}<span class="c5">价格（元）</span><span class="c5s">补货量</span>${pcHead('箱规',68)}</div>
+      <div id="${id}_rows">${rows}</div>
     </div>
     <div class="addrow" id="${id}_add">＋ 添加商品</div>
-    ${PCW?'':'<div class="hint">先定要上什么商品，下一步再挑机器 · 补货量默认＝箱规 × 1.5</div>'}`;
+    ${PCW?'':'<div class="hint">先定要上什么商品，下一步再挑机器 · 补货量默认＝箱规 × 1.5 · 上错的可点 ✕ 移除</div>'}`;
   }
   function bind1(){
     c.querySelectorAll('.pin').forEach(i=>{i.oninput=()=>{const k=+i.getAttribute('data-i');state.items[k].price=i.value.trim();
       i.classList.toggle('chg',Math.abs(Number(i.value)-Number(i.getAttribute('data-lib')))>1e-9);
-      state.conf={};refresh()}});
-    c.querySelectorAll('.qin').forEach(i=>{i.oninput=()=>{const k=+i.getAttribute('data-i');state.items[k].qty=i.value.trim();state.conf={};refresh()}});
+      state.cfg={};refresh()}});
+    c.querySelectorAll('.qin').forEach(i=>{i.oninput=()=>{const k=+i.getAttribute('data-i');state.items[k].qty=i.value.trim();state.cfg={};refresh()}});
+    /* 2026-10-28 定稿 #23：只有「添加」没有「移除」——上错一个商品只能重开卡；补成可删 */
+    c.querySelectorAll('.pdel').forEach(b=>{b.onclick=e=>{e.stopPropagation();
+      const k=+b.getAttribute('data-i');
+      state.items.splice(k,1);state.cfg={};render();}});
     /* ⚠ 商品库按本批机器机型的**交集**出（2026-10-16 裁决） */
     c.querySelector('#'+id+'_add').onclick=()=>sheetAddProduct(null,picks=>{
       if(!picks.length)return;
       const cur=state.items.map(x=>x.n);
       picks.forEach(n=>{if(cur.indexOf(n)>=0)return;const p=prodByName(n)||{price:3,box:12};
         state.items.push({n:n,price:p.price,lib:p.price,qty:suggestQty(p)})});
-      state.conf={};render();
+      state.cfg={};render();
     },state.mids,state.items.map(x=>x.n));
   }
-  /* ================= Step 2：选机器 ================= */
+  /* ================= Step 2：选机器（按线路 / 自选） ================= */
   function html2(){
     if(fixed)return `<div class="kv"><span class="k">机器范围</span><span class="v">${state.mids.length} 台<em>${esc(opts.midsNote||'按问法限定')}</em></span></div>
       <div class="chips">${state.mids.map(k=>`<span>${esc(MACHINES[k].name)}</span>`).join('')}</div>
       ${skipNote?`<div class="hint">${esc(skipNote)}</div>`:''}`;
     return `<div class="seg" id="${id}_seg">
-        <span class="${state.scope==='all'?'on':''}" data-s="all">全部机器 ${all.length}</span>
         <span class="${state.scope==='line'?'on':''}" data-s="line">按线路</span>
         <span class="${state.scope==='pick'?'on':''}" data-s="pick">自选${state.scope==='pick'?' '+state.mids.length:''}</span>
       </div>
       <div id="${id}_range"></div>`;
   }
   function rangeHtml(){
-    if(state.scope==='all')return `<div class="kv"><span class="k">范围</span><span class="v">全部 ${all.length} 台</span></div>`;
     if(state.scope==='line'){const ln=scopeLine||LINES[0];
       return `<div class="kv"><span class="k">线路</span><span class="v ldsel" id="${id}_ltop">${esc(ln)} ▾<em>${lineCount(ln)} 台</em></span></div>`+
         (PCW?`<div class="linedrop" id="${id}_ldrop" style="display:none">${LINES.map(l=>`<div class="lopt${l===ln?' on':''}" data-l="${esc(l)}"><span>${esc(l)}</span><em>${lineCount(l)} 台</em></div>`).join('')}</div>`:'')+
@@ -1778,16 +1806,16 @@ function cardBatchOnshelf(scope,items,opts){
     const box=c.querySelector('#'+id+'_range');
     if(box)box.innerHTML=rangeHtml();
     const lm=box&&box.querySelector('#'+id+'_addm');
-    if(lm)lm.onclick=()=>sheetAddMachine(state.mids,sel=>{state.mids=sel;state.conf={};render()});
+    if(lm)lm.onclick=()=>sheetAddMachine(state.mids,sel=>{state.mids=sel;state.cfg={};render()});
     if(box)box.querySelectorAll('[data-x]').forEach(b=>{b.onclick=e=>{e.stopPropagation();
-      state.mids=state.mids.filter(k=>k!==b.getAttribute('data-x'));state.conf={};render()}});
+      state.mids=state.mids.filter(k=>k!==b.getAttribute('data-x'));state.cfg={};render()}});
     const lt=box&&box.querySelector('#'+id+'_ltop');
     if(lt&&PCW){
       const ld=box.querySelector('#'+id+'_ldrop');
       if(ld){
         lt.onclick=e=>{e.stopPropagation();ld.style.display=(ld.style.display==='none'?'block':'none')};
         ld.querySelectorAll('.lopt').forEach(o=>{o.onclick=e=>{e.stopPropagation();
-          scopeLine=o.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);state.conf={};render()}});
+          scopeLine=o.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);state.cfg={};render()}});
       }
     }else if(lt){
       /* 2026-10-19 用户反馈：线路选择必须是**真下拉**——点开列出全部线路（+台数），点选直接切换 */
@@ -1798,51 +1826,56 @@ function cardBatchOnshelf(scope,items,opts){
         const x=mask.querySelector('.sh-hd .x');if(x)x.onclick=()=>closeSheet();
         mask.querySelectorAll('.lopt').forEach(r=>{r.onclick=()=>{
           scopeLine=r.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);
-          closeSheet();state.conf={};render()}});
+          closeSheet();state.cfg={};render()}});
       };
     }
     c.querySelectorAll('#'+id+'_seg span').forEach(s=>{s.onclick=()=>{
       const to=s.getAttribute('data-s');
-      if(to==='line'&&state.scope!=='line'){scopeLine=scopeLine||LINES[0];state.mids=lineMachines(scopeLine).map(([k])=>k)}
-      if(to==='all')state.mids=all.slice();
+      if(to==='line'){scopeLine=scopeLine||LINES[0];state.mids=lineMachines(scopeLine).map(([k])=>k)}
       if(to==='pick'&&state.scope!=='pick')state.mids=batchPickCache.length?batchPickCache.slice():['hls','lj3','nwhh'];
-      state.scope=to;state.conf={};render();
+      state.scope=to;state.cfg={};render();
     }});
   }
-  /* ================= Step 3：逐台配置位置 / 价格 / 库存 ================= */
+  /* ================= Step 3：按机型统一设置位置 / 价格 / 库存 =================
+     2026-10-28 定稿 #21：用户原话「智能柜都选一个层数价格和库存上架，售货机同理，
+     而不是到这一步后还是要一台台机器的设置库存价格等」——粒度从「逐台」改为「按机型」：
+       · 智能柜 N 台 → 一行层 + 价格 + 库存，统一应用
+       · 售货机 M 台 → 一行起始货道 + 价格 + 库存，各机从该货道起按**自己的空闲货道**依次分配 */
   function html3(){
-    return state.mids.map(k=>{
-      const m=MACHINES[k],isVm=m.kind==='vm',op=!!state.open[k];
-      return `<div class="mx${op?' open':''}" id="${id}_mx_${k}">
-        <div class="mx-hd" data-mx="${k}"><span>${esc(m.name)}</span><span class="mh-code">${esc(m.code)}</span>
-          <span class="mh-kind">${esc(isVm?'售货机':'智能柜')}</span><span class="fg">${op?'收起 ▴':'展开 ▾'}</span></div>
+    const ks=kindsIn();
+    if(!ks.length)return `<div class="hint">还没有选机器 —— 回到第 2 步按线路或自选机器</div>`;
+    const order=['cab','vm'].filter(k=>ks.indexOf(k)>=0);
+    const body=order.map(kind=>{
+      const ms=state.mids.filter(k=>kindOf(k)===kind),isVm=kind==='vm';
+      const rows=state.items.map((it,i)=>{const cf=cfgOf(kind,i);
+        const smp=MACHINES[sample(kind)];
+        const ln=isVm?(laneOf(smp,cf.slot)||{max:30,stock:0}):null;
+        return `<div class="pr pre" data-i="${i}">
+          <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>
+            ${pcCol(`<span class="slot" data-k="${kind}" data-i="${i}">${esc(cf.slot)} ▾</span>`,88)}
+            <span class="c5"><input class="cfp" data-k="${kind}" data-i="${i}" value="${Number(cf.price).toFixed(2)}" inputmode="decimal"></span>
+            <span class="c5s"><input class="cfq" data-k="${kind}" data-i="${i}" value="${cf.qty}" inputmode="numeric"></span></div>
+          ${pcLn(`<span class="slot" data-k="${kind}" data-i="${i}">${esc(cf.slot)} ▾</span>${
+            isVm?`从该货道起按每台空闲货道分配`:'一层可放多个商品'}`)}
+        </div>`}).join('');
+      return `<div class="mx open" id="${id}_k_${kind}">
+        <div class="mx-hd"><span>${isVm?'售货机':'智能柜'}</span><span class="mh-kind">${ms.length} 台 · 统一设置</span></div>
         <div class="mx-bd"><div class="ptable">
-          <div class="ph"><span class="c1">商品</span>${pcHead(isVm?'货道':'层',84)}<span class="c5">价格</span><span class="c5s">库存</span></div>
-          ${state.items.map((it,i)=>{const cf=confOf(k,i);const ln=isVm?(laneOf(m,cf.slot)||{max:30,stock:0}):null;
-            return `<div class="pr pre" data-m="${k}" data-i="${i}">
-              <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>
-                ${pcCol(`<span class="slot" data-m="${k}" data-i="${i}">${esc(cf.slot)} ▾</span>`,84)}
-                <span class="c5"><input class="cfp" data-m="${k}" data-i="${i}" value="${Number(cf.price).toFixed(2)}" inputmode="decimal"></span>
-                <span class="c5s"><input class="cfq" data-m="${k}" data-i="${i}" value="${cf.qty}" inputmode="numeric"></span></div>
-              ${pcLn(`<span class="slot" data-m="${k}" data-i="${i}">${esc(cf.slot)} ▾</span>${
-                isVm?`最大 ${ln.max} · 现存 ${ln.stock}`:'一层可放多个商品'}`)}
-            </div>`}).join('')}
+          <div class="ph"><span class="c1">商品</span>${pcHead(isVm?'起始货道':'层',88)}<span class="c5">价格</span><span class="c5s">库存</span></div>
+          ${rows}
         </div></div>
       </div>`;
-    }).join('')+`<div class="hint">${esc(lane?'位置已按问法锁定为 '+lane+' · 价格与库存可逐台改'
-      :'位置按机型预填（智能柜＝第 1 层 · 售货机＝下一个空闲货道），点机器展开后可逐项改')}${skipNote?' · '+esc(skipNote):''}</div>`;
+    }).join('');
+    return body+`<div class="hint">${esc(lane?'位置已按问法锁定为 '+lane+' · 价格与库存按机型统一设置'
+      :'同一机型统一设置，一次生效 · 某一台要单独调，可把它拆成「自选」单独做一次')}${skipNote?' · '+esc(skipNote):''}</div>`;
   }
   function bind3(){
-    c.querySelectorAll('.mx-hd').forEach(h=>{h.onclick=()=>{
-      const k=h.getAttribute('data-mx');state.open[k]=!state.open[k];
-      h.querySelector('.fg').textContent=state.open[k]?'收起 ▴':'展开 ▾';
-      h.parentNode.classList.toggle('open',!!state.open[k]);}});
     c.querySelectorAll('.slot').forEach(s=>{s.onclick=()=>{
-      const k=s.getAttribute('data-m'),i=+s.getAttribute('data-i'),m=MACHINES[k],isVm=m.kind==='vm';
-      sheetPickSlot(k,isVm,confOf(k,i).slot,ns=>{confOf(k,i).slot=ns;render()});
+      const kind=s.getAttribute('data-k'),i=+s.getAttribute('data-i'),mid=sample(kind);
+      sheetPickSlot(mid,kind==='vm',cfgOf(kind,i).slot,ns=>{cfgOf(kind,i).slot=ns;render()});
     }});
-    c.querySelectorAll('.cfp').forEach(i=>{i.oninput=()=>{confOf(i.getAttribute('data-m'),+i.getAttribute('data-i')).price=i.value.trim();refresh()}});
-    c.querySelectorAll('.cfq').forEach(i=>{i.oninput=()=>{confOf(i.getAttribute('data-m'),+i.getAttribute('data-i')).qty=i.value.trim();refresh()}});
+    c.querySelectorAll('.cfp').forEach(i=>{i.oninput=()=>{cfgOf(i.getAttribute('data-k'),+i.getAttribute('data-i')).price=i.value.trim();refresh()}});
+    c.querySelectorAll('.cfq').forEach(i=>{i.oninput=()=>{cfgOf(i.getAttribute('data-k'),+i.getAttribute('data-i')).qty=i.value.trim();refresh()}});
   }
   function render(){
     c.querySelectorAll('#'+id+'_steps .stp').forEach(s=>{
@@ -1859,12 +1892,12 @@ function cardBatchOnshelf(scope,items,opts){
     if(nx)nx.onclick=()=>{if(!state.items.length)return;if(state.step===2&&!state.mids.length)return;state.step++;render()};
     if(ok)ok.onclick=submit;
     note.innerHTML=state.step===1?'🔒 先定商品，机器与位置在下一步'
-      :(state.step===2?'🔒 机器范围定好后，第 3 步按机型逐台确认位置与价格'
+      :(state.step===2?'🔒 选好线路或自选机器，第 3 步按机型统一设位置与价格'
       :'🔒 部分机器失败会逐台列出原因，其余不受影响');
     refresh();
   }
   function refresh(){
-    const bad=state.items.some(it=>!(Number(it.price)>0))||state.items.some(it=>!(Number(it.qty)>=0));
+    const bad=!state.items.length||state.items.some(it=>!(Number(it.price)>0))||state.items.some(it=>!(Number(it.qty)>=0));
     let h='';
     if(state.step===1){
       h=`<div class="hd">已选 ${state.items.length} 个商品 · 下一步挑机器</div>`;
@@ -1876,16 +1909,19 @@ function cardBatchOnshelf(scope,items,opts){
         if(state.scope==='pick'&&!fixed)state.mids.forEach(k=>{h+=`<div class="r"><span>${esc(MACHINES[k].name)}</span><span>${esc(MACHINES[k].code)}</span></div>`});}
     }else{
       const vmN=state.mids.filter(k=>MACHINES[k].kind==='vm').length;
-      h=`<div class="hd">${state.mids.length} 台 × ${state.items.length} 项 = ${state.mids.length*state.items.length} 条</div>`
-        +`<div class="r"><span>位置</span><span>${esc(lane?lane+'（指定货道）':`智能柜第 1 层 · 售货机空闲货道（${vmN} 台）`)}</span></div>`;
+      const cabN=state.mids.length-vmN;
+      h=`<div class="hd">${state.mids.length} 台 × ${state.items.length} 项 = ${state.mids.length*state.items.length} 条</div>`;
+      if(vmN)h+=`<div class="r"><span>售货机 ${vmN} 台</span><span>从「${esc(cfgOf('vm',0).slot)}」起 · 每台按各自空闲货道顺延</span></div>`;
+      if(cabN)h+=`<div class="r"><span>智能柜 ${cabN} 台</span><span>统一放「${esc(cfgOf('cab',0).slot)}」</span></div>`;
     }
     pv.className='pdiff'+(bad?' err':'');
-    pv.innerHTML=bad?'价格需为大于 0 的数字、库存需为不小于 0 的整数':h;
+    pv.innerHTML=bad?(state.items.length?'价格需为大于 0 的数字、库存需为不小于 0 的整数':'请至少保留一个商品'):h;
     const nx=c.querySelector('#'+id+'_next'),ok=c.querySelector('#'+id+'_ok');
     if(nx)nx.disabled=bad||(state.step===2&&!state.mids.length);
     if(ok)ok.disabled=bad||!state.mids.length;
   }
   function submit(){
+    if(!state.mids.length||!state.items.length)return;
     const btnsEl=c.querySelector('#'+id+'_btns');if(btnsEl)btnsEl.innerHTML=`<button class="btn done" disabled>⏳ 执行中…</button>`;
     const chip=c.querySelector('#'+id+'_st');if(chip)chip.textContent='⏳ 执行中…';
     setTimeout(()=>{
@@ -1894,18 +1930,21 @@ function cardBatchOnshelf(scope,items,opts){
       const failSet={};fails.forEach(f=>failSet[f.mid]=1);
       const succ=state.mids.filter(k=>!failSet[k]);
       const tot=state.mids.length*state.items.length;
-      succ.forEach(k=>{const m=MACHINES[k];const isVm=m.kind==='vm';
-        state.items.forEach((it,i)=>{const cf=confOf(k,i);const slot=cf.slot||defSlot(k);
+      succ.forEach(k=>{const m=MACHINES[k],kind=kindOf(k);
+        /* 售货机：各台从「起始货道」起按自己的空闲货道依次分配（未指定货道时才自动） */
+        const seq=(kind==='vm'&&!lane)?lanesFrom(m,cfgOf('vm',0).slot,state.items.length):null;
+        state.items.forEach((it,i)=>{const cf=cfgOf(kind,i);
+          const slot=seq?(seq[i]||seq[0]):cf.slot;
           applyOnshelf(m,it.n,slot,cf.price,cf.qty);});});
-      trace('write',`三段式确认 · <b>批量上架</b>：商品 ${state.items.length} 项 → 机器 ${state.mids.length} 台 → 逐台按机型给位置（智能柜＝层 / 售货机＝货道）+ 价格 + 库存${lane?'（位置锁定 '+esc(lane)+'）':''}；执行统一走 <b>ca-api 单机循环</b>，成功 <b>${succ.length}</b> 台、失败 <b>${fails.length}</b> 台。`);
+      trace('write',`三段式确认 · <b>批量上架</b>：商品 ${state.items.length} 项 → 机器 ${state.mids.length} 台 → **按机型统一设置**位置（智能柜＝层 / 售货机＝起始货道起步的空闲货道）+ 价格 + 库存${lane?'（位置锁定 '+esc(lane)+'）':''}；执行统一走 <b>ca-api 单机循环</b>，成功 <b>${succ.length}</b> 台、失败 <b>${fails.length}</b> 台。`);
       syncHomeStats();
       if(fails.length)return cardBatchResult({title:'批量上架结果',succ:succ.map(k=>({mid:k,n:state.items.length})),fails:fails,okTitle:'台'});
       finishOp(id,'ok',`已在 <b>${succ.length}</b> 台机器上架 <b>${tot}</b> 条商品`,
-        `<div class="res-sub">逐台执行成功 · 位置按各机机型逐项写入</div>`,
+        `<div class="res-sub">按机型统一写入 · 售货机各台按自己的空闲货道依次分配</div>`,
         `工具返回 <b>{code:0, message:"ok"}</b> · ${succ.length} 台全部成功，已写入审计日志。`);
     },1100);
   }
-  /* 指定货道场景（第 2 条）：商品与机器都已点名 → 直接从第 3 步起 */
+  /* 指定货道场景（W2-d）：商品与机器都已点名 → 直接从第 3 步起 */
   if(lane&&state.mids.length)state.step=3;
   render();
   return id;
@@ -3350,7 +3389,10 @@ function v11Intent(q){
       scopeLine=hit;
       return cardBatchOnshelf('line',names.map(n=>({n:n})));
     }
-    if(isAll)return cardBatchOnshelf('all',names.map(n=>({n:n})));
+    /* ⚠ 2026-10-28 定稿 #22：「全部机器」这一档撤下（客户不再能一键改全部机器）——
+       「所有机器 / 批量 / 一键」这类问法仍进卡，但范围默认落在**第一条线路**，
+       由客户在第 2 步改成别的线路或切「自选」，不再有「全部 12 台」直接可提交。 */
+    if(isAll)return cardBatchOnshelf('line',names.map(n=>({n:n})));
     if(mids.length>1)return cardBatchOnshelf('pick',names.map(n=>({n:n})));
     if(mids.length===1)return cardOnshelf(mids[0],names.map(n=>({n:n})));
     /* ⚠ 反问机器也必须「算命中」：askMachine 本身没有返回值（undefined），
@@ -3735,7 +3777,7 @@ const SKILL_GROUPS=[
   {id:'shelf',emoji:'➕',title:'上架 / 下架',color:'#722ed1',desc:'1.1 新增写能力：单台按货道 / 层，批量按范围',
     items:[{t:'在南油文化广场上架康师傅碱性水',tip:'单台 · 按机型给层或货道'},
       {t:'在欢乐颂 5 号机上架百事可乐',tip:'单台 · 售货机逐个指定货道'},
-      {t:'所有机器都上架百事可乐 500ml',tip:'批量 · 全部机器'},
+      {t:'批量上架百事可乐',tip:'批量 · 按线路或自选机器'},
       {t:'给南油线路所有机器上架百事可乐',tip:'批量 · 按线路'},
       {t:'给欢乐颂 5 号机、兰均三期上架百事可乐',tip:'批量 · 自选'},
       {t:'帮我批量下架一些机器的可口可乐',tip:'下架 · 按机型两套处理'}]},
@@ -3776,7 +3818,7 @@ const SKILL_GUIDE={
 };
 /* 开场示例问法（2026-10-19 用户反馈：把 1.0 的查询操作也放进 1.1 开场交互）：
    前 6 条＝1.1 新能力演示；后 6 条＝1.0 已上线的查询 / 问答高频问法。 */
-const OPEN_GUIDE_CHIPS=['在南油文化广场上架康师傅碱性水','所有机器都上架百事可乐 500ml',
+const OPEN_GUIDE_CHIPS=['在南油文化广场上架康师傅碱性水','批量上架百事可乐',
   '帮我批量下架一些机器的可口可乐','有没有机器长时间没补货？','什么原因离线','把机器停售',
   '查我的机器','查询机器库存','今天的销售额','最近的订单','查看补货记录','售货机和智能柜有什么区别？'];
 /* 1.0 遗留兼容：技能清单里「生成补货单」走 1.1 的补货单卡
