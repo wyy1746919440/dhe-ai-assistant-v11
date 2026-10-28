@@ -359,6 +359,12 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
 .chips span{font-size:11px;background:#f2f5f9;border:1px solid #e3e8ef;border-radius:8px;padding:3px 7px;color:#3f4a5a}
 .chips span b{color:#b4bac4;font-weight:400;margin-left:3px}
+/* 2026-10-28（R1 定稿 #18）：筛选条件 chip 做成可点开关 —— 选中＝品牌色描边，关掉＝灰 + 中划 */
+.chips .cchip{cursor:pointer;user-select:none}
+.chips .cchip.on{border-color:var(--brand);color:var(--brand);background:#f0f7ff}
+.chips .cchip.off{opacity:.5;text-decoration:line-through}
+.empty-inline{padding:14px 10px;text-align:center;color:#8c8c8c;font-size:12px;background:#fafbfd;border:1px dashed #e6e9ef;border-radius:9px;margin-top:8px}
+.empty-inline .sub{margin-top:5px;font-size:10.5px;color:#a8aeb8;line-height:1.5}
 .seg span.off{background:#f5f6f8;color:#b4bac4;border-color:#eceef1}
 .hint{font-size:10.5px;color:#aab0b8;margin-top:5px;display:flex;align-items:center;gap:4px}
 .altseg{margin-top:9px;border:1px dashed #e3e8ef;border-radius:9px;padding:7px 9px;background:#fcfdff}
@@ -392,6 +398,21 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .mx-r .mxn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mx-r .mxp{width:52px;text-align:right;font-variant-numeric:tabular-nums}
 .mx-go{color:var(--brand);cursor:pointer;white-space:nowrap}
+/* —— 三步向导（2026-10-28 定稿 #19：批量上架改为「选商品 → 选机器 → 逐台定位置/价格/库存」）——
+   当前步＝品牌色 + 实心上划线，已完成的步＝绿色打勾，未到的步＝灰。 */
+.steps{display:flex;align-items:center;gap:6px;margin-top:9px}
+.steps .stp{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;
+  padding-top:5px;border-top:2px solid #eef1f5;font-size:10.5px;color:#a8aeb8;white-space:nowrap}
+.steps .stp b{flex:none;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;
+  border-radius:50%;background:#eef1f5;color:#a8aeb8;font-size:9.5px;font-weight:700;line-height:1}
+.steps .stp.on{color:var(--brand);border-top-color:var(--brand);font-weight:700}
+.steps .stp.on b{background:var(--brand);color:#fff}
+.steps .stp.done{color:var(--ok);border-top-color:#b7e3c4}
+.steps .stp.done b{background:var(--ok);color:#fff}
+/* 第 3 步逐台块的表头：机器名 · 编号 · 机型 */
+.mx-hd .mh-code{color:#a8aeb8;font-size:10.5px;font-variant-numeric:tabular-nums}
+.mx-hd .mh-kind{margin-left:auto;color:#8c8c8c;font-size:10.5px;white-space:nowrap}
+.mx-hd .mh-kind+.fg{margin-left:8px}
 .op-btns{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;border:none;border-radius:9px;padding:8px 0;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer}
 .btn.ghost{background:#f2f3f5;color:#666}
@@ -1011,9 +1032,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261028c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261028c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261028c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261028e" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261028e" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261028e" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1118,15 +1139,24 @@ const prodByName=n=>PRODUCTS.find(p=>p.n===n)||null;
 
 /* ---------- 只读数据源（1.1 新增读能力）----------
    ⚠ 全部静态演示数据；真实实现走对应只读接口（见各卡的 trace 文案） */
-/* R1 补货记录：未补货时长倒序 */
+/* R6 补货记录（R1 卡）：
+   ⚠ 2026-10-28 产品裁决（定稿 #18）：查的不是「补过货的机器」，是**该补还没补的机器** ——
+     口径＝最近一个月 ∩ 在线 ∩ 有销量 ∩ 未补货 > 15 天，三者缺一就不是待补货对象。
+     演示数据按此重排，刻意保留三类「未命中」以便看清筛选逻辑：
+     gzg（26 天但离线）· mlyc（19 天、近一月零销量，该机同时也离线）· hls（13 天未超阈值）。 */
 const REPLEN_REC=[
+  {mid:'hwy',cnt:4,last:'10-01',days:21,avg:'平均 9 天 / 次'},
+  {mid:'ftka',cnt:2,last:'10-04',days:18,avg:'平均 14 天 / 次'},
+  {mid:'bg2',cnt:1,last:'10-05',days:17,avg:'平均 22 天 / 次'},
+  {mid:'dch',cnt:3,last:'10-06',days:16,avg:'平均 12 天 / 次'},
   {mid:'gzg',cnt:0,last:'—',days:26,avg:'从未补货'},
+  {mid:'mlyc',cnt:1,last:'10-03',days:19,avg:'平均 30 天 / 次'},
   {mid:'hls',cnt:2,last:'10-02',days:13,avg:'平均 15 天 / 次'},
   {mid:'lj3',cnt:3,last:'10-10',days:5,avg:'平均 11 天 / 次'},
-  {mid:'nswt',cnt:1,last:'10-11',days:4,avg:'平均 20 天 / 次'},
-  {mid:'kjy',cnt:5,last:'10-13',days:2,avg:'平均 8 天 / 次'},
   {mid:'nwhh',cnt:6,last:'10-14',days:0,avg:'平均 5 天 / 次'}
 ];
+/* 机器销售额取数（"¥128.0" → 128）；零销量的机器不算待补货对象 */
+function salesOf(m){return parseFloat(String(m.sales||'¥0').replace(/[^\d.]/g,''))||0}
 /* R2 订单商品明细 */
 const ORDER_DETAIL={no:'818086331791620724763',mid:'hls',t:'10-14 09:12',pay:'微信支付',st:'已支付',
   items:[{n:'可口可乐 330ml',price:3.00,qty:2},{n:'辣媳妇山椒笋尖 75g',price:2.50,qty:1}]};
@@ -1962,78 +1992,130 @@ function onshelfGoodsBlocked(mid,mids,n){
   return '';
 }
 
-/* ---------- W2-a / W2-b / W2-c：批量上架（范围三选一）----------
-   2026-10-19 用户反馈：线路选择必须是**真下拉**——点开列出商户下全部线路机构（线路 + 台数），
-   点选直接切换目标线路；不能是「点一下循环切到下一条」（用户无法直接选定要切到哪条）。
-   下拉卡片外点击自动收起（全局只绑一次）。
-   ⚠ 三张卡共用同一套商品行，仅机器选择区不同；顶部 .seg 切换
-   ⚠ 批量不逐台指定货道 / 层，由各机自动分配 */
 if(typeof document!=='undefined'&&!window.__lineDropClose){window.__lineDropClose=1;
   document.addEventListener('click',()=>{document.querySelectorAll('.linedrop').forEach(d=>{d.style.display='none'})});}
-function cardBatchOnshelf(scope,items){
+/* ---------- W2-a / W2-b / W2-c：批量上架（一张卡内三步向导）----------
+   2026-10-28 用户反馈（定稿 #19）：批量上架原来「先选机器 → 商品行 → 位置自动分配」，
+   位置不可见也不可改，12 台机器 × 3 个商品＝36 个位置全靠猜。改为：
+     第 1 步 选商品（价格 / 补货量）
+     第 2 步 选机器（全部 / 按线路 / 自选，沿用 W2-a/b/c 的范围逻辑）
+     第 3 步 逐台按机型确认位置 + 价格 + 库存
+   位置默认值（预填 + 可改，用户选「预填默认 + 可改」）：
+     · 智能柜 ＝ 第 1 层（定稿 #14：一层没有商品数限制，不构成占用）
+     · 售货机 ＝ 下一个空闲货道
+   点位置 chip 走 sheetPickSlot / modalPickSlot（定稿 #13 已有），改完全卡价预览联动。
+   ⚠ opts.lane：第 2 条「按货道批量上架」复用本卡 —— 位置锁定为固定货道号，不再自动分配，
+     且机器范围只留售货机（智能柜没有 A1 货道这种编号）。 */
+function cardBatchOnshelf(scope,items,opts){
+  opts=opts||{};
   const all=Object.keys(MACHINES);
-  let mids=[];
-  if(scope==='all')mids=all.slice();
-  else if(scope==='line')mids=lineMachines(scopeLine||LINES[0]).map(([id])=>id);
-  else mids=(batchPickCache.length?batchPickCache.slice():['hls','lj3','nwhh']);
+  const lane=opts.lane||null;                     /* 指定货道（第 2 条） */
+  const fixed=opts.mids||null;                    /* 指定货道场景下由路由限定好的机器 */
+  const skipNote=opts.skipNote||'';               /* 「已跳过 N 台非售货机」这类说明 */
+  const title=opts.title||'➕ 批量上架商品';
   items=(items||[]).map(it=>{const p=prodByName(it.n)||{price:3.5,box:12};
     return {n:it.n,price:it.price!=null?it.price:p.price,lib:p.price,qty:it.qty!=null?it.qty:suggestQty(p)}});
-  if(!items.length){const p=prodByName('百事可乐 500ml');items=[{n:'百事可乐 500ml',price:p.price,lib:p.price,qty:suggestQty(p)}]}
+  if(!items.length){const p=prodByName('百事可乐 500ml');
+    items=[{n:'百事可乐 500ml',price:p.price,lib:p.price,qty:suggestQty(p)}]}
   const id=uid();
+  const state={step:1,items:items,mids:[],scope:scope||'all',lane:lane,conf:{},open:{}};
+  if(fixed)state.mids=fixed.slice();
+  else if(state.scope==='all')state.mids=all.slice();
+  else if(state.scope==='line')state.mids=lineMachines(scopeLine||LINES[0]).map(([k])=>k);
+  else state.mids=batchPickCache.length?batchPickCache.slice():['hls','lj3','nwhh'];
+  if(state.mids.length)state.open[state.mids[0]]=true;
   const c=pushCard(`<div class="cardbox" id="${id}_box">
-    <div class="cb-head c" id="${id}_head"><span class="ttl">➕ 批量上架商品</span><span class="st" id="${id}_st">待确认</span></div>
-    <div class="op-wrap" id="${id}_op">
-      <div class="seg" id="${id}_seg">
-        <span class="${scope==='all'?'on':''}" data-s="all">全部机器 ${all.length}</span>
-        <span class="${scope==='line'?'on':''}" data-s="line">按线路</span>
-        <span class="${scope==='pick'?'on':''}" data-s="pick">自选${scope==='pick'?' '+mids.length:''}</span>
-      </div>
-      <div id="${id}_range"></div>
-      <div class="ptable" id="${id}_tb">
-        <div class="ph"><span class="c1">商品</span>${pcHead('商品库价',88)}<span class="c5">价格（元）</span><span class="c5s">补货量</span>${pcHead('箱规',68)}</div>
-        <div id="${id}_rows">${items.map((it,i)=>`<div class="pr pre" data-i="${i}">
-          <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>${pcCol(money(it.lib),88)}
-            <span class="c5"><input class="pin" data-i="${i}" data-lib="${it.lib}" value="${Number(it.price).toFixed(2)}" inputmode="decimal"></span>
-            <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(boxOf(it.n)+' 件/箱',68)}</div>
-          ${pcLn(`对 <b class="cnt">${mids.length}</b> 台逐台执行 · 货道自动分配`)}
-        </div>`).join('')}</div>
-      </div>
-      <div class="addrow" id="${id}_add">＋ 添加商品</div>
-      ${PCW?`<div class="hint">对 <b class="cnt">0</b> 台逐台执行 · 货道 / 层由各机自动分配（批量不逐个指定）· 价格默认取商品库价，改过的行会标橙 · 补货量按各台货道容量上限生效 · 「＋ 添加商品」按本批机器<b>机型交集</b>出商品</div>`:''}
-      <div class="pdiff" id="${id}_pv"></div>
-      <div class="op-btns" id="${id}_btns"><button class="btn ghost" id="${id}_cancel">取消</button><button class="btn main" id="${id}_ok">确认上架</button></div>
-      <div class="exec-note">🔒 部分机器失败会逐台列出原因，其余不受影响</div>
+    <div class="cb-head c" id="${id}_head"><span class="ttl">${esc(title)}</span><span class="st" id="${id}_st">待确认</span></div>
+    <div class="steps" id="${id}_steps">
+      <span class="stp on" data-s="1"><b>1</b>选商品</span>
+      <span class="stp" data-s="2"><b>2</b>选机器</span>
+      <span class="stp" data-s="3"><b>3</b>位置 / 价格 / 库存</span>
     </div>
+    <div id="${id}_body"></div>
+    <div class="pdiff" id="${id}_pv"></div>
+    <div class="op-btns" id="${id}_btns"></div>
+    <div class="exec-note" id="${id}_note"></div>
   </div>`);
-  const state={scope:scope,mids:mids,items:items};
+  const pv=c.querySelector('#'+id+'_pv'),btns=c.querySelector('#'+id+'_btns'),note=c.querySelector('#'+id+'_note');
+  /* 位置默认值：智能柜＝第 1 层；售货机＝下一个空闲货道；指定货道场景直接锁定 */
+  function defSlot(mid){
+    if(lane)return lane;
+    const m=MACHINES[mid];
+    if(m.kind!=='vm')return '第 1 层';
+    return nextFreeLane(m,8)[0]||'A1 货道';
+  }
+  function confOf(mid,i){
+    if(!state.conf[mid])state.conf[mid]={};
+    if(!state.conf[mid][i])state.conf[mid][i]={slot:defSlot(mid),price:state.items[i].price,qty:state.items[i].qty};
+    return state.conf[mid][i];
+  }
+  /* ================= Step 1：选商品 ================= */
+  function html1(){
+    return `<div class="ptable" id="${id}_tb">
+      <div class="ph"><span class="c1">商品</span>${pcHead('商品库价',88)}<span class="c5">价格（元）</span><span class="c5s">补货量</span>${pcHead('箱规',68)}</div>
+      <div id="${id}_rows">${state.items.map((it,i)=>`<div class="pr pre" data-i="${i}">
+        <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>${pcCol(money(it.lib),88)}
+          <span class="c5"><input class="pin" data-i="${i}" data-lib="${it.lib}" value="${Number(it.price).toFixed(2)}" inputmode="decimal"></span>
+          <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(boxOf(it.n)+' 件/箱',68)}</div>
+        ${pcLn(`箱规 ${boxOf(it.n)} 件/箱 · 默认价 ${money(it.lib)}`)}
+      </div>`).join('')}</div>
+    </div>
+    <div class="addrow" id="${id}_add">＋ 添加商品</div>
+    ${PCW?'':'<div class="hint">先定要上什么商品，下一步再挑机器 · 补货量默认＝箱规 × 1.5</div>'}`;
+  }
+  function bind1(){
+    c.querySelectorAll('.pin').forEach(i=>{i.oninput=()=>{const k=+i.getAttribute('data-i');state.items[k].price=i.value.trim();
+      i.classList.toggle('chg',Math.abs(Number(i.value)-Number(i.getAttribute('data-lib')))>1e-9);
+      state.conf={};refresh()}});
+    c.querySelectorAll('.qin').forEach(i=>{i.oninput=()=>{const k=+i.getAttribute('data-i');state.items[k].qty=i.value.trim();state.conf={};refresh()}});
+    /* ⚠ 商品库按本批机器机型的**交集**出（2026-10-16 裁决） */
+    c.querySelector('#'+id+'_add').onclick=()=>sheetAddProduct(null,picks=>{
+      if(!picks.length)return;
+      const cur=state.items.map(x=>x.n);
+      picks.forEach(n=>{if(cur.indexOf(n)>=0)return;const p=prodByName(n)||{price:3,box:12};
+        state.items.push({n:n,price:p.price,lib:p.price,qty:suggestQty(p)})});
+      state.conf={};render();
+    },state.mids,state.items.map(x=>x.n));
+  }
+  /* ================= Step 2：选机器 ================= */
+  function html2(){
+    if(fixed)return `<div class="kv"><span class="k">机器范围</span><span class="v">${state.mids.length} 台<em>${esc(opts.midsNote||'按问法限定')}</em></span></div>
+      <div class="chips">${state.mids.map(k=>`<span>${esc(MACHINES[k].name)}</span>`).join('')}</div>
+      ${skipNote?`<div class="hint">${esc(skipNote)}</div>`:''}`;
+    return `<div class="seg" id="${id}_seg">
+        <span class="${state.scope==='all'?'on':''}" data-s="all">全部机器 ${all.length}</span>
+        <span class="${state.scope==='line'?'on':''}" data-s="line">按线路</span>
+        <span class="${state.scope==='pick'?'on':''}" data-s="pick">自选${state.scope==='pick'?' '+state.mids.length:''}</span>
+      </div>
+      <div id="${id}_range"></div>`;
+  }
   function rangeHtml(){
     if(state.scope==='all')return `<div class="kv"><span class="k">范围</span><span class="v">全部 ${all.length} 台</span></div>`;
     if(state.scope==='line'){const ln=scopeLine||LINES[0];
-      /* 2026-10-19 用户反馈：移动端选择类交互没有「卡内嵌下拉」的先例（P1/P2 都是半屏弹层）
-         → 移动端＝点「线路」行呼出**半屏弹层**选线路；PC 端＝卡内真下拉。 */
       return `<div class="kv"><span class="k">线路</span><span class="v ldsel" id="${id}_ltop">${esc(ln)} ▾<em>${lineCount(ln)} 台</em></span></div>`+
         (PCW?`<div class="linedrop" id="${id}_ldrop" style="display:none">${LINES.map(l=>`<div class="lopt${l===ln?' on':''}" data-l="${esc(l)}"><span>${esc(l)}</span><em>${lineCount(l)} 台</em></div>`).join('')}</div>`:'')+
         `<div class="chips">${lineMachines(ln).slice(0,3).map(([,m])=>`<span>${esc(m.name)}</span>`).join('')}${lineCount(ln)>3?`<span>＋${lineCount(ln)-3}</span>`:''}</div>`}
     return `<div class="kv"><span class="k">已选机器</span><span class="v">${state.mids.length} 台</span></div>
       <div class="chips">${state.mids.map(k=>`<span>${esc(MACHINES[k].name)} <b data-x="${k}">✕</b></span>`).join('')}<span id="${id}_addm">＋ 添加机器</span></div>`;
   }
-  function renderRange(){
-    const box=c.querySelector('#'+id+'_range');box.innerHTML=rangeHtml();
-    const lm=box.querySelector('#'+id+'_addm');
-    if(lm)lm.onclick=()=>sheetAddMachine(state.mids,sel=>{state.mids=sel;renderRange();refresh()});
-    box.querySelectorAll('[data-x]').forEach(b=>{b.onclick=e=>{e.stopPropagation();
-      state.mids=state.mids.filter(k=>k!==b.getAttribute('data-x'));renderRange();refresh()}});
-    /* 线路选择：PC＝卡内下拉（点 kv 行开合，点选项直接切换）；移动端＝半屏弹层（同 P1/P2 形态，2026-10-19 用户反馈） */
-    const lt=box.querySelector('#'+id+'_ltop');
+  function bind2(){
+    if(fixed)return;
+    const box=c.querySelector('#'+id+'_range');
+    if(box)box.innerHTML=rangeHtml();
+    const lm=box&&box.querySelector('#'+id+'_addm');
+    if(lm)lm.onclick=()=>sheetAddMachine(state.mids,sel=>{state.mids=sel;state.conf={};render()});
+    if(box)box.querySelectorAll('[data-x]').forEach(b=>{b.onclick=e=>{e.stopPropagation();
+      state.mids=state.mids.filter(k=>k!==b.getAttribute('data-x'));state.conf={};render()}});
+    const lt=box&&box.querySelector('#'+id+'_ltop');
     if(lt&&PCW){
       const ld=box.querySelector('#'+id+'_ldrop');
       if(ld){
         lt.onclick=e=>{e.stopPropagation();ld.style.display=(ld.style.display==='none'?'block':'none')};
         ld.querySelectorAll('.lopt').forEach(o=>{o.onclick=e=>{e.stopPropagation();
-          scopeLine=o.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);
-          renderRange();refresh()}});
+          scopeLine=o.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);state.conf={};render()}});
       }
     }else if(lt){
+      /* 2026-10-19 用户反馈：线路选择必须是**真下拉**——点开列出全部线路（+台数），点选直接切换 */
       lt.onclick=()=>{
         const ln=scopeLine||LINES[0];
         const mask=openSheet(`<div class="sh-hd">选择线路<span class="x">✕</span></div><div class="picklist">${
@@ -2041,59 +2123,95 @@ function cardBatchOnshelf(scope,items){
         const x=mask.querySelector('.sh-hd .x');if(x)x.onclick=()=>closeSheet();
         mask.querySelectorAll('.lopt').forEach(r=>{r.onclick=()=>{
           scopeLine=r.getAttribute('data-l');state.mids=lineMachines(scopeLine).map(([k])=>k);
-          closeSheet();renderRange();refresh()}});
+          closeSheet();state.conf={};render()}});
       };
     }
+    c.querySelectorAll('#'+id+'_seg span').forEach(s=>{s.onclick=()=>{
+      const to=s.getAttribute('data-s');
+      if(to==='line'&&state.scope!=='line'){scopeLine=scopeLine||LINES[0];state.mids=lineMachines(scopeLine).map(([k])=>k)}
+      if(to==='all')state.mids=all.slice();
+      if(to==='pick'&&state.scope!=='pick')state.mids=batchPickCache.length?batchPickCache.slice():['hls','lj3','nwhh'];
+      state.scope=to;state.conf={};render();
+    }});
   }
-  const pv=c.querySelector('#'+id+'_pv'),okBtn=c.querySelector('#'+id+'_ok');
+  /* ================= Step 3：逐台配置位置 / 价格 / 库存 ================= */
+  function html3(){
+    return state.mids.map(k=>{
+      const m=MACHINES[k],isVm=m.kind==='vm',op=!!state.open[k];
+      return `<div class="mx${op?' open':''}" id="${id}_mx_${k}">
+        <div class="mx-hd" data-mx="${k}"><span>${esc(m.name)}</span><span class="mh-code">${esc(m.code)}</span>
+          <span class="mh-kind">${esc(isVm?'售货机':'智能柜')}</span><span class="fg">${op?'收起 ▴':'展开 ▾'}</span></div>
+        <div class="mx-bd"><div class="ptable">
+          <div class="ph"><span class="c1">商品</span>${pcHead(isVm?'货道':'层',84)}<span class="c5">价格</span><span class="c5s">库存</span></div>
+          ${state.items.map((it,i)=>{const cf=confOf(k,i);const ln=isVm?(laneOf(m,cf.slot)||{max:30,stock:0}):null;
+            return `<div class="pr pre" data-m="${k}" data-i="${i}">
+              <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>
+                ${pcCol(`<span class="slot" data-m="${k}" data-i="${i}">${esc(cf.slot)} ▾</span>`,84)}
+                <span class="c5"><input class="cfp" data-m="${k}" data-i="${i}" value="${Number(cf.price).toFixed(2)}" inputmode="decimal"></span>
+                <span class="c5s"><input class="cfq" data-m="${k}" data-i="${i}" value="${cf.qty}" inputmode="numeric"></span></div>
+              ${pcLn(`<span class="slot" data-m="${k}" data-i="${i}">${esc(cf.slot)} ▾</span>${
+                isVm?`最大 ${ln.max} · 现存 ${ln.stock}`:'一层可放多个商品'}`)}
+            </div>`}).join('')}
+        </div></div>
+      </div>`;
+    }).join('')+`<div class="hint">${esc(lane?'位置已按问法锁定为 '+lane+' · 价格与库存可逐台改'
+      :'位置按机型预填（智能柜＝第 1 层 · 售货机＝下一个空闲货道），点机器展开后可逐项改')}${skipNote?' · '+esc(skipNote):''}</div>`;
+  }
+  function bind3(){
+    c.querySelectorAll('.mx-hd').forEach(h=>{h.onclick=()=>{
+      const k=h.getAttribute('data-mx');state.open[k]=!state.open[k];
+      h.querySelector('.fg').textContent=state.open[k]?'收起 ▴':'展开 ▾';
+      h.parentNode.classList.toggle('open',!!state.open[k]);}});
+    c.querySelectorAll('.slot').forEach(s=>{s.onclick=()=>{
+      const k=s.getAttribute('data-m'),i=+s.getAttribute('data-i'),m=MACHINES[k],isVm=m.kind==='vm';
+      sheetPickSlot(k,isVm,confOf(k,i).slot,ns=>{confOf(k,i).slot=ns;render()});
+    }});
+    c.querySelectorAll('.cfp').forEach(i=>{i.oninput=()=>{confOf(i.getAttribute('data-m'),+i.getAttribute('data-i')).price=i.value.trim();refresh()}});
+    c.querySelectorAll('.cfq').forEach(i=>{i.oninput=()=>{confOf(i.getAttribute('data-m'),+i.getAttribute('data-i')).qty=i.value.trim();refresh()}});
+  }
+  function render(){
+    c.querySelectorAll('#'+id+'_steps .stp').forEach(s=>{
+      const n=+s.getAttribute('data-s');
+      s.className='stp'+(n===state.step?' on':(n<state.step?' done':''));});
+    const body=c.querySelector('#'+id+'_body');
+    body.innerHTML=state.step===1?html1():(state.step===2?html2():html3());
+    if(state.step===1)bind1();else if(state.step===2)bind2();else bind3();
+    btns.innerHTML=(state.step>1?`<button class="btn ghost" id="${id}_prev">上一步</button>`:'')
+      +(state.step<3?`<button class="btn main" id="${id}_next">下一步：${state.step===1?'选机器':'位置 / 价格'}</button>`
+                   :`<button class="btn main" id="${id}_ok">确认上架（${state.mids.length} 台）</button>`);
+    const pv_=c.querySelector('#'+id+'_prev'),nx=c.querySelector('#'+id+'_next'),ok=c.querySelector('#'+id+'_ok');
+    if(pv_)pv_.onclick=()=>{state.step--;render()};
+    if(nx)nx.onclick=()=>{if(!state.items.length)return;if(state.step===2&&!state.mids.length)return;state.step++;render()};
+    if(ok)ok.onclick=submit;
+    note.innerHTML=state.step===1?'🔒 先定商品，机器与位置在下一步'
+      :(state.step===2?'🔒 机器范围定好后，第 3 步按机型逐台确认位置与价格'
+      :'🔒 部分机器失败会逐台列出原因，其余不受影响');
+    refresh();
+  }
   function refresh(){
-    const pins=[...c.querySelectorAll('.pin')],qins=[...c.querySelectorAll('.qin')];
-    pins.forEach(i=>{state.items[+i.getAttribute('data-i')].price=i.value.trim()});
-    qins.forEach(i=>{state.items[+i.getAttribute('data-i')].qty=i.value.trim()});
-    c.querySelectorAll('.cnt').forEach(e=>e.textContent=state.mids.length);
-    const bad=state.items.some(it=>!(Number(it.price)>0))||state.items.some(it=>!(Number(it.qty)>=0))||!state.mids.length;
-    let h=`<div class="hd">将上架 ${state.mids.length} 台 × ${state.items.length} 项 = ${state.mids.length*state.items.length} 条</div>`;
-    if(state.scope==='line')h+=`<div class="r"><span>线路</span><span>${esc(scopeLine||LINES[0])} · 点线路名可下拉切换</span></div>`;
-    if(state.scope==='pick')state.mids.forEach(k=>{h+=`<div class="r"><span>${esc(MACHINES[k].name)}</span><span>${MACHINES[k].code}</span></div>`});
+    const bad=state.items.some(it=>!(Number(it.price)>0))||state.items.some(it=>!(Number(it.qty)>=0));
+    let h='';
+    if(state.step===1){
+      h=`<div class="hd">已选 ${state.items.length} 个商品 · 下一步挑机器</div>`;
+      state.items.forEach(it=>{h+=`<div class="r"><span>${esc(shortName(it.n))}</span><span>${money(it.price)} · 补 ${it.qty}</span></div>`});
+    }else if(state.step===2){
+      if(!state.mids.length)h=`<div class="hd">请先选择机器</div>`;
+      else{h=`<div class="hd">将上架 ${state.mids.length} 台 × ${state.items.length} 项 = ${state.mids.length*state.items.length} 条</div>`;
+        if(state.scope==='line')h+=`<div class="r"><span>线路</span><span>${esc(scopeLine||LINES[0])} · 点线路名可切换</span></div>`;
+        if(state.scope==='pick'&&!fixed)state.mids.forEach(k=>{h+=`<div class="r"><span>${esc(MACHINES[k].name)}</span><span>${esc(MACHINES[k].code)}</span></div>`});}
+    }else{
+      const vmN=state.mids.filter(k=>MACHINES[k].kind==='vm').length;
+      h=`<div class="hd">${state.mids.length} 台 × ${state.items.length} 项 = ${state.mids.length*state.items.length} 条</div>`
+        +`<div class="r"><span>位置</span><span>${esc(lane?lane+'（指定货道）':`智能柜第 1 层 · 售货机空闲货道（${vmN} 台）`)}</span></div>`;
+    }
     pv.className='pdiff'+(bad?' err':'');
-    pv.innerHTML=bad?(state.mids.length?'价格需为大于 0 的数字、补货量需为不小于 0 的整数':'请先选择机器'):h;
-    okBtn.disabled=bad;
-    okBtn.textContent=`确认上架（${state.mids.length} 台）`;
+    pv.innerHTML=bad?'价格需为大于 0 的数字、库存需为不小于 0 的整数':h;
+    const nx=c.querySelector('#'+id+'_next'),ok=c.querySelector('#'+id+'_ok');
+    if(nx)nx.disabled=bad||(state.step===2&&!state.mids.length);
+    if(ok)ok.disabled=bad||!state.mids.length;
   }
-  c.querySelectorAll('#'+id+'_seg span').forEach(s=>{s.onclick=()=>{
-    const to=s.getAttribute('data-s');
-    if(to==='line'&&state.scope!=='line'){scopeLine=scopeLine||LINES[0];state.mids=lineMachines(scopeLine).map(([k])=>k)}
-    if(to==='all')state.mids=all.slice();
-    if(to==='pick'&&state.scope!=='pick')state.mids=batchPickCache.length?batchPickCache.slice():['hls','lj3','nwhh'];
-    state.scope=to;
-    c.querySelectorAll('#'+id+'_seg span').forEach(x=>x.className=(x.getAttribute('data-s')===to?'on':''));
-    const last=c.querySelector('#'+id+'_seg span[data-s="pick"]');
-    if(last)last.textContent='自选'+(to==='pick'?' '+state.mids.length:'');
-    renderRange();refresh();
-  }});
-  [...c.querySelectorAll('.pin')].forEach(i=>{i.oninput=refresh;i.classList.toggle('chg',Math.abs(Number(i.value)-Number(i.getAttribute('data-lib')))>1e-9)});
-  [...c.querySelectorAll('.qin')].forEach(i=>{i.oninput=refresh});
-  /* ⚠ 批量上架：商品库按本批机器机型的**交集**出（2026-10-16 裁决）→ 传 state.mids */
-  c.querySelector('#'+id+'_add').onclick=()=>sheetAddProduct(null,picks=>{
-    if(!picks.length)return;
-    const cur=state.items.map(x=>x.n);
-    picks.forEach(n=>{if(cur.indexOf(n)>=0)return;const p=prodByName(n)||{price:3,box:12};
-      state.items.push({n:n,price:p.price,lib:p.price,qty:suggestQty(p)})});
-    renderRows();refresh();
-  },state.mids,state.items.map(x=>x.n));
-  function renderRows(){
-    c.querySelector('#'+id+'_rows').innerHTML=state.items.map((it,i)=>`<div class="pr pre" data-i="${i}">
-      <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span></span>${pcCol(money(it.lib),88)}
-        <span class="c5"><input class="pin" data-i="${i}" data-lib="${it.lib}" value="${Number(it.price).toFixed(2)}" inputmode="decimal"></span>
-        <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(boxOf(it.n)+' 件/箱',68)}</div>
-      ${pcLn(`对 <b class="cnt">${state.mids.length}</b> 台逐台执行 · 货道自动分配`)}
-    </div>`).join('');
-    [...c.querySelectorAll('.pin')].forEach(i=>{i.oninput=refresh;i.classList.toggle('chg',Math.abs(Number(i.value)-Number(i.getAttribute('data-lib')))>1e-9)});
-    [...c.querySelectorAll('.qin')].forEach(i=>{i.oninput=refresh});
-  }
-  c.querySelector('#'+id+'_cancel').onclick=()=>markCancelled(id);
-  okBtn.onclick=()=>{
-    const btns=c.querySelector('#'+id+'_btns');if(btns)btns.innerHTML=`<button class="btn done" disabled>⏳ 执行中…</button>`;
+  function submit(){
+    const btnsEl=c.querySelector('#'+id+'_btns');if(btnsEl)btnsEl.innerHTML=`<button class="btn done" disabled>⏳ 执行中…</button>`;
     const chip=c.querySelector('#'+id+'_st');if(chip)chip.textContent='⏳ 执行中…';
     setTimeout(()=>{
       const names=state.items.map(x=>x.n);
@@ -2101,20 +2219,45 @@ function cardBatchOnshelf(scope,items){
       const failSet={};fails.forEach(f=>failSet[f.mid]=1);
       const succ=state.mids.filter(k=>!failSet[k]);
       const tot=state.mids.length*state.items.length;
-      /* 写库：逐台上架 */
-      succ.forEach(k=>{const m=MACHINES[k];
-        state.items.forEach(it=>{const ex=m.products.find(x=>x.n===it.n);
-          if(ex)ex.price=Number(it.price);
-          else m.products.push({n:it.n,price:Number(it.price),lanes:[{id:(m.kind==='vm'?nextFreeLane(m,1)[0]:nextFreeLayer(m,1)[0]),stock:Number(it.qty),max:30}]});});});
-      trace('write',`多台执行统一走 <b>ca-api 单机循环</b>：${state.mids.length} 台逐台提交，成功 <b>${succ.length}</b> 台、失败 <b>${fails.length}</b> 台，失败原因原样透传后端。`);
+      succ.forEach(k=>{const m=MACHINES[k];const isVm=m.kind==='vm';
+        state.items.forEach((it,i)=>{const cf=confOf(k,i);const slot=cf.slot||defSlot(k);
+          applyOnshelf(m,it.n,slot,cf.price,cf.qty);});});
+      trace('write',`三段式确认 · <b>批量上架</b>：商品 ${state.items.length} 项 → 机器 ${state.mids.length} 台 → 逐台按机型给位置（智能柜＝层 / 售货机＝货道）+ 价格 + 库存${lane?'（位置锁定 '+esc(lane)+'）':''}；执行统一走 <b>ca-api 单机循环</b>，成功 <b>${succ.length}</b> 台、失败 <b>${fails.length}</b> 台。`);
       syncHomeStats();
       if(fails.length)return cardBatchResult({title:'批量上架结果',succ:succ.map(k=>({mid:k,n:state.items.length})),fails:fails,okTitle:'台'});
       finishOp(id,'ok',`已在 <b>${succ.length}</b> 台机器上架 <b>${tot}</b> 条商品`,
-        `<div class="res-sub">逐台执行成功，货道 / 层由各机自动分配</div>`,
+        `<div class="res-sub">逐台执行成功 · 位置按各机机型逐项写入</div>`,
         `工具返回 <b>{code:0, message:"ok"}</b> · ${succ.length} 台全部成功，已写入审计日志。`);
     },1100);
-  };
-  renderRange();refresh();
+  }
+  /* 指定货道场景（第 2 条）：商品与机器都已点名 → 直接从第 3 步起 */
+  if(lane&&state.mids.length)state.step=3;
+  render();
+  return id;
+}
+/* 把「商品 × 位置 × 价格 × 库存」写进某台机器的数据（上架卡 / 按货道上架共用） */
+function applyOnshelf(m,n,slot,price,qty){
+  const ex=m.products.find(x=>x.n===n);
+  if(ex){ex.price=Number(price);if(!ex.lanes)ex.lanes=[];
+    const ln=ex.lanes.find(l=>l.id===slot);
+    if(ln)ln.stock=Number(qty);else ex.lanes.push({id:slot,stock:Number(qty),max:30});}
+  else m.products.push({n:n,price:Number(price),lanes:[{id:slot,stock:Number(qty),max:30}]});
+}
+/* ---------- W2-d（1.1 新增）：按货道批量上架 ----------
+   2026-10-28 用户反馈（定稿 #19·2）：「所有机器的 A1 货道上架百事可乐」——
+   直接点名货道号，一步到位，不用再逐台挑位置。
+   ⚠ 货道是**售货机**的概念，智能柜只有「层」→ 命中的智能柜一律跳过并在卡内说明台数。 */
+function cardLaneOnshelf(lane,names,scope){
+  const all=Object.keys(MACHINES);
+  const vmAll=all.filter(k=>MACHINES[k].kind==='vm');
+  let mids=vmAll,vmNote='全部售货机';
+  if(scope==='line'){mids=lineMachines(scopeLine||LINES[0]).map(([k])=>k).filter(k=>MACHINES[k].kind==='vm');vmNote='该线路售货机'}
+  const vmSkip=all.length-vmAll.length;
+  const skipNote=vmSkip>0?`已跳过 ${vmSkip} 台非售货机（智能柜按层管理，无货道编号）`:'';
+  const items=(names&&names.length)?names.map(n=>{const p=prodByName(n)||{price:3.5,box:12};return {n:n,price:p.price,qty:suggestQty(p)}})
+    :[{n:'百事可乐 500ml',price:3.5,qty:suggestQty(prodByName('百事可乐 500ml'))}];
+  const id=cardBatchOnshelf('pick',items,{lane:lane,mids:mids,midsNote:vmNote,skipNote:skipNote,title:'➕ 按货道上架商品'});
+  trace('write',`命中 <b>按货道上架</b>（1.1 新增）：货道 <b>${esc(lane)}</b> · 商品 <b>${esc(items.map(x=>x.n).join('、'))}</b> · 售货机 <b>${mids.length}</b> 台${vmSkip>0?`（跳过 ${vmSkip} 台智能柜）`:''}；位置锁定为该货道，价格 / 库存逐台可改。`);
   return id;
 }
 let scopeLine=null, batchPickCache=[];
@@ -2525,55 +2668,87 @@ function cardReplenish(mids){
   return id;
 }
 
-/* ---------- R1：补货记录（可勾选 → 直连补货单）---------- */
+/* ---------- R1：补货记录 / 待补货机器（可勾选 → 直连补货单）----------
+   ⚠ 2026-10-28 产品裁决（定稿 #18）：这张卡查的是**该补还没补的机器**，不是补货流水。
+     口径＝最近一个月 ∩ 在线 ∩ 有销量 ∩ 未补货 > 15 天，三者缺一就不是待补货对象。
+     条件做成**可点开关**（默认全开）—— 条件写死但**不隐藏**：客户要能看出「为什么只有这几台」，
+     放宽一个条件立刻在卡内重算，不算新提问。
+     命中 0 台走空状态卡：不说「没数据」，说清是被哪个条件滤掉的。 */
 function cardReplenishRecord(){
   const id=uid();
-  const rows=REPLEN_REC.map(r=>Object.assign({},r,{on:r.days>=7}));
-  /* 空状态：近 30 天无补货记录 —— 说清时间范围，别让客户以为坏了 */
-  if(!rows.length){
-    pushEmpty('🚚','🚚 补货记录（近 30 天）','近 30 天没有补货记录','如果期间确实补过货，可能是补货单未提交成功 · 可到 PC 端补货管理核对');
-    trace('api',`意图 <b>query</b> → GET <b>/ai/tools/replenish_record?range=30d</b> · <b>返回 0 条</b> → 走空状态卡（说明时间范围 + 排查建议），不给空表和按钮。`);
-    return id;
-  }
+  const COND=[
+    {k:'online',t:'在线',hit:(r,m)=>!!m.online,miss:()=>'离线'},
+    {k:'sales',t:'有销量',hit:(r,m)=>salesOf(m)>0,miss:()=>'近一月无销量'},
+    {k:'days',t:'未补货 > 15 天',hit:(r,m)=>r.days>15,miss:(r,m)=>'仅 '+r.days+' 天'}
+  ];
+  const on={online:true,sales:true,days:true};
+  const base=REPLEN_REC.map(r=>Object.assign({},r,{on:true})).sort((a,b)=>b.days-a.days);
+  const pass=r=>{const m=MACHINES[r.mid];return COND.every(c=>!on[c.k]||c.hit(r,m))};
+  /* 未命中原因：用于空状态与 diff 区，避免「机器凭空消失」的观感 */
+  const missWhy=r=>{const m=MACHINES[r.mid];return COND.filter(c=>on[c.k]&&!c.hit(r,m)).map(c=>c.miss(r,m)).join(' · ')};
+  let rows=base.filter(pass);
   const c=pushCard(`<div class="cardbox" id="${id}_box">
     <div class="cb-head q" id="${id}_head"><span class="ttl">🚚 补货记录（近 30 天）</span><span class="st" id="${id}_st">已查询</span></div>
-    <div class="kv"><span class="k">统计范围</span><span class="v">${Object.keys(MACHINES).length} 台<em>未补货时长倒序</em></span></div>
+    <div class="kv"><span class="k">待补货</span><span class="v" id="${id}_cnt">—<em>近一个月 · 点条件可放宽</em></span></div>
+    <div class="chips" id="${id}_conds">${COND.map(x=>`<span class="cchip on" data-k="${x.k}">${esc(x.t)} <b>✓</b></span>`).join('')}</div>
     <div class="ptable t8" id="${id}_tb">
       <div class="ph"><span class="csel"><span class="ck" id="${id}_all">☑</span></span><span class="c1">机器</span>${pcHead('编号')}<span class="c3">次数</span><span class="c4">最近</span><span class="c5">未补货</span>${pcHead('平均')}${pcHead('线路',90)}</div>
-      <div id="${id}_rows">${rows.map((r,i)=>rowR1(r,i)).join('')}</div>
+      <div id="${id}_rows"></div>
     </div>
     <div class="pdiff" id="${id}_pv"></div>
     <div class="op-btns" id="${id}_btns"><button class="btn main" id="${id}_gen">生成补货单</button></div>
-    <div class="exec-note">最多可查近 180 天的补货记录</div>
+    <div class="exec-note">口径＝在线 + 有销量 + 未补货 &gt;15 天 · 点上方条件可放宽｜最多可查近 180 天</div>
   </div>`);
-  trace('api',`意图 <b>query</b> → GET <b>/ai/tools/replenish_record?range=30d</b> · 只读工具，返回最近一个月补过货的机器 + 补货次数，按<b>未补货时长倒序</b>；默认勾中 7 天以上未补货的机器。`);
+  const trace5=()=>{const q=['range=30d'].concat(on.online?['online=1']:[],on.sales?['has_sales=1']:[],on.days?['no_replenish_gt=15d']:[]).join('&');
+    trace('api',`意图 <b>query</b> → GET <b>/ai/tools/replenish_record?${q}</b> · 只读工具，按<b>未补货时长倒序</b>；命中 <b>${rows.length}</b> 台。**过滤与排序都在服务端完成**，AI 不自行筛列表。`);};
   function rowR1(r,i){
     const m=MACHINES[r.mid];
-    const col=r.days>=26?'var(--danger)':(r.days>=7?'var(--warn)':'var(--ok)');
+    const col=r.days>=21?'var(--danger)':(r.days>15?'var(--warn)':'var(--ok)');
     return `<div class="pr${r.on?' pre':''}" data-i="${i}">
       <div class="l1"><span class="csel"><span class="ck${r.on?'':' off'}" data-k="${i}">${r.on?'☑':'☐'}</span></span>
-        <span class="c1"><span class="nm">${esc(m.name)}</span></span>${pcCol(m.code,78)}<span class="c3">${r.cnt} 次</span><span class="c4">${r.last}</span>
+        <span class="c1"><span class="nm">${esc(m.name)}</span></span>${pcCol(m.code,78)}<span class="c3">${r.cnt} 次</span><span class="c4">${esc(r.last)}</span>
         <span class="c5" style="color:${col};font-weight:700">${r.days} 天</span>${pcCol(esc(r.avg),90)}${pcCol(m.line,84)}</div>
-      ${pcLn(`${m.code} · ${esc(r.avg)}`)}</div>`;
+      ${pcLn(`${m.code} · ${esc(r.avg)} · ${esc(m.type)}`)}</div>`;
+  }
+  function renderRows(){
+    const box=c.querySelector('#'+id+'_rows');
+    const hitBlock=c.querySelector('#'+id+'_tb');
+    const miss=base.length-rows.length;
+    if(!rows.length){
+      hitBlock.style.display='none';
+      box.innerHTML=`<div class="empty-inline">没有符合当前条件的机器<div class="sub">${base.slice(0,3).map(r=>esc(MACHINES[r.mid].name)+'（'+esc(missWhy(r))+'）').join('、')}${base.length>3?' 等':''} · 放宽一个条件试试</div></div>`;
+    }else{
+      hitBlock.style.display='';
+      box.innerHTML=rows.map(rowR1).join('');
+    }
+    c.querySelector('#'+id+'_cnt').innerHTML=`${rows.length} 台<em>共 ${base.length} 台 · 排除 ${miss} 台</em>`;
+    bind();refresh();
   }
   const pv=c.querySelector('#'+id+'_pv'),gen=c.querySelector('#'+id+'_gen'),allBtn=c.querySelector('#'+id+'_all');
   function refresh(){
-    const on=rows.filter(r=>r.on);
-    pv.innerHTML=`<div class="hd">已选 ${on.length} 台${on.length?' · 均 7 天以上未补货':''}</div>${on.length?`<div class="r"><span>建议</span><span>可直接生成补货单 ↓</span></div>`:''}`;
-    gen.disabled=!on.length;
-    gen.textContent=on.length?`为这 ${on.length} 台生成补货单`:'生成补货单';
-    allBtn.className='ck'+(on.length===0?' off':(on.length===rows.length?'':' half'));
-    allBtn.textContent=on.length===rows.length?'☑':(on.length===0?'☐':'▣');
+    const sel=rows.filter(r=>r.on);
+    pv.innerHTML=`<div class="hd">已选 ${sel.length} 台${sel.length?' · 未补货 '+Math.max.apply(null,sel.map(r=>r.days))+' 天以上':''}</div>`
+      +(sel.length?`<div class="r"><span>建议</span><span>可直接生成补货单 ↓</span></div>`:'')
+      +(rows.length?`<div class="r"><span>未纳入</span><span>${base.length-rows.length} 台不符合筛选条件</span></div>`:'');
+    gen.disabled=!sel.length;
+    gen.textContent=sel.length?`为这 ${sel.length} 台生成补货单`:'生成补货单';
+    allBtn.className='ck'+(sel.length===0?' off':(sel.length===rows.length?'':' half'));
+    allBtn.textContent=sel.length===rows.length&&rows.length?'☑':(sel.length===0?'☐':'▣');
   }
   function bind(){
     c.querySelectorAll('#'+id+'_rows .ck').forEach(k=>{k.onclick=()=>{const i=+k.getAttribute('data-k');rows[i].on=!rows[i].on;
       k.className='ck'+(rows[i].on?'':' off');k.textContent=rows[i].on?'☑':'☐';
       k.closest('.pr').className='pr'+(rows[i].on?' pre':'');refresh()}});
   }
-  allBtn.onclick=()=>{const allOn=rows.every(r=>r.on);rows.forEach(r=>r.on=!allOn);
-    c.querySelector('#'+id+'_rows').innerHTML=rows.map(rowR1).join('');bind();refresh()};
-  bind();refresh();
-  gen.onclick=()=>{const mids=rows.filter(r=>r.on).map(r=>r.mid);cardReplenish(mids)};
+  allBtn.onclick=()=>{const allOn=rows.length&&rows.every(r=>r.on);rows.forEach(r=>r.on=!allOn);renderRows()};
+  c.querySelectorAll('#'+id+'_conds .cchip').forEach(ch=>{ch.onclick=()=>{
+    const k=ch.getAttribute('data-k');on[k]=!on[k];
+    ch.className='cchip'+(on[k]?' on':' off');
+    ch.innerHTML=`${esc(COND.find(x=>x.k===k).t)} <b>${on[k]?'✓':'＋'}</b>`;
+    rows=base.filter(pass);trace5();renderRows();
+  }});
+  renderRows();trace5();
+  gen.onclick=()=>{const mids=rows.filter(r=>r.on).map(r=>r.mid);if(mids.length)cardReplenish(mids)};
   return id;
 }
 /* ---------- R2：订单商品明细（只读 · 两段式：先选单、后看明细）----------
@@ -2666,10 +2841,10 @@ function cardPaySplit(){
     <div class="cb-head q"><span class="ttl">💳 销售额构成</span><span class="st">已查询</span></div>
     <div class="kv"><span class="k">时间 / 范围</span><span class="v">今日 · 全部 ${Object.keys(MACHINES).length} 台</span></div>
     <div class="ptable">
-      <div class="ph"><span class="c1">支付方式</span><span class="c3">金额</span><span class="c4">笔数</span><span class="c5">占比</span>${pcHead('笔均',64)}${pcHead('明细',150)}</div>
-      ${PAY_SPLIT.map(p=>`<div class="pr"><div class="l1"><span class="c1"><span class="nm">${esc(p.n)}</span></span><span class="c3">${money0(p.amt)}</span><span class="c4">${p.cnt}</span><span class="c5">${(p.amt/tot*100).toFixed(1)}%</span>${pcCol(money(p.amt/p.cnt),64)}${pcCol(esc(p.sub),150)}</div>
-        ${pcLn(esc(p.sub))}</div>`).join('')}
-      <div class="sumline"><span>合计</span><span>${money0(tot)}</span></div>
+      <div class="ph"><span class="c1">支付方式</span><span class="c3">占比</span><span class="c4">笔数</span>${pcHead('笔均',64)}${pcHead('明细',150)}<span class="c5">金额</span></div>
+      ${PAY_SPLIT.map(p=>`<div class="pr"><div class="l1"><span class="c1"><span class="nm">${esc(p.n)}</span></span><span class="c3">${(p.amt/tot*100).toFixed(1)}%</span><span class="c4">${p.cnt}</span>${pcCol(money(p.amt/p.cnt),64)}${pcCol(esc(p.sub),150)}<span class="c5"><b>${money0(p.amt)}</b></span></div>
+        ${pcLn(esc(p.sub)+' · '+money0(p.amt))}</div>`).join('')}
+      <div class="sumline"><span>合计</span><span><b>${money0(tot)}</b></span></div>
     </div>
   </div>`);
   trace('api',`意图 <b>query</b> → GET <b>/ai/tools/sales_by_paytype</b>?range=today · 只读工具，按支付方式拆分金额 / 笔数 / 占比。`);
@@ -3469,10 +3644,29 @@ function v11Intent(q){
      （「可以帮我批量下架一些机器可口可乐商品么？」），那仍是指令不是提问。 */
   const howTo=/怎么|如何|在哪|哪里|步骤|流程|为什么|规则|区别/.test(q);
   const mids=midsIn(q);
-  /* 上架（A1）：批量 / 按线路 / 自选 / 单台 */
+  /* 按货道批量上架（W2-d · 1.1 新增，定稿 #19）：「所有机器的 A1 货道上架百事可乐」——
+     直接点名货道号，位置锁定为该货道，智能柜（只有「层」）跳过。
+     ⚠ 必须排在通用「上架」分支**之前**：这句话同样含「上架 / 所有机器」，
+       若被通用分支先命中，货道号会被当成普通批量上架吞掉。 */
+  if(!howTo&&/上架|铺货/.test(q)){
+    const lm=q.match(/([A-Ha-h])\s*([1-9])\s*货道/);
+    if(lm){
+      const lane=lm[1].toUpperCase()+lm[2]+' 货道';
+      const names=pickProducts(q);
+      if(/线路/.test(q)){const hit=LINES.find(l=>q.indexOf(l.slice(0,2))>=0)||LINES[0];scopeLine=hit;
+        return cardLaneOnshelf(lane,names,'line');}
+      return cardLaneOnshelf(lane,names,'all');
+    }
+  }
+  /* 上架（A1）：批量 / 按线路 / 自选 / 单台
+     ⚠ 2026-10-28 用户反馈：「批量上架百事可乐」不出卡，反而反问「要在哪台机器上架」。
+       根因＝isAll 只认「所有机器 / 全部点位 / 每台 / 各台」，不认用户最常用的「批量」，
+       于是落到最后一行 askMachine 去做**单台**补槽位；用户回「500ml」又被判成没认出机器 → 未命中兜底。
+       现在把「批量 / 一键 / 全上」这类表述一律当批量范围，直接进三步向导第 1 步（选商品），
+       不再向用户反问「哪台机器」——批量场景的机器范围本来就在第 2 步里选。 */
   if(!howTo&&/上架|铺货/.test(q)){
     const names=pickProducts(q);
-    const isAll=/所有机器|全部机器|所有点位|全部点位|每台|各台|全部\s*\d+/.test(q);
+    const isAll=/所有机器|全部机器|所有点位|全部点位|每台|各台|批量|一键|全量|全部\s*\d+/.test(q);
     /* ⚠ 先判「线路」再判「全部」——「给南油线路所有机器上架…」里同时含「所有机器」，
        若 isAll 先命中会被当成「全部 12 台」，线路限定被吞掉。线路更具体，优先。 */
     const byLine=/线路/.test(q);
@@ -3506,7 +3700,7 @@ function v11Intent(q){
     if(names.length)return cardBatchPrice(names);
   }
   /* 生成补货单（W7）
-     ⚠ 2026-10-28 用户反馈（定稿 #15）：未点名机器不再硬编码 3 台直接出确认卡 ——
+     ⚠ 2026-10-28 用户反馈（定稿 #16）：未点名机器不再硬编码 3 台直接出确认卡 ——
        写操作不能替用户决定补货范围，先给候选机器让用户勾选；点名机器仍直接出卡。 */
   if(/补货单/.test(q)&&!/记录/.test(q)){
     return mids.length?cardReplenish(mids):cardReplenishPick();

@@ -98,6 +98,12 @@ table.idx th{background:#fafbfd;font-weight:700}
 .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
 .chips span{font-size:11px;background:#f2f5f9;border:1px solid #e3e8ef;border-radius:8px;padding:3px 7px;color:#3f4a5a}
 .chips span b{color:#b4bac4;font-weight:400;margin-left:3px}
+/* 2026-10-28（R1 定稿 #18）：筛选条件 chip 做成可点开关 —— 选中＝品牌色描边，关掉＝灰 + 中划 */
+.chips .cchip{cursor:pointer;user-select:none}
+.chips .cchip.on{border-color:var(--brand);color:var(--brand);background:#f0f7ff}
+.chips .cchip.off{opacity:.5;text-decoration:line-through}
+.empty-inline{padding:14px 10px;text-align:center;color:#8c8c8c;font-size:12px;background:#fafbfd;border:1px dashed #e6e9ef;border-radius:9px;margin-top:8px}
+.empty-inline .sub{margin-top:5px;font-size:10.5px;color:#a8aeb8;line-height:1.5}
 .seg span.off{background:#f5f6f8;color:#b4bac4;border-color:#eceef1}
 .hint{font-size:10.5px;color:#aab0b8;margin-top:5px;display:flex;align-items:center;gap:4px}
 .altseg{margin-top:9px;border:1px dashed #e3e8ef;border-radius:9px;padding:7px 9px;background:#fcfdff}
@@ -131,6 +137,21 @@ table.idx th{background:#fafbfd;font-weight:700}
 .mx-r .mxn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mx-r .mxp{width:52px;text-align:right;font-variant-numeric:tabular-nums}
 .mx-go{color:var(--brand);cursor:pointer;white-space:nowrap}
+/* —— 三步向导（2026-10-28 定稿 #19：批量上架改为「选商品 → 选机器 → 逐台定位置/价格/库存」）——
+   当前步＝品牌色 + 实心上划线，已完成的步＝绿色打勾，未到的步＝灰。 */
+.steps{display:flex;align-items:center;gap:6px;margin-top:9px}
+.steps .stp{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;
+  padding-top:5px;border-top:2px solid #eef1f5;font-size:10.5px;color:#a8aeb8;white-space:nowrap}
+.steps .stp b{flex:none;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;
+  border-radius:50%;background:#eef1f5;color:#a8aeb8;font-size:9.5px;font-weight:700;line-height:1}
+.steps .stp.on{color:var(--brand);border-top-color:var(--brand);font-weight:700}
+.steps .stp.on b{background:var(--brand);color:#fff}
+.steps .stp.done{color:var(--ok);border-top-color:#b7e3c4}
+.steps .stp.done b{background:var(--ok);color:#fff}
+/* 第 3 步逐台块的表头：机器名 · 编号 · 机型 */
+.mx-hd .mh-code{color:#a8aeb8;font-size:10.5px;font-variant-numeric:tabular-nums}
+.mx-hd .mh-kind{margin-left:auto;color:#8c8c8c;font-size:10.5px;white-space:nowrap}
+.mx-hd .mh-kind+.fg{margin-left:8px}
 .op-btns{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;border:none;border-radius:9px;padding:8px 0;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer}
 .btn.ghost{background:#f2f3f5;color:#666}
@@ -200,8 +221,10 @@ table.idx th{background:#fafbfd;font-weight:700}
 <div class="wrap">
   <h1>大黄鹅 AI 助手 · 1.1 期卡片设计稿</h1>
   <div class="meta">
-    2026-10-16 ｜ <b>16 张卡片 + 2 个添加弹层</b>：写能力确认卡 8 张（W1 / W1-b / W2-a·b·c / W3 / W4 / W5）+ 结果卡 2 张（W6 结果 / W6-b 成功明细）+ 读能力结果卡 6 张（R1–R6）+ 半屏弹层 P1 添加商品 / P2 添加机器｜<br>
+    2026-10-16 ｜ <b>16 张卡片 + 2 个添加弹层</b>：写能力确认卡 8 张（W1 / W1-b / W2-a·b·c ＝<b>批量上架三步向导的三个界面态</b> / W3 / W4 / W5）+ 结果卡 2 张（W6 结果 / W6-b 成功明细）+ 读能力结果卡 6 张（R1–R6）+ 半屏弹层 P1 添加商品 / P2 添加机器｜<br>
     <b>2026-10-16 修订</b>：按产品裁决 —— ① W5-a/W5-b <b>合并为 W5</b>（不要算法建议量，补货量＝最大库存−现存）；② W4 命中台数<b>卡内可展开到机器层级</b>；③ 批量上架商品库按机型<b>交集</b>；④ 离线机器也可上架（后端判定）；⑤ R5 <b>保留「铺货 N 台」</b>｜<br>
+    <b>2026-10-28 修订（定稿 #18 / #19）</b>：① <b>批量上架改成一张卡内三步向导</b>——W2-a＝第 1 步 选商品、W2-b＝第 2 步 选机器、W2-c＝第 3 步 逐台定位置 / 价格 / 库存（智能柜默认第 1 层、售货机默认下一个空闲货道，可点选改；点名货道时位置锁定＝按货道变体 W2-d）；② <b>补货记录改口径</b>——查「该补还没补的机器」（近 30 天 ∩ 在线 ∩ 有销量 ∩ 未补货 &gt; 15 天），三个条件做成卡内可点 chip；<br>
+    <b>2026-10-28 修订（定稿 #20 · 路由）</b>：「批量 / 一键 / 全量」本身即范围词 —— <b>「批量上架百事可乐」直接进 W2-a</b>，不再反问「要在哪台机器上架」；只有既无范围词、也未点名机器（如「上架百事可乐」）才反问机器（卡片本身无改动，改的是进卡条件）｜<br>
     <b>2026-10-28 修订（定稿 #16）</b>：W5 <b>机器范围不由 AI 代选</b> —— 未点名机器先出「选择补货机器」前置步骤（见 W5 下方示意），勾选后才进确认卡；确认卡内新增<b>「补货机器明细」块</b>（逐台 编号 · 名称 · 缺货率，默认展开）；底部 <code>100-1/100-2</code> 明确为<b>子单号</b>、不替代机器编号｜
     样式沿用引导式原型 <code>mp-ai-assistant-guided.html</code> 的 <code>.cardbox / .ptable / .op-btns</code> 体系 ｜
     统一字段口径：<b>商品名称 · 价格 · 库存</b> 为基础项，<b>商品ID</b> 按场景取舍（上架 / 下架卡不显示，改价 / 补货 / 订单明细保留），<b>状态一律用文字</b>不用符号
@@ -213,15 +236,15 @@ table.idx th{background:#fafbfd;font-weight:700}
       <tr><th style="width:56px">编号</th><th style="width:168px">卡片</th><th style="width:64px">类型</th><th style="width:96px">对应能力</th><th>触发问法 / 触发时机</th></tr>
       <tr><td>W1</td><td>上架商品 · 单台</td><td>写·确认</td><td>A1</td><td>「帮我在南油文化广场上架康师傅碱性水」</td></tr>
       <tr><td>W1-b</td><td>上架商品 · 售货机（逐个指定货道）</td><td>写·确认</td><td>A1</td><td>「在南油文化广场 A3 货道上架康师傅碱性水」</td></tr>
-      <tr><td>W2-a</td><td>批量上架 · 全部机器</td><td>写·确认</td><td>A1</td><td>「所有机器都上架百事可乐 500ml」</td></tr>
-      <tr><td>W2-b</td><td>批量上架 · 按线路</td><td>写·确认</td><td>A1</td><td>「南山这条线的机器都上架百事可乐」</td></tr>
-      <tr><td>W2-c</td><td>批量上架 · 自选机器</td><td>写·确认</td><td>A1</td><td>「给这几台机器都上架百事可乐」</td></tr>
+      <tr><td>W2-a</td><td>批量上架 · 第 1 步 选商品</td><td>写·确认</td><td>A1</td><td>「所有机器都上架百事可乐 500ml」/「批量上架百事可乐」（批量 / 一键 / 全量即范围词）</td></tr>
+      <tr><td>W2-b</td><td>批量上架 · 第 2 步 选机器（全部 / 按线路 / 自选）</td><td>写·确认</td><td>A1</td><td>「南山这条线的机器都上架百事可乐」</td></tr>
+      <tr><td>W2-c</td><td>批量上架 · 第 3 步 位置 / 价格 / 库存（含按货道变体 W2-d）</td><td>写·确认</td><td>A1</td><td>「给这几台机器都上架百事可乐」</td></tr>
       <tr><td>W3</td><td>下架商品</td><td>写·确认</td><td>C8</td><td>「帮我批量下架可口可乐」</td></tr>
       <tr><td>W4</td><td>批量改商品价格（跨机器）</td><td>写·确认</td><td>C2</td><td>「把所有点位的雀巢咖啡调整到 5.5」</td></tr>
       <tr><td>W5</td><td>生成补货单（含前置「选择补货机器」· 补货量＝最大库存 − 现存）</td><td>写·确认</td><td>B2</td><td>「给这 3 台机器生成补货单」</td></tr>
       <tr><td>W6</td><td>批量执行结果（部分失败）</td><td>结果反馈</td><td>A1/C8/C2</td><td>多台循环执行后，部分机器被校验拦截</td></tr>
       <tr><td>W6-b</td><td>成功明细展开（逐台列出）</td><td>结果反馈</td><td>A1/C8/C2</td><td>W6 内点「查看成功明细」</td></tr>
-      <tr><td>R1</td><td>补货记录查询</td><td>读·结果</td><td>B1</td><td>「最近一个月哪些机器补过货 / 有没有长时间没补货的」</td></tr>
+      <tr><td>R1</td><td>补货记录 / 待补货机器</td><td>读·结果</td><td>B1</td><td>「最近一个月哪些机器补过货 / 有没有长时间没补货的」</td></tr>
       <tr><td>R2</td><td>订单商品明细（先选单后看明细）</td><td>读·结果</td><td>B3</td><td>泛问「查一下订单明细」→ 先选单；点名「此单…」直接出明细</td></tr>
       <tr><td>R3</td><td>按销售额反查机器</td><td>读·结果</td><td>C3</td><td>「上个月做低于 700 块的机器列出来」</td></tr>
       <tr><td>R4</td><td>销售额支付方式拆分</td><td>读·结果</td><td>C4</td><td>「现金多少、刷卡多少」</td></tr>
@@ -284,31 +307,32 @@ table.idx th{background:#fafbfd;font-weight:700}
 
       <!-- W2-a -->
       <div class="unit">
-        <div class="cap"><span class="cd">W2-a</span><span class="tag w">写</span>批量上架 · 全部机器<span class="cd" style="margin-left:4px">A1</span></div>
+        <div class="cap"><span class="cd">W2-a</span><span class="tag w">写</span>批量上架 · 第 1 步 选商品<span class="cd" style="margin-left:4px">A1</span></div>
         <span class="q">「所有机器都上架百事可乐 500ml」</span>
         <div class="cardbox">
           <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
-          <div class="seg"><span class="on">全部机器 12</span><span>按线路</span><span>自选</span></div>
-          <div class="kv"><span class="k">范围</span><span class="v">全部 12 台</span></div>
+          <div class="steps"><span class="stp on"><b>1</b>选商品</span><span class="stp"><b>2</b>选机器</span><span class="stp"><b>3</b>位置 / 价格 / 库存</span></div>
           <div class="ptable">
             <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
-            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="30" class="chg"></span></div><div class="ln">对 12 台逐台执行 · 货道自动分配</div></div>
+            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="18" class="chg"></span></div><div class="ln">箱规 12 件/箱 · 默认价 ¥3.50</div></div>
           </div>
           <div class="addrow">＋ 添加商品</div>
-          <div class="pdiff"><div class="hd">将上架 12 台 × 1 项 = 12 条</div>
+          <div class="pdiff"><div class="hd">已选 1 个商品 · 下一步挑机器</div>
+            <div class="r"><span>百事可乐 500ml</span><span>¥3.50 · 补 18</span></div>
           </div>
-          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（12 台）</button></div>
-          <div class="exec-note">🔒 部分机器失败会逐台列出原因，其余不受影响</div>
+          <div class="op-btns"><button class="btn main demo">下一步：选机器</button></div>
+          <div class="exec-note">🔒 先定商品，机器与位置在下一步</div>
         </div>
-        <div class="rule">三张批量上架卡<b>共用同一套商品行</b>、仅机器选择区不同，顶部 <code>.seg</code> 切换（全部机器为默认）。与 W1 一致：不显示库存与商品ID、价格可改；<b>范围只写「全部 N 台」</b>，不区分在线 / 离线台数，成败由后端校验透传（<b>已确认 4</b>：离线机器也可上架，由后端判定）。<br><b>批量不逐台指定货道 / 层</b>（各机货道不同、无法在一张卡里逐个指定），按各机自动分配；要精确指定货道用单台卡 W1 / W1-b。</div>
+        <div class="rule"><b>2026-10-28 定稿 #19：批量上架改成一张卡内三步向导</b>——顶部步骤条「选商品 → 选机器 → 位置 / 价格 / 库存」，当前步品牌色高亮、已完成步打勾、可点「上一步」回改。<br><b>第 1 步只管「上什么」</b>：商品行价格可改，补货量默认＝<b>箱规 × 1.5</b>（此处 12 × 1.5 ＝ 18），「＋ 添加商品」按本批机器<b>机型交集</b>出商品（<b>已确认 3</b>）。与 W1 一致：不显示库存与商品ID、价格可改。</div>
       </div>
 
       <!-- W2-b -->
       <div class="unit">
-        <div class="cap"><span class="cd">W2-b</span><span class="tag w">写</span>批量上架 · 按线路<span class="cd" style="margin-left:4px">A1</span></div>
+        <div class="cap"><span class="cd">W2-b</span><span class="tag w">写</span>批量上架 · 第 2 步 选机器<span class="cd" style="margin-left:4px">A1</span></div>
         <span class="q">「给南油线路所有机器上架百事可乐」</span>
         <div class="cardbox">
           <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
+          <div class="steps"><span class="stp done"><b>1</b>选商品</span><span class="stp on"><b>2</b>选机器</span><span class="stp"><b>3</b>位置 / 价格 / 库存</span></div>
           <div class="seg"><span>全部机器 12</span><span class="on">按线路</span><span>自选</span></div>
           <div class="kv"><span class="k">线路</span><span class="v ldsel">南油线路 ▾<em>3 台</em></span></div>
           <div style="font-size:10.5px;color:#98a2b3;margin-top:6px">▼ 下拉展开态＝PC 端形态示意；移动端为底部半屏弹层（选择类交互无卡内下拉先例）</div>
@@ -319,42 +343,51 @@ table.idx th{background:#fafbfd;font-weight:700}
             <div class="lopt"><span>南山线路</span><em>3 台</em></div>
           </div>
           <div class="chips"><span>欢乐颂 5 号机</span><span>南油文化广场</span><span>兰均三期</span></div>
-          <div class="ptable">
-            <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
-            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="18" class="chg"></span></div><div class="ln">对该线路 3 台逐台执行</div></div>
-          </div>
-          <div class="addrow">＋ 添加商品</div>
           <div class="pdiff"><div class="hd">将上架 3 台 × 1 项 = 3 条</div>
             <div class="r"><span>线路</span><span>南油线路 · 点线路名可下拉切换</span></div>
           </div>
-          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（3 台）</button></div>
+          <div class="op-btns"><button class="btn ghost">上一步</button><button class="btn main demo">下一步：位置 / 价格</button></div>
+          <div class="exec-note">🔒 机器范围定好后，第 3 步按机型逐台确认位置与价格</div>
         </div>
-        <div class="rule"><b>按线路</b>：点「线路」行 → 列出该商户下<b>全部线路机构</b>（线路 + 台数），<b>点选哪条切哪条</b>；不是点一下循环切到下一条（用户没法直接选定）。两端形态不同：⚠ <b>移动端＝底部半屏弹层</b>（同 P1 / P2 选择形态——移动端选择类交互没有「卡内嵌下拉」的先例）；<b>PC 端＝卡内真下拉</b>（点卡片外任意处收起）。下方 chips 预览该线路机器。</div>
+        <div class="rule"><b>第 2 步只管「上到哪」</b>：<code>.seg</code> 三档——<b>全部机器</b>（默认，范围只写「全部 N 台」，不区分在线 / 离线台数，成败由后端透传，<b>已确认 4</b>：离线机器也可上架）· <b>按线路</b> · <b>自选</b>（chips 逐个列已选机器、✕ 可删、「＋ 添加机器」呼出 P2，diff 区列全部机器编号防选错）。<br><b>按线路</b>：点「线路」行 → 列出该商户下<b>全部线路机构</b>（线路 + 台数），<b>点选哪条切哪条</b>；不是点一下循环切到下一条（用户没法直接选定）。两端形态不同：⚠ <b>移动端＝底部半屏弹层</b>（同 P1 / P2 选择形态——移动端选择类交互没有「卡内嵌下拉」的先例）；<b>PC 端＝卡内真下拉</b>（点卡片外任意处收起）。</div>
       </div>
 
       <!-- W2-c -->
       <div class="unit">
-        <div class="cap"><span class="cd">W2-c</span><span class="tag w">写</span>批量上架 · 自选<span class="cd" style="margin-left:4px">A1</span></div>
+        <div class="cap"><span class="cd">W2-c</span><span class="tag w">写</span>批量上架 · 第 3 步 位置 / 价格 / 库存<span class="cd" style="margin-left:4px">A1</span></div>
         <span class="q">「给欢乐颂 5 号机、兰均三期、南油文化广场上架百事可乐」</span>
         <div class="cardbox">
           <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
-          <div class="seg"><span>全部机器 12</span><span>按线路</span><span class="on">自选 3</span></div>
-          <div class="kv"><span class="k">已选机器</span><span class="v">3 台</span></div>
-          <div class="chips"><span>欢乐颂 5 号机 <b>✕</b></span><span>兰均三期 <b>✕</b></span><span>南油文化广场 <b>✕</b></span><span>＋ 添加机器</span></div>
-          <div class="ptable">
-            <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
-            <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="30" class="chg"></span></div><div class="ln">对自选的 3 台逐台执行</div></div>
+          <div class="steps"><span class="stp done"><b>1</b>选商品</span><span class="stp done"><b>2</b>选机器</span><span class="stp on"><b>3</b>位置 / 价格 / 库存</span></div>
+          <div class="mx open">
+            <div class="mx-hd"><span>欢乐颂 5 号机</span><span class="mh-code">51890784</span><span class="mh-kind">售货机</span><span class="fg">收起 ▴</span></div>
+            <div class="mx-bd"><div class="ptable">
+              <div class="ph"><span class="c1">商品</span><span class="c5">价格</span><span class="c5s">库存</span></div>
+              <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="18"></span></div><div class="ln"><span class="slot">A1 货道 ▾</span>最大 30 · 现存 0</div></div>
+            </div></div>
           </div>
-          <div class="addrow">＋ 添加商品</div>
-          <div class="pdiff"><div class="hd">将上架 3 台 × 1 项 = 3 条</div>
-            <div class="r"><span>欢乐颂 5 号机</span><span>51890784</span></div>
-            <div class="r"><span>兰均三期</span><span>51839139</span></div>
-            <div class="r"><span>南油文化广场</span><span>51861091</span></div>
+          <div class="mx">
+            <div class="mx-hd"><span>兰均三期</span><span class="mh-code">51839139</span><span class="mh-kind">售货机</span><span class="fg">展开 ▾</span></div>
+            <div class="mx-bd"><div class="ptable">
+              <div class="ph"><span class="c1">商品</span><span class="c5">价格</span><span class="c5s">库存</span></div>
+              <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="18"></span></div><div class="ln"><span class="slot">B1 货道 ▾</span>最大 30 · 现存 6</div></div>
+            </div></div>
           </div>
-          <div class="op-btns"><button class="btn ghost">取消</button><button class="btn main demo">确认上架（3 台）</button></div>
-          <div class="exec-note">🔒 部分失败会逐台列出原因，成功的不受影响</div>
+          <div class="mx">
+            <div class="mx-hd"><span>南油文化广场</span><span class="mh-code">51861091</span><span class="mh-kind">智能柜</span><span class="fg">展开 ▾</span></div>
+            <div class="mx-bd"><div class="ptable">
+              <div class="ph"><span class="c1">商品</span><span class="c5">价格</span><span class="c5s">库存</span></div>
+              <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="18"></span></div><div class="ln"><span class="slot">第 1 层 ▾</span>一层可放多个商品</div></div>
+            </div></div>
+          </div>
+          <div class="hint">位置按机型预填（智能柜＝第 1 层 · 售货机＝下一个空闲货道），点机器展开后可逐项改</div>
+          <div class="pdiff"><div class="hd">3 台 × 1 项 = 3 条</div>
+            <div class="r"><span>位置</span><span>智能柜第 1 层 · 售货机空闲货道（2 台）</span></div>
+          </div>
+          <div class="op-btns"><button class="btn ghost">上一步</button><button class="btn main demo">确认上架（3 台）</button></div>
+          <div class="exec-note">🔒 部分机器失败会逐台列出原因，其余不受影响</div>
         </div>
-        <div class="rule"><b>自选</b>：chips 逐个列出已选机器（带 ✕ 可删）+「＋ 添加机器」；diff 区列出全部机器编号，确认前防选错。「＋ 添加机器」呼出 P2 弹层。</div>
+        <div class="rule"><b>第 3 步＝逐台（按机型）确认位置 / 价格 / 库存</b>：每台一个可展开块（名称 · 编号 · 机型），首台默认展开、其余收起；块内按商品行给「商品 / 位置 / 价格 / 库存」，价格与库存可逐台单独改。<br><b>位置＝预填默认 + 可改</b>：<b>售货机＝下一个空闲货道</b>（一货道一商品，副行给「最大 · 现存」；PC 端把位置提为独立列）；<b>智能柜＝第 1 层</b>（<b>#14</b>：一层不限商品数、选已有商品的层合法，故副行只写「一层可放多个商品」）。点位置 chip 呼出<b>选择弹层</b>（移动端半屏 / PC 居中弹窗，同 <b>#13</b>），点选即回填。<br>⚠ 旧口径「<b>批量不逐台指定货道 / 层，各机自动分配</b>」<b>作废</b>。<br><b>按货道变体（W2-d · 1.1 新增）</b>：问法点名货道（「所有机器的 A1 货道上架百事可乐」）→ <b>位置锁定该货道</b>、<b>直接从本步起</b>（商品与机器都已点名）、机器范围<b>只留售货机</b>，卡内写明「已跳过 N 台非售货机（智能柜按层管理，无货道编号）」。</div>
       </div>
 
       <!-- W3 -->
@@ -526,24 +559,27 @@ table.idx th{background:#fafbfd;font-weight:700}
 
       <!-- R1 -->
       <div class="unit">
-        <div class="cap"><span class="cd">R1</span><span class="tag r">读</span>补货记录查询<span class="cd" style="margin-left:4px">B1</span></div>
+        <div class="cap"><span class="cd">R1</span><span class="tag r">读</span>补货记录 / 待补货机器<span class="cd" style="margin-left:4px">B1</span></div>
         <span class="q">「有没有机器长时间没补货？」</span>
         <div class="cardbox">
           <div class="cb-head q"><span class="ttl">🚚 补货记录（近 30 天）</span><span class="st">已查询</span></div>
-          <div class="kv"><span class="k">统计范围</span><span class="v">12 台<em>未补货时长倒序</em></span></div>
+          <div class="kv"><span class="k">待补货</span><span class="v">4 台<em>共 9 台 · 排除 5 台</em></span></div>
+          <div class="chips"><span class="cchip on">在线 <b>✓</b></span><span class="cchip on">有销量 <b>✓</b></span><span class="cchip on">未补货 &gt; 15 天 <b>✓</b></span></div>
           <div class="ptable">
-            <div class="ph"><span class="csel"><span class="ck half">▣</span></span><span class="c1">机器</span><span class="c3">次数</span><span class="c4">最近</span><span class="c5">未补货</span></div>
-            <div class="pr pre"><div class="l1"><span class="csel"><span class="ck">☑</span></span><span class="c1"><span class="nm">格子柜 A 座</span></span><span class="c3">0 次</span><span class="c4">—</span><span class="c5" style="color:var(--danger);font-weight:700">26 天</span></div><div class="ln">51839134 · 从未补货</div></div>
-            <div class="pr pre"><div class="l1"><span class="csel"><span class="ck">☑</span></span><span class="c1"><span class="nm">欢乐颂 5 号机</span></span><span class="c3">2 次</span><span class="c4">10-02</span><span class="c5" style="color:var(--warn);font-weight:700">13 天</span></div><div class="ln">51890784 · 平均 15 天 / 次</div></div>
-            <div class="pr"><div class="l1"><span class="csel"><span class="ck off">☐</span></span><span class="c1"><span class="nm">南油文化广场</span></span><span class="c3">6 次</span><span class="c4">10-14</span><span class="c5" style="color:var(--ok)">0 天</span></div><div class="ln">51861091 · 平均 5 天 / 次</div></div>
+            <div class="ph"><span class="csel"><span class="ck">☑</span></span><span class="c1">机器</span><span class="c3">次数</span><span class="c4">最近</span><span class="c5">未补货</span></div>
+            <div class="pr pre"><div class="l1"><span class="csel"><span class="ck">☑</span></span><span class="c1"><span class="nm">深圳湾体育中心</span></span><span class="c3">4 次</span><span class="c4">10-01</span><span class="c5" style="color:var(--danger);font-weight:700">21 天</span></div><div class="ln">51860045 · 平均 9 天 / 次</div></div>
+            <div class="pr pre"><div class="l1"><span class="csel"><span class="ck">☑</span></span><span class="c1"><span class="nm">福田口岸</span></span><span class="c3">2 次</span><span class="c4">10-04</span><span class="c5" style="color:var(--warn);font-weight:700">18 天</span></div><div class="ln">51860078 · 平均 14 天 / 次</div></div>
+            <div class="pr pre"><div class="l1"><span class="csel"><span class="ck">☑</span></span><span class="c1"><span class="nm">大黄鹅办公室的双门柜</span></span><span class="c3">1 次</span><span class="c4">10-05</span><span class="c5" style="color:var(--warn);font-weight:700">17 天</span></div><div class="ln">51860019 · 平均 22 天 / 次</div></div>
+            <div class="pr pre"><div class="l1"><span class="csel"><span class="ck">☑</span></span><span class="c1"><span class="nm">大冲商务花园</span></span><span class="c3">3 次</span><span class="c4">10-06</span><span class="c5" style="color:var(--warn);font-weight:700">16 天</span></div><div class="ln">51860067 · 平均 12 天 / 次</div></div>
           </div>
-          <div class="pdiff"><div class="hd">已选 2 台 · 均 7 天以上未补货</div>
+          <div class="pdiff"><div class="hd">已选 4 台 · 未补货 21 天以上</div>
             <div class="r"><span>建议</span><span>可直接生成补货单 ↓</span></div>
+            <div class="r"><span>未纳入</span><span>5 台不符合筛选条件</span></div>
           </div>
-          <div class="op-btns"><button class="btn main">为这 2 台生成补货单</button></div>
-          <div class="exec-note">最多可查近 180 天的补货记录</div>
+          <div class="op-btns"><button class="btn main">为这 4 台生成补货单</button></div>
+          <div class="exec-note">口径＝在线 + 有销量 + 未补货 &gt;15 天 · 点上方条件可放宽｜最多可查近 180 天</div>
         </div>
-        <div class="rule">口径：① 最近一个月补过货的机器 + ② 各自补货次数；③ <b>未补货时长从长到短倒序</b>。<br>行可勾选，<b>默认勾中 7 天以上未补货的机器</b>（其余不勾）；表头 <b>全选</b> 一键全选 / 再点全不选，部分选中时表头显示半选态。<br>选中数实时回显到 diff 区与底部按钮；卡片只展示倒序前的若干行，<b>全选作用于卡内全部行</b>。<br>底部直连 W5 补货单卡，形成「查 → 补」闭环。</div>
+        <div class="rule"><b>2026-10-28 定稿 #18：这张卡查的是「该补还没补的机器」，不是补货流水。</b>口径＝<b>近 30 天 ∩ 在线 ∩ 有销量 ∩ 未补货 &gt; 15 天</b>（三者取交集），按未补货时长倒序，≥21 天标红、&gt;15 天标橙。<br><b>条件写死但不隐藏</b>：三个条件做成卡内<b>可点 chip</b>（默认全开）——点掉一个条件<b>立刻在卡内重算</b>（不算新提问、不发新请求），让客户自己看出「为什么只有这几台」；kv 行同步给「命中 N 台 / 共 M 台 · 排除 K 台」。<br><b>命中 0 台走空状态卡</b>：不说「没数据」，而是列出被哪个条件滤掉的（如「格子柜 A 座（离线）」「梅林一村（近一月无销量）」「欢乐颂 5 号机（仅 13 天）」）。<br>行可勾选，<b>默认勾中全部命中机器</b>；表头 <b>全选</b> 一键全选 / 再点全不选、部分选中半选态；选中数实时回显到 diff 区与底部按钮。<b>底部直连 W5 补货单卡</b>，形成「查 → 补」闭环。<br>⚠ 旧口径「最近一个月<b>补过货</b>的机器 + 补货次数 + 默认勾中 7 天以上」<b>作废</b>。</div>
       </div>
 
       <!-- R2 -->
@@ -677,7 +713,7 @@ table.idx th{background:#fafbfd;font-weight:700}
       <!-- P1 添加商品 -->
       <div class="unit">
         <div class="cap"><span class="cd">P1</span>添加商品 · 私有商品库选择</div>
-        <span class="q">W1 / W2-a·b·c 内点「＋ 添加商品」呼出</span>
+        <span class="q">W1 / W2 第 1 步内点「＋ 添加商品」呼出</span>
         <div class="masknote">手机端＝半屏底部弹出；PC 端（2026-10-16）＝居中弹窗，对齐现有系统「添加商品」弹窗</div>
         <div class="sheet">
           <div class="sh-hd">添加商品<span class="x">✕</span></div>
@@ -704,7 +740,7 @@ table.idx th{background:#fafbfd;font-weight:700}
       <!-- P2 添加机器 -->
       <div class="unit">
         <div class="cap"><span class="cd">P2</span>添加机器 · 编号 + 名称 + 地址</div>
-        <span class="q">W2-c / W3 内点「＋ 添加机器」呼出</span>
+        <span class="q">W2 第 2 步自选 / W3 内点「＋ 添加机器」呼出</span>
         <div class="masknote">手机端＝半屏底部弹出；PC 端（2026-10-16）＝居中弹窗，对齐现有系统「选择机器」弹窗</div>
         <div class="sheet">
           <div class="sh-hd">添加机器<span class="x">✕</span></div>
@@ -745,7 +781,7 @@ table.idx th{background:#fafbfd;font-weight:700}
       <tr><td>校验与失败</td><td>AI 侧不重写校验：适用机型、建模、价格区间、库存上下限全部由后端判定，卡片只负责<b>标红 + 原样透传原因</b>。</td></tr>
       <tr><td>多台执行</td><td>统一为 ca-api 单机循环；结果卡必须<b>逐台列出成功/失败与原因</b>（W6），不得整批报失败、也不得静默跳过。</td></tr>
       <tr><td>下架处理</td><td><b>按机型分两套</b>：智能柜＝移除该商品、<b>库存清零</b>（剔除 sku 重建货道）；售货机＝该商品所在<b>货道停售</b>（<code>is_sale_enabled='N'</code>，不清空、不换商品）。<b>2026-10-16 代码复核修正</b>。<br>⚠ 静态柜<b>不支持上下架</b>，机器选择范围不含静态柜。</td></tr>
-      <tr><td>上架位置</td><td><b>按机型分两套</b>：售货机＝<b>货道</b>，逐个指定（默认分配空闲货道、可点选改，副行给最大库存与现存）；智能柜＝<b>层</b>（无货道概念）。<br><b>批量上架</b>不逐台指定，按各机自动分配；需精确指定走单台卡。<br>⚠ <b>静态柜不支持上架</b>（2026-10-16 裁决）：单机 <code>AbstractSmartAisleInfoService.java:1435-1437</code> 抛 <code>NOT_SUPPORT_ALI_MACHINE_SHELVES</code>、批量 <code>SmartAilseInfoController.java:216-218</code> 直接 return，<b>两条路径都拦</b>，机器选择范围排除静态柜。</td></tr>
+      <tr><td>上架位置</td><td><b>按机型分两套</b>：售货机＝<b>货道</b>，逐个指定（默认分配空闲货道、可点选改，副行给最大库存与现存）；智能柜＝<b>层</b>（无货道概念）。<br><b>批量上架（#19）</b>：第 3 步<b>逐台按机型给位置</b>——智能柜默认第 1 层、售货机默认下一个空闲货道，<b>预填后仍可点选改</b>；点名货道时（「所有机器的 A1 货道」）<b>位置锁定</b>、直接从第 3 步起。<br>⚠ <b>静态柜不支持上架</b>（2026-10-16 裁决）：单机 <code>AbstractSmartAisleInfoService.java:1435-1437</code> 抛 <code>NOT_SUPPORT_ALI_MACHINE_SHELVES</code>、批量 <code>SmartAilseInfoController.java:216-218</code> 直接 return，<b>两条路径都拦</b>，机器选择范围排除静态柜。</td></tr>
       <tr><td>读卡操作位</td><td>读卡<b>不带「确认执行」按钮</b>；<b>只在确有明确下一步、且是该条数据的自然延续时才给按钮</b>（如补货记录 → 生成补货单）。卡内已有信息不做循环跳转（离线原因卡不再给「查硬件状态」），跨能力动作不硬凑（需要重启直接问即可）；<b>没有下一步就不给按钮区</b>。</td></tr>
       <tr><td>结果卡闭环</td><td>结果卡（W6）<b>不能只报失败</b>——成功 / 失败两个动作都要有下文：失败项可重试，成功项可展开明细（W6-b），两者<b>同源同批</b>，成功台数 + 失败台数 = 命中总数。<br>明细卡是只读卡，不带「确认执行」；完整清单在<b>卡内滚动展示</b>。</td></tr>
       <tr><td>说明行（exec-note）</td><td>卡片底部灰色说明行<b>只承载本条数据的口径</b>——能查多久、数据来源、默认给什么（如「最多可查近 180 天」「默认给合计」）。<b>不写「你可以接着问我…」这类引导话术</b>：用户想追问直接打字就行，卡片不需要教他怎么说。</td></tr>
