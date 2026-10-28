@@ -1032,9 +1032,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261028e" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261028e" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261028e" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261028f" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261028f" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261028f" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -3678,7 +3678,12 @@ function v11Intent(q){
     if(isAll)return cardBatchOnshelf('all',names.map(n=>({n:n})));
     if(mids.length>1)return cardBatchOnshelf('pick',names.map(n=>({n:n})));
     if(mids.length===1)return cardOnshelf(mids[0],names.map(n=>({n:n})));
-    return askMachine('请问要在哪台机器上架商品？','onshelf');
+    /* ⚠ 反问机器也必须「算命中」：askMachine 本身没有返回值（undefined），
+       handleIntent 里是 `if(v!==null&&v!==undefined)return v`——直接 return askMachine(...) 会被当成
+       「没命中意图」继续往下走，结果是**反问句 + 未命中兜底两句一起出**（用户看到「请问要在哪台机器上架商品？」
+       紧跟「抱歉，我暂时无法回答这个问题」，等于白问）。故反问后显式 return true 结束链路。 */
+    askMachine('请问要在哪台机器上架商品？','onshelf');
+    return true;
   }
   /* 下架（C8） */
   if(!howTo&&/下架|撤下|移除商品|不要卖了|停卖/.test(q)){
