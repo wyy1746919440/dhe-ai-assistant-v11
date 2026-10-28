@@ -1011,9 +1011,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261022e" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261022e" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261022e" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261028a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261028a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261028a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1163,11 +1163,13 @@ const ORDERS={
     {no:'2026101219250031',m:'福田口岸',p:'康师傅冰红茶 500ml',amt:3.00,pay:'储值卡',st:'已支付',t:'10-12 19:25'},
     {no:'2026101119120044',m:'科技园 A 栋',p:'东鹏特饮',amt:4.50,pay:'支付宝',st:'已支付',t:'10-11 19:12'},
     {no:'2026101118560018',m:'深圳湾体育中心',p:'雀巢咖啡 268ml',amt:5.00,pay:'微信',st:'已支付',t:'10-11 18:56'}],
-  abnormal:[{no:'2026101415350001',m:'科技园 A 栋',p:'东鹏特饮',amt:4.50,pay:'微信',type:'扣款失败',note:'消费者账户余额不足，待补扣',t:'15:35'},
-    {no:'2026101414250004',m:'南山文体中心',p:'毛巾',amt:15.00,pay:'微信',type:'未上架',note:'商品已下架，订单待人工核销',t:'14:25'},
-    {no:'2026101413520022',m:'福田口岸',p:'泡面',amt:4.50,pay:'支付宝',type:'非友好',note:'开门后未取货，需人工确认',t:'13:52'},
-    {no:'2026101412400009',m:'梅林一村',p:'康师傅冰红茶 500ml',amt:3.00,pay:'储值卡',type:'拉黑',note:'消费者已被拉黑，订单冻结',t:'12:40'},
-    {no:'2026101411180035',m:'欢乐颂 5 号机',p:'可口可乐 330ml',amt:3.00,pay:'微信',type:'未上架',note:'售卖中商品被下架，订单待处理',t:'11:18'}],
+  /* 2026-10-28 用户反馈（定稿 #15）：异常订单行加「已超过 xx 小时」（对齐线上异常订单列表），
+     订单卡两态都不再显示支付方式（线上列表也不展示）。over 仅异常单有；≥24h 标红提醒。 */
+  abnormal:[{no:'2026101415350001',m:'科技园 A 栋',p:'东鹏特饮',amt:4.50,pay:'微信',type:'扣款失败',note:'消费者账户余额不足，待补扣',t:'15:35',over:'已超过2小时'},
+    {no:'2026101414250004',m:'南山文体中心',p:'毛巾',amt:15.00,pay:'微信',type:'未上架',note:'商品已下架，订单待人工核销',t:'14:25',over:'已超过5小时'},
+    {no:'2026101413520022',m:'福田口岸',p:'泡面',amt:4.50,pay:'支付宝',type:'非友好',note:'开门后未取货，需人工确认',t:'13:52',over:'已超过9小时'},
+    {no:'2026101412400009',m:'梅林一村',p:'康师傅冰红茶 500ml',amt:3.00,pay:'储值卡',type:'拉黑',note:'消费者已被拉黑，订单冻结',t:'12:40',over:'已超过24小时'},
+    {no:'2026101411180035',m:'欢乐颂 5 号机',p:'可口可乐 330ml',amt:3.00,pay:'微信',type:'未上架',note:'售卖中商品被下架，订单待处理',t:'11:18',over:'已超过48小时'}],
   complaint:[],payfail:[]
 };
 /* BIZ 全部派生，首页与 AI 卡片同源（避免两套数字） */
@@ -1403,9 +1405,11 @@ function cardOrderList(kind){
     : `数据截至 ${BIZ.updated} 更新 · 按时间倒序，仅展示最近 ${rows.length} 笔；今日成交 ${BIZ.todayOrders} 单（与首页「今日订单量」同源）`;
   const body=rows.length
     ? rows.map(o=>`<div class="mini-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px">
-        <span><b>${o.m}</b> · ${o.p}<br><span style="color:#8c8c8c;font-size:11px">${o.no} · ${o.t} · ${o.pay||'—'}</span>
+        <span><b>${o.m}</b> · ${o.p}<br><span style="color:#8c8c8c;font-size:11px">${o.no} · ${o.t}</span>
         ${isAb?`<br><span style="color:#D93026;font-size:11px">${o.type}：${o.note}</span>`:''}</span>
-        <span style="white-space:nowrap">${isAb?`<span class="lack-tag">${o.type}</span>`:money(o.amt)}</span>
+        <span style="white-space:nowrap;text-align:right">${isAb
+          ?`<span class="lack-tag">${o.type}</span>${o.over?`<br><span style="color:${parseInt(o.over)>=24?'#D93026':'#B25E00'};font-size:11px;display:inline-block;margin-top:4px">${o.over}</span>`:''}`
+          :money(o.amt)}</span>
       </div>`).join('')
     : `<div style="color:#8c8c8c;font-size:12px;padding:8px 0">暂无</div>`;
   const c=elx(`<div class="msg ai"><div class="av">AI</div><div class="cardbox">
