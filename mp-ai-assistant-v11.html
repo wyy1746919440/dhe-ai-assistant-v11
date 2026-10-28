@@ -524,9 +524,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261028a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261028a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261028a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261028b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261028b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261028b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1071,6 +1071,11 @@ function cardBizData(kind){
   chatBody.appendChild(c);chatBody.scrollTop=chatBody.scrollHeight;
   trace('api',`意图 <b>query</b> → GET <b>${api}</b> · 按 <b>商户维度</b>取数 · 只读工具，<b>不走向量检索、不生成文案、不改动任何数据</b>。`);
 }
+/* 机器名 → 机器编号（异常订单行＝机器名 + 编号，不展示商品名；2026-10-28 定稿 #15 二轮） */
+function mCodeOf(name){
+  const id=Object.keys(MACHINES).find(k=>MACHINES[k].name===name);
+  return id?MACHINES[id].code:'';
+}
 function cardOrderList(kind){
   const isAb=kind==='abnormal';
   const rows=isAb?ORDERS.abnormal:ORDERS.recent;
@@ -1080,10 +1085,10 @@ function cardOrderList(kind){
     : `数据截至 ${BIZ.updated} 更新 · 按时间倒序，仅展示最近 ${rows.length} 笔；今日成交 ${BIZ.todayOrders} 单（与首页「今日订单量」同源）`;
   const body=rows.length
     ? rows.map(o=>`<div class="mini-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #f4f6f8;font-size:13px">
-        <span><b>${o.m}</b> · ${o.p}<br><span style="color:#8c8c8c;font-size:11px">${o.no} · ${o.t}</span>
-        ${isAb?`<br><span style="color:#D93026;font-size:11px">${o.type}：${o.note}</span>`:''}</span>
+        <span><b>${o.m}</b> · ${isAb?(mCodeOf(o.m)||'—'):o.p}<br><span style="color:#8c8c8c;font-size:11px">${o.no} · ${o.t}</span>
+        ${isAb?`<br><span style="color:#D93026;font-size:11px">${o.type}</span>`:''}</span>
         <span style="white-space:nowrap;text-align:right">${isAb
-          ?`<span class="lack-tag">${o.type}</span>${o.over?`<br><span style="color:${parseInt(o.over)>=24?'#D93026':'#B25E00'};font-size:11px;display:inline-block;margin-top:4px">${o.over}</span>`:''}`
+          ?(o.over?`<span style="color:${parseInt(o.over)>=24?'#D93026':'#B25E00'};font-size:11px;display:inline-block;margin-top:4px">${o.over}</span>`:'')
           :money(o.amt)}</span>
       </div>`).join('')
     : `<div style="color:#8c8c8c;font-size:12px;padding:8px 0">暂无</div>`;
@@ -2040,13 +2045,85 @@ function cardBatchPrice(names){
   return id;
 }
 
+/* ---------- W5 前置：选择补货机器（2026-10-28 用户反馈 · 定稿 #15）----------
+   起因：原来直接问「补货单」会硬编码 3 台机器直接出确认卡 —— 写操作替用户决定了补货范围，
+        且卡上只有「3 台」、没有机器编号，确认前无法核对给哪几台补。
+   口径：未点名机器 → 先出候选清单（缺货率倒序，默认勾中 ≥30% 且可补的机器）→ 勾选后再进 W5；
+        已点名机器（「给欢乐颂 5 号机生成补货单」）→ 仍直接出卡，不额外加一步。
+   ⚠ 已停售 / 故障中的机器默认不勾：机器本身不卖货，补了也用不上；离线不影响（人到了照样能补）。 */
+function cardReplenishPick(){
+  const id=uid();
+  const rows=Object.entries(MACHINES).filter(([,m])=>m.lack)
+    .map(([k,m])=>{
+      const rate=parseInt(String(m.lackRate).replace('%',''),10)||0;
+      const block=m.biz==='已停售'?'已停售':(m.biz==='故障'?'故障中':'');
+      const st=block||(m.online?'营业中':'离线');
+      return {k:k,m:m,rate:rate,st:st,block:block,on:!block&&rate>=30};
+    })
+    .sort((a,b)=>b.rate-a.rate);
+  if(!rows.length){
+    pushEmpty('🛒','🛒 选择补货机器','当前没有需要补货的机器',
+      '机器库存都在补满线以上 · 可到 PC 端库存查询逐台核对');
+    trace('api',`意图 <b>write</b>（生成补货单）→ GET <b>/ai/tools/lack_machines</b> · <b>返回 0 台</b> → 走空状态卡，<b>不生成补货单</b>（不给空表、不给确认按钮）。`);
+    return id;
+  }
+  const c=pushCard(`<div class="cardbox" id="${id}_box">
+    <div class="cb-head q" id="${id}_head"><span class="ttl">🛒 选择补货机器</span><span class="st" id="${id}_st">待选择</span></div>
+    <div class="kv"><span class="k">候选</span><span class="v">${rows.length} 台<em>缺货率倒序 · 默认勾选 ≥30%</em></span></div>
+    <div class="ptable" id="${id}_tb">
+      <div class="ph"><span class="csel"><span class="ck" id="${id}_all">☑</span></span><span class="c1">机器</span>${pcHead('编号')}<span class="c3">缺货率</span><span class="c4">状态</span></div>
+      <div id="${id}_rows">${rows.map((r,i)=>rowPick(r,i)).join('')}</div>
+    </div>
+    <div class="pdiff" id="${id}_pv"></div>
+    <div class="op-btns" id="${id}_btns"><button class="btn ghost" id="${id}_cancel">取消</button><button class="btn main" id="${id}_gen">生成补货单</button></div>
+    <div class="exec-note">补货量＝最大库存（后台「补满」配置）− 现存 · 下一步可逐项改</div>
+  </div>`);
+  trace('api',`意图 <b>write</b>（生成补货单）→ GET <b>/ai/tools/lack_machines</b> · 返回缺货机器 ${rows.length} 台，按<b>缺货率倒序</b>；<b>默认勾中缺货率 ≥30% 且可补的机器</b>（已停售 / 故障中默认不勾）。用户确认范围后才进补货单预览。`);
+  function rowPick(r,i){
+    const col=r.rate>=50?'var(--danger)':(r.rate>=30?'var(--warn)':'var(--ok)');
+    return `<div class="pr${r.on?' pre':''}" data-i="${i}">
+      <div class="l1"><span class="csel"><span class="ck${r.on?'':' off'}" data-k="${i}">${r.on?'☑':'☐'}</span></span>
+        <span class="c1"><span class="nm">${esc(r.m.name)}</span></span>${pcCol(esc(r.m.code),78)}
+        <span class="c3" style="color:${col};font-weight:700">${esc(r.m.lackRate)}</span><span class="c4">${esc(r.st)}</span></div>
+      ${pcLn(`${esc(r.m.code)} · ${esc(r.m.type)}${r.block?' · '+esc(r.block):''}`)}</div>`;
+  }
+  const pv=c.querySelector('#'+id+'_pv'),gen=c.querySelector('#'+id+'_gen'),allBtn=c.querySelector('#'+id+'_all');
+  function refresh(){
+    const on=rows.filter(r=>r.on);
+    const blocked=on.filter(r=>r.block).length;
+    pv.innerHTML=`<div class="hd">已选 ${on.length} 台${on.length&&!blocked?' · 补货量按「最大库存 − 现存」计算':''}</div>`
+      +(on.length?`<div class="r"><span>生成结果</span><span><b>1 张</b>补货单 · 含 ${on.length} 台机器子单</span></div>`
+                 :`<div class="r"><span>提示</span><span>请先勾选要补货的机器</span></div>`);
+    gen.disabled=!on.length;
+    gen.textContent=on.length?`为这 ${on.length} 台生成补货单`:'生成补货单';
+    allBtn.className='ck'+(on.length===0?' off':(on.length===rows.length?'':' half'));
+    allBtn.textContent=on.length===rows.length?'☑':(on.length===0?'☐':'▣');
+  }
+  function bind(){
+    c.querySelectorAll('#'+id+'_rows .ck').forEach(k=>{k.onclick=()=>{const i=+k.getAttribute('data-k');rows[i].on=!rows[i].on;
+      k.className='ck'+(rows[i].on?'':' off');k.textContent=rows[i].on?'☑':'☐';
+      k.closest('.pr').className='pr'+(rows[i].on?' pre':'');refresh()}});
+  }
+  allBtn.onclick=()=>{const allOn=rows.every(r=>r.on);rows.forEach(r=>r.on=!allOn);
+    c.querySelector('#'+id+'_rows').innerHTML=rows.map(rowPick).join('');bind();refresh()};
+  bind();refresh();
+  c.querySelector('#'+id+'_cancel').onclick=()=>{
+    const chip=c.querySelector('#'+id+'_st');if(chip)chip.textContent='⊘ 已取消';
+    c.querySelector('#'+id+'_btns').innerHTML='<div class="res mut"><div class="res-l"><span>⊘</span><span>已取消，未生成补货单</span></div></div>';
+  };
+  gen.onclick=()=>{const mids=rows.filter(r=>r.on).map(r=>r.k);if(mids.length)cardReplenish(mids)};
+  return id;
+}
+
 /* ---------- W5：生成补货单 ----------
    ⚠ 字段＝商品 / 缺货数 / 缺货箱数 / 补货量；不显示价格与商品ID（补货用不到）
    ⚠ 生成结构＝一张主单 + 每台机器一条子单，不是逐台各出一张
    ⚠ 2026-10-16 裁决：**不要算法建议量** —— 补货量 = 最大库存（后台补满配置）− 现存，可逐项手改。
      原「按销量 / 按补满库存」两模式合并为一张卡（W5-a 撤下）。 */
 function cardReplenish(mids){
-  mids=(mids&&mids.length)?mids:['hls','lj3','nwhh'];
+  /* 2026-10-28 用户反馈（定稿 #15）：机器范围不再硬编码兜底 —— 未点名机器一律先走选择卡，
+     写操作不许替用户决定范围（旧实现直接取 3 台演示机器出确认卡）。 */
+  if(!mids||!mids.length)return cardReplenishPick();
   const id=uid();
   /* PC 独有：把这批机器上该商品的**可售库存 / 最大库存**一并读出来（与补货量同一口径）。
      手机端 375 屏放不下这两列，且补货员在机器旁主要看缺货数；
@@ -2058,8 +2135,12 @@ function cardReplenish(mids){
   const sumNow=items.reduce((a,x)=>a+x.now,0),sumMx=items.reduce((a,x)=>a+x.max,0);
   const c=pushCard(`<div class="cardbox" id="${id}_box">
     <div class="cb-head c" id="${id}_head"><span class="ttl">📋 生成补货单</span><span class="st" id="${id}_st">待确认</span></div>
-    <div class="kv"><span class="k">机器</span><span class="v">${mids.length} 台<em>缺货率 ≥30%</em></span></div>
+    <div class="kv"><span class="k">机器</span><span class="v">${mids.length} 台<em>按缺货情况挑选</em></span></div>
     ${pcKv('范围合计',`可售 <b>${sumNow}</b> 件 · 最大 <b>${sumMx}</b> 件`)}
+    <div class="mx open" id="${id}_mx">
+      <div class="mx-hd" id="${id}_mxh">补货机器明细 · 共 ${mids.length} 台<span class="fg" id="${id}_mxg">收起 ▴</span></div>
+      <div class="mx-bd" id="${id}_mxb">${mids.map(k=>{const m=MACHINES[k];return `<div class="mx-r"><span class="mxc">${esc(m.code)}</span><span class="mxn">${esc(m.name)}</span><span class="mxp">缺货 ${esc(m.lackRate||'—')}</span></div>`}).join('')}</div>
+    </div>
     <div class="op-wrap" id="${id}_op">
       <div class="hint" id="${id}_hint"></div>
       <div class="ptable" id="${id}_tb">
@@ -2072,12 +2153,15 @@ function cardReplenish(mids){
     </div>
     <div class="altseg">
       <div class="t">生成结构：一主多子（一次补货只出一张主单）</div>
-      <div class="hint">主单 1 张 · ${mids.length} 台机器各挂一条子单：${mids.map((k,i)=>`100-${i+1} ${esc(MACHINES[k].name)}`).join(' / ')}</div>
+      <div class="hint">主单 1 张 · ${mids.length} 台机器各挂一条子单（子单号＝主单号-序号，依次对应上方机器）</div>
       <div class="hint">多台须同属一个车线路仓 → 可合并；跨仓需按仓分别提交</div>
     </div>
   </div>`);
   trace('write',`两段式确认 · <b>生成补货单</b>：预览阶段按「最大库存 − 现存」算出缺货数 / 缺货箱数 / 补货量（<b>不调算法</b>）→ 确认才调 <b>POST /ai/actions/${OP_TOOL.replenish}</b>，接口返回<b>单个 masterId</b>。`);
   const pv=c.querySelector('#'+id+'_pv'),okBtn=c.querySelector('#'+id+'_ok'),hint=c.querySelector('#'+id+'_hint'),note=c.querySelector('#'+id+'_note');
+  /* 机器明细默认展开 —— 确认前必须能核对「给哪几台补」，机器多时可手动收起 */
+  const mx=c.querySelector('#'+id+'_mx'),mxg=c.querySelector('#'+id+'_mxg');
+  c.querySelector('#'+id+'_mxh').onclick=()=>{const on=mx.classList.toggle('open');mxg.textContent=on?'收起 ▴':'展开 ▾'};
   function render(){
     hint.textContent='补货量＝最大库存（后台「补满」配置）− 现存，可逐项改';
     note.textContent='🔒 补货量可逐项手改';
@@ -2200,7 +2284,6 @@ function cardOrderDetail(pick){
           ${pcLn(`ID ${esc((prodByName(it.n)||{}).id||'6901234567892')}`)}</div>`).join('')}
         <div class="sumline"><span>合计 ${qty} 件</span><span>${money(tot)}</span></div>
       </div>
-      <div class="pdiff"><div class="r"><span>支付方式</span><span>${esc(o.pay)}</span></div><div class="r"><span>订单状态</span><span>${esc(o.st)}</span></div></div>
       ${pick?'<div class="op-btns"><button class="btn ghost back2list">‹ 返回订单列表</button></div>':''}
       <div class="exec-note">用于核对消费者拿取的商品与扣款是否一致</div>`;
     const back=body.querySelector('.back2list');
@@ -2212,8 +2295,8 @@ function cardOrderDetail(pick){
     body.innerHTML=`
       <div class="kv"><span class="k">时间</span><span class="v">最近 ${ORDERS.recent.length} 单<em>近 7 天 · 按时间倒序</em></span></div>
       <div class="ptable">
-        <div class="ph"><span class="c1">订单号</span><span class="c3">机器</span><span class="c4">商品</span><span class="c5">金额</span>${pcHead('支付',64)}${pcHead('状态',56)}</div>
-        ${ORDERS.recent.map(o=>`<div class="pr opick" data-no="${o.no}"><div class="l1"><span class="c1"><span class="nm">${esc(o.no)}</span></span><span class="c3">${esc(o.m)}</span><span class="c4">${esc(o.p)}</span><span class="c5">${money(o.amt)}</span>${pcCol(esc(o.pay),64)}${pcCol(esc(o.st||'已支付'),56)}</div>
+        <div class="ph"><span class="c1">订单号</span><span class="c3">机器</span><span class="c4">商品</span><span class="c5">金额</span></div>
+        ${ORDERS.recent.map(o=>`<div class="pr opick" data-no="${o.no}"><div class="l1"><span class="c1"><span class="nm">${esc(o.no)}</span></span><span class="c3">${esc(o.m)}</span><span class="c4">${esc(o.p)}</span><span class="c5">${money(o.amt)}</span></div>
           ${pcLn(`${o.t} · 点击查看该单商品明细`)}</div>`).join('')}
       </div>
       <div class="pdiff"><div class="r"><span>怎么用</span><span>点任意一单 → 展开该单商品明细；也可直接发订单号</span></div></div>
@@ -3097,9 +3180,11 @@ function v11Intent(q){
     const names=pickProducts(q);
     if(names.length)return cardBatchPrice(names);
   }
-  /* 生成补货单（W7） */
+  /* 生成补货单（W7）
+     ⚠ 2026-10-28 用户反馈（定稿 #15）：未点名机器不再硬编码 3 台直接出确认卡 ——
+       写操作不能替用户决定补货范围，先给候选机器让用户勾选；点名机器仍直接出卡。 */
   if(/补货单/.test(q)&&!/记录/.test(q)){
-    return cardReplenish(mids.length?mids:['hls','lj3','nwhh']);
+    return mids.length?cardReplenish(mids):cardReplenishPick();
   }
   /* 补货记录（B1） */
   if(/补货记录|长时间没补|多久没补|没补货|未补货|多久补一次/.test(q))return cardReplenishRecord();
@@ -3495,9 +3580,10 @@ const SKILL_GUIDE={
 const OPEN_GUIDE_CHIPS=['在南油文化广场上架康师傅碱性水','所有机器都上架百事可乐 500ml',
   '帮我批量下架一些机器的可口可乐','有没有机器长时间没补货？','什么原因离线','把机器停售',
   '查我的机器','查询机器库存','今天的销售额','最近的订单','查看补货记录','售货机和智能柜有什么区别？'];
-/* 1.0 遗留兼容：技能清单里「生成补货单」走 1.1 的补货单卡 */
+/* 1.0 遗留兼容：技能清单里「生成补货单」走 1.1 的补货单卡
+   ⚠ 2026-10-28：未点名机器时先进选择卡，不再默认 3 台 */
 function cardReplenishConfirm(scope){
-  return cardReplenish(scope&&scope!=='multi'?[scope]:['hls','lj3','nwhh']);
+  return (scope&&scope!=='multi')?cardReplenish([scope]):cardReplenishPick();
 }
 
 /* 加号面板：拍照 / 相册 */
