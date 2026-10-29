@@ -229,7 +229,7 @@ table.idx th{background:#fafbfd;font-weight:700}
     <b>2026-10-28 修订（定稿 #18 / #19）</b>：① <b>批量上架改成一张卡内三步向导</b>——W2-a＝第 1 步 选商品、W2-b＝第 2 步 选机器、W2-c＝第 3 步 逐台定位置 / 价格 / 库存（智能柜默认第 1 层、售货机默认下一个空闲货道，可点选改；点名货道时位置锁定＝按货道变体 W2-d）；② <b>补货记录改口径</b>——查「该补还没补的机器」（近 30 天 ∩ 在线 ∩ 有销量 ∩ 未补货 &gt; 15 天），三个条件做成卡内可点 chip；<br>
     <b>2026-10-28 修订（定稿 #20 · 路由）</b>：「批量 / 一键 / 全量」本身即范围词 —— <b>「批量上架百事可乐」直接进 W2-a</b>，不再反问「要在哪台机器上架」；只有既无范围词、也未点名机器（如「上架百事可乐」）才反问机器，且<b>反问只出一句就结束链路</b>（原来反问后还会再跟一条未命中兜底）。卡片本身无改动，改的是进卡条件｜<br>
     <b>2026-10-28 修订（定稿 #21 / #22 / #23）</b>：① <b>第 3 步改「按机型统一设置」</b>——同一机型只给一行（<b>N 台 · 统一设置</b>），智能柜＝层、售货机＝<b>起始货道</b>并逐台按各自空闲货道顺延，不再一台台设置（原逐台方案 12 台 × 3 商品＝36 行）；② <b>第 2 步撤下「全部机器」档</b>，只留「按线路 / 自选」（范围词仍进卡，进卡后默认第一条线路）；③ <b>第 1 步商品行可「✕ 移除」</b>，允许删到 0 并给空态、禁用「下一步」｜<br>
-    <b>2026-10-28 修订（定稿 #24 / #25 / #26）</b>：① <b>售货机货道互斥</b>——同一张卡里两个商品不能选同一货道（默认各占不同空闲货道；选择弹层里被本卡占的货道<b>置灰 + 「本卡已占用：X」</b>、点了只提示不改选；提交按每个商品各自的货道落位、该机被占才顺延）；② <b>不可上架的机器在选机器阶段就剔除</b>——机型不支持 / 商品未建模的机器不进第 3 步、不计入确认台数，卡内写「已跳过 N 台不可上架的机器：名称（原因）」；单台点名到这类机器改出「这台机器上架不了」说明卡｜<br>
+    <b>2026-10-29 修订（定稿 #27）</b>：批量上架步骤条第 3 段文案由「位置 / 价格 / 库存」缩为「<b>上架</b>」——六个字加两个分隔符在手机上挤成两行、与「选商品 / 选机器」四字不对称（用户原话「六个字加符号太多了；直接展示上架就行了」）；第 2 步「下一步」按钮同步改为「下一步：上架」。第 3 步的内容与列头不变。<br><b>2026-10-28 修订（定稿 #24 / #25 / #26）</b>：① <b>售货机货道互斥</b>——同一张卡里两个商品不能选同一货道（默认各占不同空闲货道；选择弹层里被本卡占的货道<b>置灰 + 「本卡已占用：X」</b>、点了只提示不改选；提交按每个商品各自的货道落位、该机被占才顺延）；② <b>不可上架的机器在选机器阶段就剔除</b>——机型不支持 / 商品未建模的机器不进第 3 步、不计入确认台数，卡内写「已跳过 N 台不可上架的机器：名称（原因）」；单台点名到这类机器改出「这台机器上架不了」说明卡｜<br>
     <b>2026-10-28 修订（定稿 #16）</b>：W5 <b>机器范围不由 AI 代选</b> —— 未点名机器先出「选择补货机器」前置步骤（见 W5 下方示意），勾选后才进确认卡；确认卡内新增<b>「补货机器明细」块</b>（逐台 编号 · 名称 · 缺货率，默认展开）；底部 <code>100-1/100-2</code> 明确为<b>子单号</b>、不替代机器编号｜
     样式沿用引导式原型 <code>mp-ai-assistant-guided.html</code> 的 <code>.cardbox / .ptable / .op-btns</code> 体系 ｜
     统一字段口径：<b>商品名称 · 价格 · 库存</b> 为基础项，<b>商品ID</b> 按场景取舍（上架 / 下架卡不显示，改价 / 补货 / 订单明细保留），<b>状态一律用文字</b>不用符号
@@ -316,7 +316,7 @@ table.idx th{background:#fafbfd;font-weight:700}
         <span class="q">「批量上架百事可乐」/「所有机器都上架百事可乐 500ml」</span>
         <div class="cardbox">
           <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
-          <div class="steps"><span class="stp on"><b>1</b>选商品</span><span class="stp"><b>2</b>选机器</span><span class="stp"><b>3</b>位置 / 价格 / 库存</span></div>
+          <div class="steps"><span class="stp on"><b>1</b>选商品</span><span class="stp"><b>2</b>选机器</span><span class="stp"><b>3</b>上架</span></div>
           <div class="ptable">
             <div class="ph"><span class="c1">商品</span><span class="c5">价格（元）</span><span class="c5s">补货量</span></div>
             <div class="pr pre"><div class="l1"><span class="c1"><span class="nm">百事可乐 500ml</span><b class="pdel">✕</b></span><span class="c5"><input value="3.50"></span><span class="c5s"><input value="18" class="chg"></span></div><div class="ln">箱规 12 件/箱 · 默认价 ¥3.50 · 点 ✕ 可移除</div></div>
@@ -345,7 +345,7 @@ table.idx th{background:#fafbfd;font-weight:700}
         <span class="q">「给科技园线路所有机器上架百事可乐」</span>
         <div class="cardbox">
           <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
-          <div class="steps"><span class="stp done"><b>1</b>选商品</span><span class="stp on"><b>2</b>选机器</span><span class="stp"><b>3</b>位置 / 价格 / 库存</span></div>
+          <div class="steps"><span class="stp done"><b>1</b>选商品</span><span class="stp on"><b>2</b>选机器</span><span class="stp"><b>3</b>上架</span></div>
           <div class="seg"><span class="on">按线路</span><span>自选</span></div>
           <div class="kv"><span class="k">线路</span><span class="v ldsel">科技园线路 ▾<em>3 台</em></span></div>
           <div style="font-size:10.5px;color:#98a2b3;margin-top:6px">▼ 下拉展开态＝PC 端形态示意；移动端为底部半屏弹层（选择类交互无卡内下拉先例）</div>
@@ -361,7 +361,7 @@ table.idx th{background:#fafbfd;font-weight:700}
           <div class="pdiff"><div class="hd">将上架 2 台 × 2 项 = 4 条</div>
             <div class="r"><span>线路</span><span>科技园线路 · 点线路名可下拉切换</span></div>
           </div>
-          <div class="op-btns"><button class="btn ghost">上一步</button><button class="btn main demo">下一步：位置 / 价格</button></div>
+          <div class="op-btns"><button class="btn ghost">上一步</button><button class="btn main demo">下一步：上架</button></div>
           <div class="exec-note">🔒 机器范围定好后，第 3 步按机型统一设置位置与价格</div>
         </div>
         <div class="rule"><b>第 2 步只管「上到哪」</b>：<code>.seg</code> <b>只剩两档</b>——<b>按线路</b>（默认）· <b>自选</b>（chips 逐个列已选机器、✕ 可删、「＋ 添加机器」呼出 P2，diff 区列全部机器编号防选错）。<br><b>2026-10-28 定稿 #22：「全部机器」档已撤下</b>——客户不能一句话把商品铺到全部机器，只能按线路或自选，影响面收窄到可核对的范围内。⚠ <b>范围词与档位解耦</b>：问法里说「所有机器 / 批量 / 一键」仍然进本卡（不再反问机器），但<b>进卡后范围默认落第一条线路</b>，客户自己改线路或切「自选」。<br><b>按线路</b>：点「线路」行 → 列出该商户下<b>全部线路机构</b>（线路 + 台数），<b>点选哪条切哪条</b>；不是点一下循环切到下一条。两端形态不同：⚠ <b>移动端＝底部半屏弹层</b>；<b>PC 端＝卡内真下拉</b>（点卡片外任意处收起）。<br><b>2026-10-28 定稿 #25 / #26：「不可上架」分两级，处理方式不同</b>——① <b>整机级</b>（机型不支持上架，如格子柜）＝这台任何商品都上不了 → <b>在本步整台剔除</b>，chips 里不出现、第 3 步也不会有它，范围下方写「<b>⛔ 已跳过 N 台不可上架的机器：机器名（原因）</b>」；② <b>商品级</b>（商品在这台机器未绑定可售机型商品 code）＝只影响<b>这一条组合</b> → ⚠⚠ <b>机器保留在范围内、只跳过这个商品</b>（定稿 #26 回退：原按整台剔除，用户原话「商品1可以在智能柜上架，但商品2不可以，这样导致智能柜都选不了了」），范围下方另起一行写「<b>⚠ 另有 N 条上不了，机器保留、只跳过这几条：机器名 · 商品名（原因）</b>」，第 3 步在被挡的商品行写明「<b>⚠ N 台里有 M 台上不了这个商品（原因）· 提交时自动跳过</b>」，能上的商品行不带告警；预览与确认按钮按<b>条</b>扣减（「3 台 × 2 项 = <b>5 条</b>（另有 1 条不支持，将跳过）」/「确认上架（3 台 · 跳过 1 条）」）」。⚠ 改线路 / 切自选 / 加减商品<b>都会重新过滤</b>——卡内同时保留「客户选的范围」与「过滤后能上架的机器」两份数据，否则一过滤就把客户的选择抹掉了。<b>W6 结果卡退回运行期兜底</b>（并发改价 / 机器离线 / 权限变更），不再靠「提交后才失败」发现机型不支持。</div>
@@ -373,7 +373,7 @@ table.idx th{background:#fafbfd;font-weight:700}
         <span class="q">「给南油线路所有机器上架百事可乐和可口可乐」</span>
         <div class="cardbox">
           <div class="cb-head c"><span class="ttl">➕ 批量上架商品</span><span class="st">待确认</span></div>
-          <div class="steps"><span class="stp done"><b>1</b>选商品</span><span class="stp done"><b>2</b>选机器</span><span class="stp on"><b>3</b>位置 / 价格 / 库存</span></div>
+          <div class="steps"><span class="stp done"><b>1</b>选商品</span><span class="stp done"><b>2</b>选机器</span><span class="stp on"><b>3</b>上架</span></div>
           <div class="mx open">
             <div class="mx-hd"><span>售货机</span><span class="mh-kind">2 台 · 统一设置</span></div>
             <div class="mx-bd"><div class="ptable">
