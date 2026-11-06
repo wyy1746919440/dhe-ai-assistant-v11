@@ -548,9 +548,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261029a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261029a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261029a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261106a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261106a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261106a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1834,10 +1834,11 @@ function cardBatchOnshelf(scope,items,opts){
     </div>
     <div id="${id}_body"></div>
     <div class="pdiff" id="${id}_pv"></div>
+    <div class="hint" id="${id}_sk" style="display:none"></div>
     <div class="op-btns" id="${id}_btns"></div>
     <div class="exec-note" id="${id}_note"></div>
   </div>`);
-  const pv=c.querySelector('#'+id+'_pv'),btns=c.querySelector('#'+id+'_btns'),note=c.querySelector('#'+id+'_note');
+  const pv=c.querySelector('#'+id+'_pv'),btns=c.querySelector('#'+id+'_btns'),note=c.querySelector('#'+id+'_note'),skEl=c.querySelector('#'+id+'_sk');
   /* ---------- 机型分组（第 3 步的粒度＝机型，不是逐台） ---------- */
   function kindOf(mid){return MACHINES[mid].kind==='vm'?'vm':'cab'}
   function kindsIn(){const o={};state.mids.forEach(k=>{o[kindOf(k)]=1});return Object.keys(o)}
@@ -1858,12 +1859,14 @@ function cardBatchOnshelf(scope,items,opts){
     return state.cfg[kind][i];
   }
   /* ================= Step 1：选商品（可增可删） ================= */
+  /* 定稿 #28：商品行副行只留「箱规」——它解释补货量＝箱规×1.5；「默认价」左侧输入框已给、
+     「点 ✕ 可移除」由常驻 ✕ 图标自带语义（且卡片底部已有一次说明），不再逐行重复 */
   function html1(){
     const rows=state.items.map((it,i)=>`<div class="pr pre" data-i="${i}">
         <div class="l1"><span class="c1"><span class="nm">${esc(it.n)}</span><b class="pdel" data-i="${i}">✕</b></span>${pcCol(money(it.lib),88)}
           <span class="c5"><input class="pin" data-i="${i}" data-lib="${it.lib}" value="${Number(it.price).toFixed(2)}" inputmode="decimal"></span>
           <span class="c5s"><input class="qin" data-i="${i}" value="${it.qty}" inputmode="numeric"></span>${pcCol(boxOf(it.n)+' 件/箱',68)}</div>
-        ${pcLn(`箱规 ${boxOf(it.n)} 件/箱 · 默认价 ${money(it.lib)} · 点 ✕ 可移除`)}
+        ${pcLn(`箱规 ${boxOf(it.n)} 件/箱`)}
       </div>`).join('');
     /* 2026-10-28 定稿 #23：允许把商品删到 0，给明确空态而不是留一张空表 */
     if(!state.items.length)return `<div class="hint">还没有商品 —— 点下面「＋ 添加商品」挑一个</div>
@@ -1897,30 +1900,32 @@ function cardBatchOnshelf(scope,items,opts){
   function html2(){
     if(fixed)return `<div class="kv"><span class="k">机器范围</span><span class="v">${state.mids.length} 台<em>${esc(opts.midsNote||'按问法限定')}</em></span></div>
       <div class="chips">${state.mids.map(k=>`<span>${esc(MACHINES[k].name)}</span>`).join('')}</div>
-      ${skipNote?`<div class="hint">${esc(skipNote)}</div>`:''}${skippedHtml()}`;
+      ${skipNote?`<div class="hint">${esc(skipNote)}</div>`:''}`;
     return `<div class="seg" id="${id}_seg">
         <span class="${state.scope==='line'?'on':''}" data-s="line">按线路</span>
         <span class="${state.scope==='pick'?'on':''}" data-s="pick">自选${state.scope==='pick'?' '+state.mids.length:''}</span>
       </div>
       <div id="${id}_range"></div>`;
   }
-  /* 两级跳过提示分开写：整机级＝整台不进第 3 步；商品级＝机器保留，只跳过这几条组合（定稿 #26） */
-  function skippedHtml(){
-    let h='';
+  /* 定稿 #28：卡片内不再堆说明行 —— 整机级与商品级合并成**一条短句**，统一挂在预览区下方
+     （refresh() 里渲染，第 2 步起才出现）。口径：只报「跳过了几台机器 / 几条商品 + 是谁」，
+     **不写原因**（原因只在第 3 步被挡行内与 W6 结果卡），避免把实现细节写进客户话术。 */
+  function skippedLine(){
+    const seg=[];
     if(state.skipped.length)
-      h+=`<div class="hint">已跳过 ${state.skipped.length} 台不可上架的机器：${state.skipped.map(s=>`${esc(s.name)}（${esc(s.reason)}）`).join('、')}</div>`;
+      seg.push(`${state.skipped.length} 台机器（${state.skipped.map(s=>esc(s.name)).join('、')}）`);
     const pb=pairsBlocked();
     if(pb.length)
-      h+=`<div class="hint">另有 ${pb.length} 条上不了，机器保留、只跳过这几条：${pb.map(p=>`${esc(p.name)} · ${esc(shortName(p.goods))}`).join('、')}（${esc(pb[0].reason)}）</div>`;
-    return h;
+      seg.push(`${pb.length} 条商品（${pb.map(p=>`${esc(p.name)} · ${esc(shortName(p.goods))}`).join('、')}）`);
+    return seg.length?`⛔ 已跳过 ${seg.join(' · ')}`:'';
   }
   function rangeHtml(){
     if(state.scope==='line'){const ln=scopeLine||LINES[0];
       return `<div class="kv"><span class="k">线路</span><span class="v ldsel" id="${id}_ltop">${esc(ln)} ▾<em>${lineCount(ln)} 台</em></span></div>`+
         (PCW?`<div class="linedrop" id="${id}_ldrop" style="display:none">${LINES.map(l=>`<div class="lopt${l===ln?' on':''}" data-l="${esc(l)}"><span>${esc(l)}</span><em>${lineCount(l)} 台</em></div>`).join('')}</div>`:'')+
-        `<div class="chips">${lineMachines(ln).slice(0,3).map(([,m])=>`<span>${esc(m.name)}</span>`).join('')}${lineCount(ln)>3?`<span>＋${lineCount(ln)-3}</span>`:''}</div>`+skippedHtml()}
+        `<div class="chips">${lineMachines(ln).slice(0,3).map(([,m])=>`<span>${esc(m.name)}</span>`).join('')}${lineCount(ln)>3?`<span>＋${lineCount(ln)-3}</span>`:''}</div>`}
     return `<div class="kv"><span class="k">已选机器</span><span class="v">${state.mids.length} 台</span></div>
-      <div class="chips">${state.mids.map(k=>`<span>${esc(MACHINES[k].name)} <b data-x="${k}">✕</b></span>`).join('')}<span id="${id}_addm">＋ 添加机器</span></div>${skippedHtml()}`;
+      <div class="chips">${state.mids.map(k=>`<span>${esc(MACHINES[k].name)} <b data-x="${k}">✕</b></span>`).join('')}<span id="${id}_addm">＋ 添加机器</span></div>`;
   }
   function bind2(){
     if(fixed)return;
@@ -1966,7 +1971,7 @@ function cardBatchOnshelf(scope,items,opts){
     const ks=kindsIn();
     if(!ks.length)return `<div class="hint">${state.range.length
       ? '选中的机器都不能上架这批商品 —— 回到第 2 步换个范围或换个商品'
-      : '还没有选机器 —— 回到第 2 步按线路或自选机器'}</div>${skippedHtml()}`;
+      : '还没有选机器 —— 回到第 2 步按线路或自选机器'}</div>`;
     const order=['cab','vm'].filter(k=>ks.indexOf(k)>=0);
     const body=order.map(kind=>{
       const ms=state.mids.filter(k=>kindOf(k)===kind),isVm=kind==='vm';
@@ -1993,7 +1998,7 @@ function cardBatchOnshelf(scope,items,opts){
       </div>`;
     }).join('');
     return body+`<div class="hint">${esc(lane?'位置已按问法锁定为 '+lane+' · 价格与库存按机型统一设置'
-      :'同一机型统一设置，一次生效 · 售货机每个商品占不同货道（点开只能选还没被本卡占用的）')}${skipNote?' · '+esc(skipNote):''}</div>`+skippedHtml();
+      :'同一机型统一设置，一次生效 · 售货机每个商品占不同货道（点开只能选还没被本卡占用的）')}${skipNote?' · '+esc(skipNote):''}</div>`;
   }
   function bind3(){
     c.querySelectorAll('.slot').forEach(s=>{s.onclick=()=>{
@@ -2034,7 +2039,9 @@ function cardBatchOnshelf(scope,items,opts){
       state.items.forEach(it=>{h+=`<div class="r"><span>${esc(shortName(it.n))}</span><span>${money(it.price)} · 补 ${it.qty}</span></div>`});
     }else if(state.step===2){
       if(!state.mids.length)h=`<div class="hd">请先选择机器</div>`;
-      else{h=`<div class="hd">将上架 ${state.mids.length} 台 × ${state.items.length} 项 = ${state.mids.length*state.items.length} 条</div>`;
+      else{const pb2=pairsBlocked().length,eff2=state.mids.length*state.items.length-pb2;
+        /* 定稿 #28：第 2 步的条数也按「条」扣减，与第 3 步同一口径（原来写 N×M，跳过的那些仍被算进去） */
+        h=`<div class="hd">将上架 ${state.mids.length} 台 × ${state.items.length} 项 = ${eff2} 条${pb2?`（另有 ${pb2} 条不支持，将跳过）`:''}</div>`;
         if(state.scope==='line')h+=`<div class="r"><span>线路</span><span>${esc(scopeLine||LINES[0])} · 点线路名可切换</span></div>`;
         if(state.scope==='pick'&&!fixed)state.mids.forEach(k=>{h+=`<div class="r"><span>${esc(MACHINES[k].name)}</span><span>${esc(MACHINES[k].code)}</span></div>`});}
     }else{
@@ -2047,6 +2054,9 @@ function cardBatchOnshelf(scope,items,opts){
     }
     pv.className='pdiff'+(bad?' err':'');
     pv.innerHTML=bad?(state.items.length?'价格需为大于 0 的数字、库存需为不小于 0 的整数':'请至少保留一个商品'):h;
+    /* 定稿 #28：跳过提示只此一行，挂在预览区正下方；第 1 步还没选机器，不提前报 */
+    const skTxt=state.step>1?skippedLine():'';
+    skEl.innerHTML=skTxt;skEl.style.display=skTxt?'':'none';
     const nx=c.querySelector('#'+id+'_next'),ok=c.querySelector('#'+id+'_ok');
     if(nx)nx.disabled=bad||(state.step===2&&!state.mids.length);
     if(ok)ok.disabled=bad||!state.mids.length;
