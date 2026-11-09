@@ -495,6 +495,13 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .row-act{display:none}
 /* —— PC 端行内动作按钮（「加入 / 选这台」）在手机端不出 */
 .row-act{display:none}
+/* —— 能力清单分类节点：移动端 4 列网格两行（7 个分类一屏看全，不靠横向滑），
+   PC 端不加 .grid、保持一行铺开（抽屉 720px 足够放 7 个）—— */
+.skill-map .nodes.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;overflow:visible;padding-bottom:2px}
+.skill-map .nodes.grid .node{width:auto;height:auto;min-height:54px;padding:8px 2px}
+.skill-map .nodes.grid .node .emoji{font-size:18px}
+.skill-map .nodes.grid .node .lab{font-size:9.5px;line-height:1.18;word-break:break-all}
+.skill-map .nodes.grid .node .count{font-size:8px}
 /* —— 去掉消息行两侧头像（AI / 我）：30px 头像 + 9px 间距共占 39px，
    375 屏内可用宽只有 323px（375−12×2 外框 −14×2 滚动区），会把 300px 卡片挤出可视区 —— */
 .msg .av{display:none}
@@ -548,9 +555,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261109c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261109c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261109c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261109d" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261109d" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261109d" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -3436,8 +3443,11 @@ function unsupAnswer(q){
   trace('block',`意图判定为 <b>unsupported_not_open</b> · 命中次批能力「${o.n}」→ <b>本期未开放</b>，返回「暂不支持」话术 + 手动入口，<b>不调用模型生成</b>。`);
   bub('ai',`${o.r}<div class="guide-tail">需要人工协助的话，请咨询售后客服。</div>`);
 }
-/* ⚠ 1.1 期已开放的能力要从「暂不支持」里摘掉（KB 区块由生成器维护，不改原数据） */
-const V11_OPEN=['生成补货单','批量改价','设置机器音量'];
+/* ⚠ 1.1 期已开放的能力要从「暂不支持」里摘掉（KB 区块由生成器维护，不改原数据）
+   ⚠ 2026-11-09：**「设置机器音量」必须留在暂不支持里**——需求说明 §1.3 / §3.4 明确「音量设置写能力＝转引导，不做写」
+     （低频，引导至 机器详情 › 音量设置）。此前把音量当成已开放，导致点「设置机器音量」能出写确认卡，
+     与口径冲突（用户原话「设置机器音量不是没有做操作吗？为什么这里有？只有引导吧我记得」）。 */
+const V11_OPEN=['生成补货单','批量改价'];
 KB_BOUNDARY.unsup=(KB_BOUNDARY.unsup||[]).filter(o=>V11_OPEN.indexOf(o.n)<0);
 
 /* ---------- 槽位：机器 / 动作 ---------- */
@@ -3451,10 +3461,17 @@ function pickMachine(id,kind){
   if(k==='onshelf')return cardOnshelf(id,[]);
   if(k==='offshelf')return cardOffshelf([id],null);
   if(k==='temp')return askValue(`${M.name} 要设置成多少度？`,['0~5℃','2~8℃','8~15℃'],v=>cardOpConfirm({type:'temp',mid:id,val:v}),parseTemp);
-  if(k==='volume')return askValue(`${M.name} 音量调到多少？（0-100）`,['40','60','80'],v=>cardOpConfirm({type:'volume',mid:id,val:v}),parseNum);
+  /* ⚠ 2026-11-09：音量＝1.1「转引导，不做写」，不签发 confirm_id（口径见需求说明 §1.3 / §3.4） */
+  if(k==='volume')return volumeGuide(id);
   if(k==='price')return cardPriceTable(id);
   if(k==='stockEdit')return cardStockTable(id);
   if(k==='replenish')return cardReplenish([id]);
+}
+/* 音量＝转引导（1.1 期不做写）：只给入口，不签发 confirm_id、不出确认卡 */
+function volumeGuide(id){
+  const M=MACHINES[id]||{};
+  trace('block',`意图判定为 <b>unsupported_not_open</b> · 「设置音量」（1.1 转引导、不做写）→ 给出「${M.name||''}」的音量设置入口，<b>不签发 confirm_id、不出确认卡</b>。`);
+  bub('ai',`「设置音量」目前不做代操作 —— 请在<b>机器详情 → 音量设置</b>里调整（开锁提示音 / 屏幕广告音量，取值 0~100）${M.name?`，「${M.name}」同样在这里改`:''}。<div class="guide-tail">需要人工协助的话，请咨询售后客服。</div>`);
 }
 /* 问句里点名的机器 / 商品 */
 function midsIn(q){
@@ -3910,8 +3927,9 @@ function handleIntent(q){
     if(/恢复营业|开始营业/.test(q))return cardOpConfirm({type:'resume',mid});
     if(/温度/.test(q)){const mm=/(\d+)\s*[-~到至]\s*(\d+)\s*度/.exec(q);
       return mm?cardOpConfirm({type:'temp',mid,val:`${mm[1]}~${mm[2]}℃`}):askValue(`请问要把 ${MACHINES[mid].name} 调到多少度？`,['0~5℃','2~8℃','8~15℃'],v=>cardOpConfirm({type:'temp',mid,val:v}),parseTemp)}
-    if(/音量/.test(q)){const mm=/(\d+)/.exec(q);
-      return mm?cardOpConfirm({type:'volume',mid,val:mm[1]}):askValue(`请问要把 ${MACHINES[mid].name} 的音量调到多少？`,['40','60','80'],v=>cardOpConfirm({type:'volume',mid,val:v}),parseNum)}
+    /* ⚠ 2026-11-09（#31）：音量＝「转引导、不做写」，已点名机器也不出写卡 / askValue，
+       一律转引导（口径见需求说明 §1.3 / §3.4）——1.0 这里直接 cardOpConfirm 是口径泄漏点。 */
+    if(/音量/.test(q))return volumeGuide(mid);
     if(isPriceQuery(q))return cardStock(mid,'price');
     if(PRICE_WORD.test(q)){
       const pm=/(\d+(?:\.\d+)?)\s*(块|元)/.exec(q);
@@ -3938,7 +3956,8 @@ const SKILL_GROUPS=[
       {t:'补货后怎么修改库存？',tip:'核心高频操作'},{t:'智能柜商品怎么做商品建模？',tip:'视觉识别规范'},
       {t:'商品库的私有库和公有库有什么区别？',tip:'商品库概念'},{t:'消费者申请退款怎么处理？',tip:'客诉订单处理'},
       {t:'智能柜异常订单有哪些类型？',tip:'资损口径'},{t:'提现多久到账？',tip:'到账时效'},
-      {t:'销售额是怎么计算的？',tip:'统计口径差异'}]},
+      {t:'销售额是怎么计算的？',tip:'统计口径差异'},
+      {t:'音量设置在哪？',tip:'引导至 机器详情 › 音量设置'}]},
   {id:'shelf',emoji:'➕',title:'上架 / 下架',color:'#722ed1',desc:'单台按货道 / 层，批量三步设置',
     items:[{t:'在南油文化广场上架康师傅碱性水',tip:'单台 · 按机型给层或货道'},
       {t:'在欢乐颂 5 号机上架百事可乐',tip:'单台 · 售货机逐个指定货道'},
@@ -3952,9 +3971,8 @@ const SKILL_GROUPS=[
       {t:'修改商品价格',tip:'单台 · 列出全部商品'},
       {t:'修改货道库存',tip:'按货道列出，售货机需在线'}]},
   {id:'replen',emoji:'🧾',title:'补货任务',color:'#52c41a',desc:'补货单与补货记录',
-    items:[{t:'给这 3 台机器生成补货单',tip:'点名机器直接出卡 · 一主多子'},
+    items:[{t:'给欢乐颂 5 号机生成补货单',tip:'点名机器直接出卡 · 一主多子'},
       {t:'给缺货的机器生成补货单',tip:'没点名机器 · 先让你挑机器'},
-      {t:'照最大库存把补货量补满',tip:'补货量＝最大−现存 · 可逐项改'},
       {t:'有没有机器长时间没补货？',tip:'该补还没补的 · 未补货超 15 天优先'},
       {t:'哪些机器需要补货？',tip:'缺货机器清单'}]},
   /* ⚠ 2026-11-09 用户反馈：「不要这种（『1.1 新增查询』），并到别的清单里面去 —— 这样 1.1 新增是啥呀，
@@ -3968,23 +3986,24 @@ const SKILL_GROUPS=[
       {t:'上个月做低于 700 块的机器列出来',tip:'按销售额反查机器'},
       {t:'今天有多少订单？',tip:'含昨日对比'},
       {t:'查一下最近的订单',tip:'近 7 天订单明细'},
+      {t:'查一下订单明细',tip:'先选单，再看明细'},
       {t:'有哪些异常订单？',tip:'待处理异常单清单'},
-      {t:'此单消费者拿去了多少件商品',tip:'订单商品明细，先选单再看明细'},
       {t:'看一下今天的经营数据',tip:'销售 + 订单 + 设备概览'}]},
   {id:'query',emoji:'📦',title:'机器与库存',color:'#13c2c2',desc:'机器状态与库存查询，不改动任何数据',
     items:[{t:'查看我的机器列表',tip:'含在线 / 离线状态'},
       {t:'查询机器库存',tip:'AI 会先问是哪台机器'},
       {t:'哪些机器缺货了？',tip:'缺货率 ≥30%'},
       {t:'什么原因离线',tip:'离线原因 + 来源'}]},
-  {id:'setting',emoji:'⚙️',title:'机器设置',color:'#8c8c8c',desc:'营业状态、温度、音量等远程设置',
+  {id:'setting',emoji:'⚙️',title:'机器设置',color:'#8c8c8c',desc:'营业状态、温度等远程设置',
     items:[{t:'把机器停售',tip:'营业状态'},{t:'把机器恢复营业',tip:'营业状态'},
-      {t:'设置机器温度',tip:'含超温预警'},{t:'设置机器音量',tip:'0~100'}]}
+      {t:'设置机器温度',tip:'含超温预警'}]}
 ];
-/* 点击能力项：有明确操作意图 → 启动引导；其余 → 直接给出答案 */
+/* 点击能力项：有明确操作意图 → 启动引导；其余 → 直接给出答案
+   ⚠ 2026-11-09 去掉「设置机器音量」——音量属「转引导不做写」，点击直接进写引导会与口径冲突 */
 const SKILL_GUIDE={
   '修改商品价格':{kind:'price'},'修改货道库存':{kind:'stockEdit'},
   '把机器停售':{kind:'stop'},'把机器恢复营业':{kind:'resume'},
-  '设置机器温度':{kind:'temp'},'设置机器音量':{kind:'volume'},
+  '设置机器温度':{kind:'temp'},
   '查询机器库存':{kind:'stockQuery'}
 };
 /* ---------- 能力清单渲染（2026-11-09 覆盖 1.0 实现，只作用于 1.1 原型） ----------
@@ -3997,9 +4016,12 @@ const SKILL_GUIDE={
      后声明覆盖前声明，1.0 原型不受影响。SKILL_GROUPS 结构不变，故只覆盖渲染。 */
 function renderSkillSheet(){
   const body=document.getElementById('skillBody');
+  /* 分类节点排布（2026-11-09 用户反馈：「分类太多了，小程序可能展示不全，PC 展示全」）：
+     移动端＝4 列网格两行（7 个分类一屏看全，不用横向滑）；PC 抽屉够宽＝一行铺开。 */
+  const nodeCls=PCW?'':' grid';
   let html=`<div class="skill-map">
     <div class="title">点击技能分类，快速查看我能做什么</div>
-    <div class="nodes">${SKILL_GROUPS.map(g=>`<div class="node" onclick="scrollToGroup('${g.id}')"><span class="emoji">${g.emoji}</span><span class="lab">${g.title}</span><span class="count">${g.items.length}项</span></div>`).join('')}</div>
+    <div class="nodes${nodeCls}">${SKILL_GROUPS.map(g=>`<div class="node" onclick="scrollToGroup('${g.id}')"><span class="emoji">${g.emoji}</span><span class="lab">${g.title}</span><span class="count">${g.items.length}项</span></div>`).join('')}</div>
   </div>`;
   SKILL_GROUPS.forEach(g=>{
     html+=`<div class="skill-sec" id="skill-group-${g.id}">
