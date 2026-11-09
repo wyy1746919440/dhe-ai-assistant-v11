@@ -1035,9 +1035,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261106a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261106a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261106a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261109a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261109a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261109a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -1913,17 +1913,17 @@ function cardOnshelf(mid,items){
     <div class="kv"><span class="k">机型</span><span class="v">${m.type}<em>${isVm?'需逐个指定货道':'无货道，按层 · 一层可放多个商品'}</em></span></div>
     <div class="op-wrap" id="${id}_op">
       <div class="ptable pw1" id="${id}_tb">
-        <div class="ph"><span class="c1">商品</span>${pcHead('位置',84)}${pcHead('最大库存',76)}${pcHead('现存',48)}<span class="c5">价格（元）</span><span class="c5s">补货量</span>${pcHead('箱规',60)}</div>
+        <div class="ph"><span class="c1">商品</span>${pcHead('位置',84)}${pcHead('最大库存',76)}${pcHead('现存',48)}<span class="c5">价格（元）</span><span class="c5s">库存</span>${pcHead('箱规',60)}</div>
         <div id="${id}_rows">${rows}</div>
       </div>
       <div class="addrow" id="${id}_add">＋ 添加商品</div>
-      ${PCW?`<div class="hint">点「位置」可切换${isVm?'货道':'层'} · 价格默认取商品库价、可直接改 · 补货量不可大于最大库存</div>`:''}
+      ${PCW?`<div class="hint">点「位置」可切换${isVm?'货道':'层'} · 价格默认取商品库价、可直接改 · 库存不可大于最大库存</div>`:''}
       <div class="pdiff" id="${id}_pv"></div>
       <div class="op-btns" id="${id}_btns"><button class="btn ghost" id="${id}_cancel">取消</button><button class="btn main" id="${id}_ok">确认上架</button></div>
       <div class="exec-note">🔒 执行将记录操作日志 · 失败的商品会逐项说明原因</div>
     </div>
   </div>`);
-  trace('write',`两段式确认 · <b>上架商品</b>（${m.type}）：预览阶段按商品库价填好价格与建议补货量、并给出${unit}位置 → 只对改动过的行签发 confirm_id；确认执行才调 <b>POST /ai/actions/${OP_TOOL.onshelf}</b>。`);
+  trace('write',`两段式确认 · <b>上架商品</b>（${m.type}）：预览阶段按商品库价填好价格与建议库存、并给出${unit}位置 → 只对改动过的行签发 confirm_id；确认执行才调 <b>POST /ai/actions/${OP_TOOL.onshelf}</b>。`);
   const state={mid:mid,items:items};
   const pv=c.querySelector('#'+id+'_pv'),okBtn=c.querySelector('#'+id+'_ok');
   function refresh(){
@@ -1937,7 +1937,7 @@ function cardOnshelf(mid,items){
     let h=chg.length?`<div class="hd">价格改动</div>`+
       chg.map(it=>`<div class="r"><span>${esc(shortName(it.n))}</span><span>¥${Number(it.lib).toFixed(2)} → ¥${Number(it.price).toFixed(2)}</span></div>`).join(''):'';
     pv.className='pdiff'+(bad?' err':'');
-    pv.innerHTML=bad?'价格需为大于 0 的数字、补货量需为不小于 0 的整数':h;
+    pv.innerHTML=bad?'价格需为大于 0 的数字、库存需为不小于 0 的整数':h;
     /* 定稿 #26：被这台机器挡下的商品不算可执行项 —— 机器照常出卡，只是这几条会被跳过 */
     const rn=state.items.filter(it=>!goodsBlockReason(mid,it.n)).length;
     okBtn.disabled=bad||!rn;
@@ -1988,7 +1988,7 @@ function cardOnshelf(mid,items){
       finishOp(id,'ok',`已在 <b>${m.name}</b> 上架 <b>${run.length}</b> 个商品`,
         `<div class="res-list">${run.map(it=>`<div class="r"><span>${esc(shortName(it.n))}</span><span>${isVm?esc(it.slot)+' · ':''}¥${Number(it.price).toFixed(2)} · <b>${it.qty}</b> 件</span></div>`).join('')}</div>
          <div class="res-sub">${isVm?'已写入对应货道':'已写入对应层'}，即时生效</div>`,
-        `工具返回 <b>{code:0, message:"ok"}</b> · 已写入审计日志（操作人 / 机器 / 商品 / 价格 / 补货量 / 时间 / confirm_id）。`);
+        `工具返回 <b>{code:0, message:"ok"}</b> · 已写入审计日志（操作人 / 机器 / 商品 / 价格 / 库存 / 时间 / confirm_id）。`);
       syncHomeStats();
     },1100);
   };
@@ -2016,8 +2016,8 @@ function subLane(it){
   const st=it.ln&&it.ln.stock!=null?it.ln.stock:0;
   return `最大 ${mx} · 现存 ${st}`;
 }
-/* 补货量默认值口径（2026-10-16 产品确认）：取商品**箱规 × 1.5**（四舍五入取整）；
-   箱规为 0 或未配置 → 补货量与箱规列都展示 0，不兜底成其他值 */
+/* 上架卡的「库存」默认值口径（2026-10-16 产品确认，2026-11-09 定稿 #29 由「补货量」改名为「库存」）：
+   取商品**箱规 × 1.5**（四舍五入取整）；箱规为 0 或未配置 → 库存与箱规列都展示 0，不兜底成其他值 */
 function boxOf(n){const p=prodByName(n);return (p&&p.box!=null)?Number(p.box):0}
 function suggestQty(p){const b=(p&&p.box!=null)?Number(p.box):0;return b>0?Math.round(b*1.5):0}
 /* ⚠ 货道号写法在演示数据里不统一（`A3` / `A1 货道` / `1号货道`）——「这个位置有没有被占」一律走 laneKey
@@ -2078,7 +2078,7 @@ if(typeof document!=='undefined'&&!window.__lineDropClose){window.__lineDropClos
 /* ---------- W2-a / W2-b / W2-c：批量上架（一张卡内三步向导）----------
    2026-10-28 用户反馈（定稿 #19）：批量上架原来「先选机器 → 商品行 → 位置自动分配」，
    位置不可见也不可改，12 台机器 × 3 个商品＝36 个位置全靠猜。改为：
-     第 1 步 选商品（价格 / 补货量，可 ✕ 删除）
+     第 1 步 选商品（价格 / 库存，可 ✕ 删除）
      第 2 步 选机器（按线路 / 自选，定稿 #22 撤下「全部机器」档）
      第 3 步 按机型统一设置位置 + 价格 + 库存（定稿 #21）
    位置默认值（预填 + 可改，用户选「预填默认 + 可改」）：
@@ -2184,7 +2184,7 @@ function cardBatchOnshelf(scope,items,opts){
     return state.cfg[kind][i];
   }
   /* ================= Step 1：选商品（可增可删） ================= */
-  /* 定稿 #28：商品行副行只留「箱规」——它解释补货量＝箱规×1.5；「默认价」左侧输入框已给、
+  /* 定稿 #28：商品行副行只留「箱规」——它解释库存＝箱规×1.5；「默认价」左侧输入框已给、
      「点 ✕ 可移除」由常驻 ✕ 图标自带语义（且卡片底部已有一次说明），不再逐行重复 */
   function html1(){
     const rows=state.items.map((it,i)=>`<div class="pr pre" data-i="${i}">
@@ -2197,11 +2197,11 @@ function cardBatchOnshelf(scope,items,opts){
     if(!state.items.length)return `<div class="hint">还没有商品 —— 点下面「＋ 添加商品」挑一个</div>
       <div class="addrow" id="${id}_add">＋ 添加商品</div>`;
     return `<div class="ptable" id="${id}_tb">
-      <div class="ph"><span class="c1">商品</span>${pcHead('商品库价',88)}<span class="c5">价格（元）</span><span class="c5s">补货量</span>${pcHead('箱规',68)}</div>
+      <div class="ph"><span class="c1">商品</span>${pcHead('商品库价',88)}<span class="c5">价格（元）</span><span class="c5s">库存</span>${pcHead('箱规',68)}</div>
       <div id="${id}_rows">${rows}</div>
     </div>
     <div class="addrow" id="${id}_add">＋ 添加商品</div>
-    ${PCW?'':'<div class="hint">先定要上什么商品，下一步再挑机器 · 补货量默认＝箱规 × 1.5 · 上错的可点 ✕ 移除</div>'}`;
+    ${PCW?'':'<div class="hint">先定要上什么商品，下一步再挑机器 · 库存默认＝箱规 × 1.5 · 上错的可点 ✕ 移除</div>'}`;
   }
   function bind1(){
     c.querySelectorAll('.pin').forEach(i=>{i.oninput=()=>{const k=+i.getAttribute('data-i');state.items[k].price=i.value.trim();
@@ -2361,7 +2361,7 @@ function cardBatchOnshelf(scope,items,opts){
     let h='';
     if(state.step===1){
       h=`<div class="hd">已选 ${state.items.length} 个商品 · 下一步挑机器</div>`;
-      state.items.forEach(it=>{h+=`<div class="r"><span>${esc(shortName(it.n))}</span><span>${money(it.price)} · 补 ${it.qty}</span></div>`});
+      state.items.forEach(it=>{h+=`<div class="r"><span>${esc(shortName(it.n))}</span><span>${money(it.price)} · 库存 ${it.qty}</span></div>`});
     }else if(state.step===2){
       if(!state.mids.length)h=`<div class="hd">请先选择机器</div>`;
       else{const pb2=pairsBlocked().length,eff2=state.mids.length*state.items.length-pb2;
