@@ -497,10 +497,10 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
 .row-act{display:none}
 /* —— 能力清单分类节点：移动端 4 列网格两行（7 个分类一屏看全，不靠横向滑），
    PC 端不加 .grid、保持一行铺开（抽屉 720px 足够放 7 个）—— */
-.skill-map .nodes.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;overflow:visible;padding-bottom:2px}
+.skill-map .nodes.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;overflow:visible;padding-bottom:2px}
 .skill-map .nodes.grid .node{width:auto;height:auto;min-height:54px;padding:8px 2px}
 .skill-map .nodes.grid .node .emoji{font-size:18px}
-.skill-map .nodes.grid .node .lab{font-size:9.5px;line-height:1.18;word-break:break-all}
+.skill-map .nodes.grid .node .lab{font-size:9.5px;line-height:1.18;white-space:nowrap;word-break:keep-all}
 .skill-map .nodes.grid .node .count{font-size:8px}
 /* —— 去掉消息行两侧头像（AI / 我）：30px 头像 + 9px 间距共占 39px，
    375 屏内可用宽只有 323px（375−12×2 外框 −14×2 滚动区），会把 300px 卡片挤出可视区 —— */
@@ -555,9 +555,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261109e" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261109e" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261109e" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261109f" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261109f" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261109f" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -3621,8 +3621,12 @@ function v11Intent(q){
   /* 按销售额反查机器（C3） */
   const th=pickThreshold(q);
   if(th!=null&&/机器|点位|设备/.test(q))return cardMachineSales(th);
-  /* 支付方式拆分（C4） */
+  /* 支付方式拆分（C4）
+     ⚠ 2026-11-09（#32）：不止「X多少」这一种问法——「现金、微信、支付宝分别是多少」这类
+     **列举支付方式 + 分别 / 各占 / 构成** 的表达同样是在问拆分，原来会掉兜底。
+     后半段要求出现「分别 / 各 / 占比 / 构成 / 拆分」等词，避免吞掉「微信支付怎么开通」这类知识问答。 */
   if(/支付方式|现金多少|打卡多少|刷卡多少|微信多少|支付宝多少|储值卡多少|怎么付|收款方式/.test(q))return cardPaySplit();
+  if(/现金|微信|支付宝|刷卡|储值卡/.test(q)&&/分别|各占|占比|构成|拆分|各多少/.test(q)&&!/怎么|如何|开通|申请|绑定/.test(q))return cardPaySplit();
   /* 商品维度销售额（C7） */
   if(/销量|销售量|卖了多少|卖出多少|卖了多少件/.test(q))return cardProductSales();
   /* 离线原因（C9） */
@@ -3925,8 +3929,15 @@ function handleIntent(q){
   if(mid&&!(howTo&&!imperative)){
     if(/停售/.test(q))return cardOpConfirm({type:'stop',mid});
     if(/恢复营业|开始营业/.test(q))return cardOpConfirm({type:'resume',mid});
-    if(/温度/.test(q)){const mm=/(\d+)\s*[-~到至]\s*(\d+)\s*度/.exec(q);
-      return mm?cardOpConfirm({type:'temp',mid,val:`${mm[1]}~${mm[2]}℃`}):askValue(`请问要把 ${MACHINES[mid].name} 调到多少度？`,['0~5℃','2~8℃','8~15℃'],v=>cardOpConfirm({type:'temp',mid,val:v}),parseTemp)}
+    if(/温度/.test(q)){
+      /* 2026-11-09（#32）：单值也要认——「把 A 机温度调到 8 度」原本只解析区间（2~8 度），
+         单值会退化成再反问一次度数（清单示例里点一下还要多问一句，不像「一步做完」）。
+         区间优先，其次单值，都没有才反问。 */
+      const mm=/(\d+)\s*[-~到至]\s*(\d+)\s*(?:度|℃)/.exec(q);
+      if(mm)return cardOpConfirm({type:'temp',mid,val:`${mm[1]}~${mm[2]}℃`});
+      const one=/(\d+)\s*(?:度|℃)/.exec(q);
+      if(one&&!/\d+\s*[-~到至]\s*\d+/.test(q))return cardOpConfirm({type:'temp',mid,val:`${one[1]}℃`});
+      return askValue(`请问要把 ${MACHINES[mid].name} 调到多少度？`,['0~5℃','2~8℃','8~15℃'],v=>cardOpConfirm({type:'temp',mid,val:v}),parseTemp)}
     /* ⚠ 2026-11-09（#31）：音量＝「转引导、不做写」，已点名机器也不出写卡 / askValue，
        一律转引导（口径见需求说明 §1.3 / §3.4）——1.0 这里直接 cardOpConfirm 是口径泄漏点。 */
     if(/音量/.test(q))return volumeGuide(mid);
@@ -3937,10 +3948,13 @@ function handleIntent(q){
       if(prod)return cardPriceTable(mid,{prod:prod.n,val:pm?pm[1]:null});
       return cardPriceTable(mid,{val:pm?pm[1]:null,keptNum:pm?pm[1]:null});
     }
-    if(/库存/.test(q)&&/改成|改为|调整|设为|设成/.test(q)){
-      const sm=/(?:改成|改为|调整到|调整|设为|设成)\s*(\d+)/.exec(q);
+    /* 2026-11-09（#32）：写判定补「修改」——「修改 X 的货道库存」原来落空，
+       掉到下面的只读分支变成「库存查询」卡（想改却只给看，语义错）。 */
+    if(/库存/.test(q)&&/改成|改为|修改|调整|设为|设成/.test(q)){
+      const sm=/(?:改成|改为|修改为|调整到|调整|设为|设成)\s*(\d+)/.exec(q);
       const prod=findProduct(MACHINES[mid],q);
       if(sm)return cardStockTable(mid,{prod:prod?prod.n:null,val:Number(sm[1])});
+      return cardStockTable(mid,{prod:prod?prod.n:null});
     }
     if(/多少|库存|还剩|查询|看看/.test(q))return cardStock(mid);
   }
@@ -3948,58 +3962,68 @@ function handleIntent(q){
   return kbAnswer(q);
 }
 
-/* ---------- 技能清单 ---------- */
+/* ---------- 技能清单 ----------
+   ⚠ 2026-11-09（#32）#32-2 再校准：**清单是给所有商户看的通用说明，示例里一律不出现具体机器名 / 点位名 / 线路名**
+     ——「每个商户的机器都不一样」（用户原话），写死「欢乐颂 5 号机」「南油文化广场」对别的商户没有意义，
+     查询价格 / 库存这类更是本来就不必锁定某一台。条目只给**通用动作**，点下去由 AI 反问「哪台机器」
+     或直接出「选择机器」卡，机器名由商户自己说。商品名保留（可口可乐 / 百事可乐这类标品）。
+   ① 删「机器不出货怎么排查？」——答案讲的是「关闭故障货道」，与问法不符（答非所问）；
+   ② 删「哪些机器需要补货？」——与「哪些机器缺货了？」出的是**同一张卡**（重复）；
+   ③ 补回 1.0 已有、1.1 清单漏掉的「哪些机器离线了？」「哪些机器停售了？」；
+   ④ 需补机器槽位的条目**恢复「先问机器」的引导**（SKILL_GUIDE），但不写死机器名；
+   ⑤ 「打卡」（应为刷卡）、「上个月做低于 700 块的机器」这类口语残句改通顺；
+   ⑥ 「给 X 号机生成补货单」与「给缺货的机器生成补货单」去名后都会出同一张选择卡，合并为「生成补货单」。
+   共 7 组 / 40 项。 */
 const SKILL_GROUPS=[
   {id:'kb',emoji:'📚',title:'知识问答',color:'#2B7DF6',desc:'覆盖机型设备 / 商品库存 / 订单售后 / 财务结算 / 运营报表',
     items:[{t:'售货机和智能柜有什么区别？',tip:'先分机型再作答'},{t:'机器怎么设置营业时间？',tip:'非营业期自动停售'},
-      {t:'机器不出货怎么排查？',tip:'排查思路'},{t:'怎么修改商品价格？',tip:'单台改价 / 跨机器批量'},
+      {t:'怎么修改商品价格？',tip:'单台改价 / 跨机器批量'},
       {t:'补货后怎么修改库存？',tip:'核心高频操作'},{t:'智能柜商品怎么做商品建模？',tip:'视觉识别规范'},
       {t:'商品库的私有库和公有库有什么区别？',tip:'商品库概念'},{t:'消费者申请退款怎么处理？',tip:'客诉订单处理'},
       {t:'智能柜异常订单有哪些类型？',tip:'资损口径'},{t:'提现多久到账？',tip:'到账时效'},
       {t:'销售额是怎么计算的？',tip:'统计口径差异'},
       {t:'音量设置在哪？',tip:'引导至 机器详情 › 音量设置'}]},
-  {id:'shelf',emoji:'➕',title:'上架 / 下架',color:'#722ed1',desc:'单台按货道 / 层，批量三步设置',
-    items:[{t:'在南油文化广场上架康师傅碱性水',tip:'单台 · 按机型给层或货道'},
-      {t:'在欢乐颂 5 号机上架百事可乐',tip:'单台 · 售货机逐个指定货道'},
+  /* 2026-11-09（#32）分组收敛：7 组 → 5 组（用户反馈「7 个还是太多了，5 个差不多」）。
+     原「上架 / 下架」「改价 / 改库存」「补货任务」都是**围绕商品售卖**的操作，并为「商品管理」；
+     「机器与库存」（只读查询）与「机器设置」（写操作）口径不同，保持分开。 */
+  {id:'goods',emoji:'🛒',title:'商品管理',color:'#722ed1',desc:'上架 / 下架 / 改价 / 改库存 / 补货单',
+    items:[{t:'上架康师傅碱性水',tip:'单台 · 按机型给层或货道'},
       {t:'批量上架百事可乐',tip:'批量 · 三步向导：选商品 → 选机器 → 上架'},
       {t:'所有机器的 A1 货道上架百事可乐',tip:'按货道 · 点名货道直接出设置'},
-      {t:'给南油线路所有机器上架百事可乐',tip:'批量 · 按线路'},
-      {t:'给欢乐颂 5 号机、兰均三期上架百事可乐',tip:'批量 · 自选'},
-      {t:'帮我批量下架一些机器的可口可乐',tip:'下架 · 按机型两套处理'}]},
-  {id:'price11',emoji:'💰',title:'改价 / 改库存',color:'#fa8c16',desc:'表格内直接改，一次改多个',
-    items:[{t:'把所有点位的雀巢咖啡调整到 5.5',tip:'跨机器批量改价 · 命中可展开到机器'},
-      {t:'修改商品价格',tip:'单台 · 列出全部商品'},
-      {t:'修改货道库存',tip:'按货道列出，售货机需在线'}]},
-  {id:'replen',emoji:'🧾',title:'补货任务',color:'#52c41a',desc:'补货单与补货记录',
-    items:[{t:'给欢乐颂 5 号机生成补货单',tip:'点名机器直接出卡 · 一主多子'},
-      {t:'给缺货的机器生成补货单',tip:'没点名机器 · 先让你挑机器'},
-      {t:'有没有机器长时间没补货？',tip:'该补还没补的 · 未补货超 15 天优先'},
-      {t:'哪些机器需要补货？',tip:'缺货机器清单'}]},
-  /* ⚠ 2026-11-09 用户反馈：「不要这种（『1.1 新增查询』），并到别的清单里面去 —— 这样 1.1 新增是啥呀，
-     客户也不需要知道 1.1 加了什么」。⇒ **能力清单不按版本分组**，一律按业务场景分；
-     原「数据 / 状态查询」拆成「订单与销售」「机器与库存」两组，原「1.1 新增查询」5 项按语义并入。 */
-  {id:'biz',emoji:'📈',title:'订单与销售',color:'#eb2f96',desc:'销售额、订单明细与商品销量',
+      {t:'按线路批量上架百事可乐',tip:'批量 · 按线路选机器'},
+      {t:'帮我批量下架一些机器的可口可乐',tip:'下架 · 按机型两套处理'},
+      {t:'把所有点位的雀巢咖啡调整到 5.5',tip:'跨机器批量改价 · 命中可展开到机器'},
+      {t:'修改商品价格',tip:'单台 · 列出该机器全部商品'},
+      {t:'修改货道库存',tip:'按货道列出，售货机需在线'},
+      {t:'生成补货单',tip:'按缺货情况挑机器，可一次勾多台'},
+      {t:'有没有机器长时间没补货？',tip:'该补还没补的 · 未补货超 15 天优先'}]},
+  {id:'biz',emoji:'📈',title:'销售订单',color:'#eb2f96',desc:'销售额、订单明细与商品销量',
     items:[{t:'查一下今日的销售额',tip:'按商户取数，含昨日对比'},
       {t:'看一下这个月的销售额',tip:'时间词解析：今日 / 近30天 / 本月'},
-      {t:'现金多少，打卡多少，分别是多少',tip:'销售额构成：占比 / 笔数 / 金额'},
+      {t:'现金、微信、支付宝分别是多少',tip:'销售额构成：占比 / 笔数 / 金额'},
       {t:'查询所有在线机器近三个月辣媳妇山椒笋尖 75g 的销量',tip:'商品维度销量'},
-      {t:'上个月做低于 700 块的机器列出来',tip:'按销售额反查机器'},
+      {t:'上个月销售额低于 700 元的机器',tip:'按销售额反查机器'},
       {t:'今天有多少订单？',tip:'含昨日对比'},
       {t:'查一下最近的订单',tip:'近 7 天订单明细'},
       {t:'查一下订单明细',tip:'先选单，再看明细'},
       {t:'有哪些异常订单？',tip:'待处理异常单清单'},
       {t:'看一下今天的经营数据',tip:'销售 + 订单 + 设备概览'}]},
-  {id:'query',emoji:'📦',title:'机器与库存',color:'#13c2c2',desc:'机器状态与库存查询，不改动任何数据',
+  {id:'query',emoji:'📦',title:'机器库存',color:'#13c2c2',desc:'机器状态与库存查询，不改动任何数据',
     items:[{t:'查看我的机器列表',tip:'含在线 / 离线状态'},
-      {t:'查询机器库存',tip:'AI 会先问是哪台机器'},
+      {t:'查询机器库存',tip:'先问是哪台机器，按货道 / 层列出'},
       {t:'哪些机器缺货了？',tip:'缺货率 ≥30%'},
+      {t:'哪些机器离线了？',tip:'按在线状态筛机器'},
+      {t:'哪些机器停售了？',tip:'按营业状态筛机器'},
       {t:'什么原因离线',tip:'离线原因 + 来源'}]},
   {id:'setting',emoji:'⚙️',title:'机器设置',color:'#8c8c8c',desc:'营业状态、温度等远程设置',
-    items:[{t:'把机器停售',tip:'营业状态'},{t:'把机器恢复营业',tip:'营业状态'},
-      {t:'设置机器温度',tip:'含超温预警'}]}
+    items:[{t:'把机器停售',tip:'先问是哪台机器，停售后消费者无法下单'},
+      {t:'把机器恢复营业',tip:'先问是哪台机器'},
+      {t:'设置机器温度',tip:'先问是哪台机器，含超温预警、按机型校验'}]}
 ];
-/* 点击能力项：有明确操作意图 → 启动引导；其余 → 直接给出答案
-   ⚠ 2026-11-09 去掉「设置机器音量」——音量属「转引导不做写」，点击直接进写引导会与口径冲突 */
+/* 点击能力项：有明确操作意图 → 先问机器再出卡；其余 → 直接把这句话当用户提问发出去
+   ⚠ 2026-11-09（#32）：清单里**不写死机器名**（每个商户的机器都不一样），
+     需要机器槽位的 6 条走这里的引导：点一下 → AI 反问「哪台机器」→ 报机器名 → 出卡。
+     其余条目（上架 / 下架 / 补货 / 销售额 / 知识问答）本身就是完整问法，直接发送即可。 */
 const SKILL_GUIDE={
   '修改商品价格':{kind:'price'},'修改货道库存':{kind:'stockEdit'},
   '把机器停售':{kind:'stop'},'把机器恢复营业':{kind:'resume'},
