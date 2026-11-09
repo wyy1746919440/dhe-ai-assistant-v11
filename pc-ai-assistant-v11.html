@@ -1035,9 +1035,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261109a" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261109a" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261109a" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261109b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261109b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261109b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -4264,35 +4264,38 @@ const SKILL_GROUPS=[
       {t:'商品库的私有库和公有库有什么区别？',tip:'商品库概念'},{t:'消费者申请退款怎么处理？',tip:'客诉订单处理'},
       {t:'智能柜异常订单有哪些类型？',tip:'资损口径'},{t:'提现多久到账？',tip:'到账时效'},
       {t:'销售额是怎么计算的？',tip:'统计口径差异'}]},
-  {id:'shelf',emoji:'➕',title:'上架 / 下架',color:'#722ed1',desc:'1.1 新增写能力：单台按货道 / 层，批量按范围',
+  {id:'shelf',emoji:'➕',title:'上架 / 下架',color:'#722ed1',desc:'1.1 新增写能力：单台按货道 / 层，批量三步向导',
     items:[{t:'在南油文化广场上架康师傅碱性水',tip:'单台 · 按机型给层或货道'},
       {t:'在欢乐颂 5 号机上架百事可乐',tip:'单台 · 售货机逐个指定货道'},
-      {t:'批量上架百事可乐',tip:'批量 · 按线路或自选机器'},
+      {t:'批量上架百事可乐',tip:'批量 · 三步向导：选商品 → 选机器 → 上架'},
+      {t:'所有机器的 A1 货道上架百事可乐',tip:'按货道 · 点名货道直接出设置'},
       {t:'给南油线路所有机器上架百事可乐',tip:'批量 · 按线路'},
       {t:'给欢乐颂 5 号机、兰均三期上架百事可乐',tip:'批量 · 自选'},
       {t:'帮我批量下架一些机器的可口可乐',tip:'下架 · 按机型两套处理'}]},
   {id:'price11',emoji:'💰',title:'改价 / 改库存',color:'#fa8c16',desc:'表格内直接改，一次改多个',
-    items:[{t:'把所有点位的雀巢咖啡调整到 5.5',tip:'跨机器批量改价'},
+    items:[{t:'把所有点位的雀巢咖啡调整到 5.5',tip:'跨机器批量改价 · 命中可展开到机器'},
       {t:'修改商品价格',tip:'单台 · 列出全部商品'},
       {t:'修改货道库存',tip:'按货道列出，售货机需在线'}]},
   {id:'replen',emoji:'🧾',title:'补货任务',color:'#52c41a',desc:'补货单与补货记录',
-    items:[{t:'给这 3 台机器生成补货单',tip:'一主多子 · 最大−现存'},
+    items:[{t:'给这 3 台机器生成补货单',tip:'点名机器直接出卡 · 一主多子'},
+      {t:'给缺货的机器生成补货单',tip:'没点名机器 · 先让你挑机器'},
       {t:'照最大库存把补货量补满',tip:'补货量＝最大−现存 · 可逐项改'},
-      {t:'有没有机器长时间没补货？',tip:'补货记录 · 未补货时长倒序'},
+      {t:'有没有机器长时间没补货？',tip:'该补还没补的 · 未补货超 15 天优先'},
       {t:'哪些机器需要补货？',tip:'缺货机器清单'}]},
   {id:'query',emoji:'📦',title:'数据 / 状态查询',color:'#13c2c2',desc:'只读查询，不改动任何数据',
     items:[{t:'查看我的机器列表',tip:'含在线 / 离线状态'},
       {t:'查询机器库存',tip:'AI 会先问是哪台机器'},
       {t:'哪些机器缺货了？',tip:'缺货率 ≥30%'},
       {t:'查一下今日的销售额',tip:'按商户取数，含昨日对比'},
+      {t:'看一下这个月的销售额',tip:'时间词解析：今日 / 近30天 / 本月'},
       {t:'今天有多少订单？',tip:'含昨日对比'},
       {t:'查一下最近的订单',tip:'订单明细，近 7 天'},
       {t:'有哪些异常订单？',tip:'待处理异常单清单'},
       {t:'看一下今天的经营数据',tip:'销售 + 订单 + 设备概览'}]},
   {id:'analyse',emoji:'📊',title:'1.1 新增查询',color:'#eb2f96',desc:'订单明细 / 销售分析 / 离线原因',
-    items:[{t:'此单消费者拿去了多少件商品',tip:'订单商品明细'},
+    items:[{t:'此单消费者拿去了多少件商品',tip:'订单商品明细 · 先选单再看明细'},
       {t:'上个月做低于 700 块的机器列出来',tip:'按销售额反查机器'},
-      {t:'现金多少，打卡多少，分别是多少',tip:'支付方式拆分'},
+      {t:'现金多少，打卡多少，分别是多少',tip:'销售额构成 · 占比 / 笔数 / 金额'},
       {t:'查询所有在线机器近三个月辣媳妇山椒笋尖 75g 的销量',tip:'商品维度销售额'},
       {t:'什么原因离线',tip:'离线原因 + 来源'}]},
   {id:'setting',emoji:'⚙️',title:'机器设置',color:'#8c8c8c',desc:'营业状态、温度、音量等远程设置',
