@@ -548,9 +548,9 @@ body{background:var(--canvas);min-height:100vh;display:flex;align-items:center;j
     <div class="step"><span class="sn">5</span><span>批量执行后看<b>结果卡</b>：成功 / 失败逐台列出，可展开成功明细、重试失败项</span></div>
     <div class="step"><span class="sn">6</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底；回复「<b>转人工</b>」将引导咨询售后客服</span></div>
     <div class="step"><span class="sn">7</span><span>每次提问后看右侧 <b>「回答链路」面板</b>：RAG 检索 / 只读查询 / 写操作 / 多轮追问 / 越界拦截 / 未命中</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261109b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261109b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261109b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261109c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261109c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261109c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -3939,7 +3939,7 @@ const SKILL_GROUPS=[
       {t:'商品库的私有库和公有库有什么区别？',tip:'商品库概念'},{t:'消费者申请退款怎么处理？',tip:'客诉订单处理'},
       {t:'智能柜异常订单有哪些类型？',tip:'资损口径'},{t:'提现多久到账？',tip:'到账时效'},
       {t:'销售额是怎么计算的？',tip:'统计口径差异'}]},
-  {id:'shelf',emoji:'➕',title:'上架 / 下架',color:'#722ed1',desc:'1.1 新增写能力：单台按货道 / 层，批量三步向导',
+  {id:'shelf',emoji:'➕',title:'上架 / 下架',color:'#722ed1',desc:'单台按货道 / 层，批量三步设置',
     items:[{t:'在南油文化广场上架康师傅碱性水',tip:'单台 · 按机型给层或货道'},
       {t:'在欢乐颂 5 号机上架百事可乐',tip:'单台 · 售货机逐个指定货道'},
       {t:'批量上架百事可乐',tip:'批量 · 三步向导：选商品 → 选机器 → 上架'},
@@ -3957,21 +3957,24 @@ const SKILL_GROUPS=[
       {t:'照最大库存把补货量补满',tip:'补货量＝最大−现存 · 可逐项改'},
       {t:'有没有机器长时间没补货？',tip:'该补还没补的 · 未补货超 15 天优先'},
       {t:'哪些机器需要补货？',tip:'缺货机器清单'}]},
-  {id:'query',emoji:'📦',title:'数据 / 状态查询',color:'#13c2c2',desc:'只读查询，不改动任何数据',
+  /* ⚠ 2026-11-09 用户反馈：「不要这种（『1.1 新增查询』），并到别的清单里面去 —— 这样 1.1 新增是啥呀，
+     客户也不需要知道 1.1 加了什么」。⇒ **能力清单不按版本分组**，一律按业务场景分；
+     原「数据 / 状态查询」拆成「订单与销售」「机器与库存」两组，原「1.1 新增查询」5 项按语义并入。 */
+  {id:'biz',emoji:'📈',title:'订单与销售',color:'#eb2f96',desc:'销售额、订单明细与商品销量',
+    items:[{t:'查一下今日的销售额',tip:'按商户取数，含昨日对比'},
+      {t:'看一下这个月的销售额',tip:'时间词解析：今日 / 近30天 / 本月'},
+      {t:'现金多少，打卡多少，分别是多少',tip:'销售额构成：占比 / 笔数 / 金额'},
+      {t:'查询所有在线机器近三个月辣媳妇山椒笋尖 75g 的销量',tip:'商品维度销量'},
+      {t:'上个月做低于 700 块的机器列出来',tip:'按销售额反查机器'},
+      {t:'今天有多少订单？',tip:'含昨日对比'},
+      {t:'查一下最近的订单',tip:'近 7 天订单明细'},
+      {t:'有哪些异常订单？',tip:'待处理异常单清单'},
+      {t:'此单消费者拿去了多少件商品',tip:'订单商品明细，先选单再看明细'},
+      {t:'看一下今天的经营数据',tip:'销售 + 订单 + 设备概览'}]},
+  {id:'query',emoji:'📦',title:'机器与库存',color:'#13c2c2',desc:'机器状态与库存查询，不改动任何数据',
     items:[{t:'查看我的机器列表',tip:'含在线 / 离线状态'},
       {t:'查询机器库存',tip:'AI 会先问是哪台机器'},
       {t:'哪些机器缺货了？',tip:'缺货率 ≥30%'},
-      {t:'查一下今日的销售额',tip:'按商户取数，含昨日对比'},
-      {t:'看一下这个月的销售额',tip:'时间词解析：今日 / 近30天 / 本月'},
-      {t:'今天有多少订单？',tip:'含昨日对比'},
-      {t:'查一下最近的订单',tip:'订单明细，近 7 天'},
-      {t:'有哪些异常订单？',tip:'待处理异常单清单'},
-      {t:'看一下今天的经营数据',tip:'销售 + 订单 + 设备概览'}]},
-  {id:'analyse',emoji:'📊',title:'1.1 新增查询',color:'#eb2f96',desc:'订单明细 / 销售分析 / 离线原因',
-    items:[{t:'此单消费者拿去了多少件商品',tip:'订单商品明细 · 先选单再看明细'},
-      {t:'上个月做低于 700 块的机器列出来',tip:'按销售额反查机器'},
-      {t:'现金多少，打卡多少，分别是多少',tip:'销售额构成 · 占比 / 笔数 / 金额'},
-      {t:'查询所有在线机器近三个月辣媳妇山椒笋尖 75g 的销量',tip:'商品维度销售额'},
       {t:'什么原因离线',tip:'离线原因 + 来源'}]},
   {id:'setting',emoji:'⚙️',title:'机器设置',color:'#8c8c8c',desc:'营业状态、温度、音量等远程设置',
     items:[{t:'把机器停售',tip:'营业状态'},{t:'把机器恢复营业',tip:'营业状态'},
@@ -3984,6 +3987,40 @@ const SKILL_GUIDE={
   '设置机器温度':{kind:'temp'},'设置机器音量':{kind:'volume'},
   '查询机器库存':{kind:'stockQuery'}
 };
+/* ---------- 能力清单渲染（2026-11-09 覆盖 1.0 实现，只作用于 1.1 原型） ----------
+   用户反馈：「不要这种（『1.1 新增查询』）…客户也不需要知道 1.1 加了什么」。三处收敛：
+   ① **分组一律按业务场景**，不出现「1.1 新增」这类版本分组（数据见 SKILL_GROUPS）；
+   ② **技能行不再逐行重复所在分组的 desc**——原实现每行都印「分组说明 · 本条 tip」，
+      同一分组 5 行重复同一句前缀（如「订单明细 / 销售分析 / 离线原因 · 商品维度销售额」），是纯噪声；
+   ③ **页头副标题不挂版本号**（原为「V1.1 知识库 / 最终版 知识库 · 共 N 项能力」），只写「共 N 项能力」。
+   ⚠ 覆盖原因：渲染函数属 1.0 通用段（seg1），改它要动 1.0 源；这里在 app3 重新声明，
+     后声明覆盖前声明，1.0 原型不受影响。SKILL_GROUPS 结构不变，故只覆盖渲染。 */
+function renderSkillSheet(){
+  const body=document.getElementById('skillBody');
+  let html=`<div class="skill-map">
+    <div class="title">点击技能分类，快速查看我能做什么</div>
+    <div class="nodes">${SKILL_GROUPS.map(g=>`<div class="node" onclick="scrollToGroup('${g.id}')"><span class="emoji">${g.emoji}</span><span class="lab">${g.title}</span><span class="count">${g.items.length}项</span></div>`).join('')}</div>
+  </div>`;
+  SKILL_GROUPS.forEach(g=>{
+    html+=`<div class="skill-sec" id="skill-group-${g.id}">
+      <div class="hd"><span class="dot" style="background:${g.color}"></span><h3>${g.emoji} ${g.title}</h3><span class="cnt">${g.items.length} 项</span></div>
+      ${g.items.map(it=>`<div class="skill-row" onclick="useSkill('${esc(it.t)}')">
+        <div class="txt">${it.t}<small>${it.tip}</small></div>
+        <span class="arrow">›</span>
+      </div>`).join('')}
+    </div>`;
+  });
+  html+=`<div class="skill-sec" style="background:#fff7e6">
+    <div class="hd"><span class="dot" style="background:#fa8c16"></span><h3>⚠️ 暂不支持</h3><span class="cnt">示例</span></div>
+    <div style="font-size:12.5px;color:#595959;line-height:1.8;padding:4px 0">
+      以下问题不在当前能力范围内，我会诚实告诉你，不会编造：<br>
+      ${OUTOFSCOPE.map(s=>`<span class="skill-chip" style="background:#fff3e0;color:#d46b08;border-color:#ffd8bf">${s}</span>`).join('')}
+    </div>
+  </div>`;
+  body.innerHTML=html;
+  const total=SKILL_GROUPS.reduce((a,g)=>a+g.items.length,0);
+  document.querySelector('.skill-head .sub').textContent='共 '+total+' 项能力';
+}
 /* 开场示例问法（2026-10-19 用户反馈：把 1.0 的查询操作也放进 1.1 开场交互）：
    前 6 条＝1.1 新能力演示；后 6 条＝1.0 已上线的查询 / 问答高频问法。 */
 const OPEN_GUIDE_CHIPS=['在南油文化广场上架康师傅碱性水','批量上架百事可乐',
