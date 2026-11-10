@@ -1035,9 +1035,9 @@ body{display:block;padding:0;background:#f0f2f5;min-height:100vh;overflow:hidden
     <div class="step"><span class="sn">5</span><span>PC 屏宽，字段一次给全：表格列更多（补货单带<b>可售库存 / 最大库存 / 箱规</b>，机器清单带<b>编号 / 机型 / 今日销售 / 缺货 / 线路</b>）</span></div>
     <div class="step"><span class="sn">6</span><span>写操作仍是 <b>「预览 → 确认执行」两段式</b>，口径说明在按钮上方、按钮靠右下（同线上）</span></div>
     <div class="step"><span class="sn">7</span><span>自由输入越界问题，观察 <b>“超出能力范围”</b> 兜底</span></div>
-    <a class="doc-link" href="v11-doc.html?v=20261110b" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
-    <a class="doc-link" href="v11-list.html?v=20261110b" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
-    <a class="doc-link" href="cards.html?v=20261110b" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
+    <a class="doc-link" href="v11-doc.html?v=20261110c" target="_blank" rel="noopener">📄 1.1 期需求说明 · 小程序端 + PC 端</a>
+    <a class="doc-link" href="v11-list.html?v=20261110c" target="_blank" rel="noopener">📋 1.1 期迭代清单 · 5 张表</a>
+    <a class="doc-link" href="cards.html?v=20261110c" target="_blank" rel="noopener">📄 1.1 卡片设计稿 · 16 张卡片 + 2 个添加弹层</a>
     <div class="demo-btns"><button class="dbtn" onclick="demoEmptyState()">空状态演示</button><button class="dbtn" onclick="demoLoadingState()">加载中演示</button></div>
   </div>
 </div>
@@ -2873,37 +2873,37 @@ function cardReplenish(mids){
   return id;
 }
 
-/* ---------- R1：补货记录（只读 · 按时间窗查每台机器的补货台账）----------
-   ⚠ 2026-11-10 产品裁决（定稿 #33，推翻 #18）：R1 是**补货记录**，不是「待补货机器」。
-     线上补货记录查询＝按时间窗把记录拉一遍（机器 / 编号 / 上次补货 / 未补天数 / 销量 / 缺货项 / 线路），
-     **不做条件过滤**：原「在线 ∩ 有销量 ∩ 未补货 > 15 天」三条件 chip 全部撤下，
-     未补天数只做颜色提示（>15 天橙、≥21 天红），不决定是否入列。
-     时间窗可切换（近 30 / 90 / 180 天，上限 180 天）：补货次数与销量随窗口变；
-     上次补货 / 未补天数是绝对量，不随窗口变。
-     勾选保留（从记录里挑机器 → 直连 W5）；未勾选点「生成补货单」→ 走选择补货机器卡。 */
-const REC_WINS=[{k:30,t:'近 30 天'},{k:90,t:'近 90 天'},{k:180,t:'近 180 天'}];
+/* ---------- R1：补货记录（只读 · 固定条件筛选的补货台账）----------
+   ⚠ 2026-11-10 二轮裁决（定稿 #34，修订 #33）：三个查询条件**恢复且固定死**——
+     在线 · 有销量 · 未补货 > 15 天，写死在卡里不做 chip、不可点改（打开卡就按这组条件出）。
+     时间窗**只跟问法走**：卡内不做时间窗 chip，问「近 90 天补货记录」就查 90 天，
+     默认近 30 天、上限 180 天；补货次数与销量随窗口变；上次补货 / 未补天数是绝对量，不随窗口变。
+     列表按未补天数倒序；未补 >15 天标橙、≥21 天标红；头部给「命中 N 台 / 共 M 台」。
+     勾选保留（从命中机器里挑 → 直连 W5）；未勾选点「生成补货单」→ 走选择补货机器卡。 */
 const fmtMD=d=>(d.getMonth()+1)+'-'+String(d.getDate()).padStart(2,'0');
 function recRangeTxt(win){const e=new Date(),s=new Date();s.setDate(s.getDate()-win);return fmtMD(s)+' ~ '+fmtMD(e)}
 function recLastTxt(days){const d=new Date();d.setDate(d.getDate()-days);return fmtMD(d)}
-function cardReplenishRecord(){
+function cardReplenishRecord(win){
+  win=win||30;
   const id=uid();
-  let win=30;
-  const rows=REPLEN_REC.map(r=>Object.assign({},r,{on:false})).sort((a,b)=>b.days-a.days);
-  const wIdx=()=>REC_WINS.findIndex(w=>w.k===win);
+  const wIdx=()=>win<=30?0:(win<=90?1:2);
   const cntOf=r=>r.cnt[wIdx()];
   const soldOf=r=>r.sold[wIdx()];
   const avgOf=r=>{const n=cntOf(r);return n?Math.round(win/n):null};
+  /* 固定条件（定稿 #34）：在线 ∩ 有销量（机器累计销量 > 0）∩ 未补货 > 15 天，不可点改 */
+  const rows=REPLEN_REC.filter(r=>MACHINES[r.mid].online&&salesOf(MACHINES[r.mid])>0&&r.days>15)
+    .map(r=>Object.assign({},r,{on:false})).sort((a,b)=>b.days-a.days);
   const c=pushCard(`<div class="cardbox" id="${id}_box">
     <div class="cb-head q" id="${id}_head"><span class="ttl">🚚 补货记录</span><span class="st" id="${id}_st">已查询</span></div>
     <div class="kv"><span class="k">机器</span><span class="v" id="${id}_cnt">—</span></div>
-    <div class="chips" id="${id}_wins">${REC_WINS.map(w=>`<span class="cchip ${w.k===30?'on':'off'}" data-k="${w.k}" data-t="${w.t}">${w.t} <b>${w.k===30?'✓':'＋'}</b></span>`).join('')}</div>
+    <div class="chips"><span class="cchip on">在线 <b>✓</b></span><span class="cchip on">有销量 <b>✓</b></span><span class="cchip on">未补货 &gt; 15 天 <b>✓</b></span></div>
     <div class="ptable" id="${id}_tb">
       <div class="ph"><span class="csel"><span class="ck" id="${id}_all">☐</span></span><span class="c1">机器</span>${pcHead('编号',72)}<span class="c4">上次补货</span><span class="c5">未补天数</span>${pcHead('销量',60)}${pcHead('缺货',48)}${pcHead('线路',72)}</div>
       <div id="${id}_rows"></div>
     </div>
     <div class="pdiff" id="${id}_pv"></div>
     <div class="op-btns" id="${id}_btns"><button class="btn main" id="${id}_gen">生成补货单</button></div>
-    <div class="exec-note">口径＝所选区间内的补货记录，按未补天数倒序；未补 &gt;15 天标橙、≥21 天标红｜最多可查近 180 天</div>
+    <div class="exec-note">查询条件固定：在线 · 有销量 · 未补货 &gt; 15 天；按未补天数倒序，未补 &gt;15 天标橙、≥21 天标红｜时间窗跟问法走，最多可查近 180 天</div>
   </div>`);
   function rowR1(r){
     const m=MACHINES[r.mid],n=cntOf(r),avg=avgOf(r);
@@ -2912,7 +2912,7 @@ function cardReplenishRecord(){
     const freq=n?(n+' 次 / '+avg+' 天'):'从未补货';
     return `<div class="pr${r.on?' pre':''}" data-mid="${r.mid}">
       <div class="l1"><span class="csel" style="align-self:flex-start;margin-top:2px"><span class="ck${r.on?'':' off'}" data-mid="${r.mid}">${r.on?'☑':'☐'}</span></span>
-        <span class="c1"><span class="nm">${esc(m.name)}</span>${PCW?`<em style="font-style:normal;font-size:11px;color:#b4bac4;margin-left:6px">${freq}</em>`:''}</span>${pcCol(esc(m.code),72)}
+        <span class="c1"><span class="nm" style="white-space:normal;overflow:visible;text-overflow:clip;line-height:1.3">${esc(m.name)}</span>${PCW?`<em style="font-style:normal;font-size:11px;color:#b4bac4;margin-left:6px">${freq}</em>`:''}</span>${pcCol(esc(m.code),72)}
         <span class="c4">${last}</span><span class="c5" style="color:${col};font-weight:700">${r.days} 天</span>${pcCol(soldOf(r)+' 件',60)}
         ${PCW?`<span class="pcx w48" style="color:${r.lack?'var(--warn)':'var(--sub)'};font-weight:${r.lack?700:400}">${r.lack?r.lack+' 项':'—'}</span>`:''}
         ${pcCol(esc(m.line),72)}</div>
@@ -2933,20 +2933,14 @@ function cardReplenishRecord(){
       r.on=!r.on;k.className='ck'+(r.on?'':' off');k.textContent=r.on?'☑':'☐';
       k.closest('.pr').className='pr'+(r.on?' pre':'');refresh()}});
   }
-  const traceR1=()=>trace('api',`意图 <b>query</b> → GET <b>/ai/tools/replenish_record?range=${win}d</b> · 只读工具，<b>按未补天数倒序全量返回</b>，不做条件过滤；命中 <b>${rows.length}</b> 台（区间 ${recRangeTxt(win)}）。`);
+  const traceR1=()=>trace('api',`意图 <b>query</b> → GET <b>/ai/tools/replenish_record?range=${win}d</b> · 只读工具，固定条件（在线 · 有销量 · 未补货 &gt; 15 天）筛选，命中 <b>${rows.length}</b> / 共 ${REPLEN_REC.length} 台，按未补天数倒序（区间 ${recRangeTxt(win)}）。`);
   function renderRows(){
     c.querySelector('#'+id+'_rows').innerHTML=rows.length?rows.map(rowR1).join('')
-      :`<div class="empty-inline">这个时间范围内没有补货记录<div class="sub">${recRangeTxt(win)} 内未取到任何补货单 · 可放宽到近 90 / 180 天再看</div></div>`;
-    c.querySelector('#'+id+'_cnt').innerHTML=`${rows.length} 台<em>共 ${rows.length} 台 · 区间 ${recRangeTxt(win)}</em>`;
+      :`<div class="empty-inline">没有符合条件的机器<div class="sub">固定条件：在线 · 有销量 · 未补货 &gt; 15 天 · 近 ${win} 天</div></div>`;
+    c.querySelector('#'+id+'_cnt').innerHTML=`命中 ${rows.length} 台<em>共 ${REPLEN_REC.length} 台 · 近 ${win} 天</em>`;
     bind();refresh();traceR1();
   }
   allBtn.onclick=()=>{const allOn=rows.length&&rows.every(r=>r.on);rows.forEach(r=>r.on=!allOn);renderRows()};
-  c.querySelectorAll('#'+id+'_wins .cchip').forEach(ch=>{ch.onclick=()=>{
-    win=+ch.getAttribute('data-k');
-    c.querySelectorAll('#'+id+'_wins .cchip').forEach(x=>{const o=+x.getAttribute('data-k')===win;
-      x.className='cchip'+(o?' on':' off');x.innerHTML=`${esc(x.getAttribute('data-t'))} <b>${o?'✓':'＋'}</b>`});
-    renderRows();
-  }});
   renderRows();
   gen.onclick=()=>{const mids=rows.filter(r=>r.on).map(r=>r.mid);if(mids.length)cardReplenish(mids);else cardReplenishPick()};
   return id;
@@ -3923,8 +3917,12 @@ function v11Intent(q){
   if(/补货单/.test(q)&&!/记录/.test(q)){
     return mids.length?cardReplenish(mids):cardReplenishPick();
   }
-  /* 补货记录（B1） */
-  if(/补货记录|长时间没补|多久没补|没补货|未补货|多久补一次/.test(q))return cardReplenishRecord();
+  /* 补货记录（R1）——条件固定死（定稿 #34）；时间窗只跟问法走：近 N 天 / 半年，默认 30，上限 180 */
+  if(/补货记录|长时间没补|多久没补|没补货|未补货|多久补一次/.test(q)){
+    let rw=30;const wm=q.match(/近\s*(\d+)\s*天/);
+    if(wm)rw=Math.max(1,Math.min(180,+wm[1]));else if(/半年/.test(q))rw=180;
+    return cardReplenishRecord(rw);
+  }
   /* 订单商品明细（B3）——两段式（2026-10-16 用户反馈）：泛问先给最近订单选择列表，
      点名订单号 / 说「此单 / 这笔」才直接出明细 */
   if(/明细|多少件|拿了什么|拿了哪些|拿了多少/.test(q)&&/订单|单|消费者|拿了/.test(q)){
